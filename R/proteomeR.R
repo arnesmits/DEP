@@ -1,0 +1,48 @@
+#' proteomeR: A package for analysis of proteomics data.
+#'
+#' The proteomeR package provides all functionalities to analyze label free quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
+#'
+#' @section proteomeR shiny apps:
+#' \itemize{
+#'   \item \code{\link{run_app}}: Shiny apps for interactive analysis
+#' }
+#'
+#' @section proteomeR workflows:
+#' \itemize{
+#'   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
+#'   \item \code{\link{TMT}}: Tandem-mass-tags (TMT) workflow
+#' }
+#'
+#' @section proteomeR functions:
+#' \itemize{
+#'   \item \code{\link{unique_names}}: Generate unique names
+#'   \item \code{\link{into_exprset}}: Turn data.frame into ExpressionSet
+#'   \item \code{\link{into_exprset_expdesign}}: Turn data.frame into ExpressionSet using an experimental design
+#'   \item \code{\link{miss_val_filter}}: Filter on missing values
+#'   \item \code{\link{norm_vsn}}: Normalize data using vsn
+#'   \item \code{\link{imputation_MSn}}: Impute missing values
+#'   \item \code{\link{imputation_perseus}}: Impute missing values manually
+#'   \item \code{\link{linear_model}}: Differential expression analysis (limma)
+#'   \item \code{\link{anova_tukey}}: Differential expression analysis (anova - tukey)
+#'   \item \code{\link{cutoffs}}: Denote significant proteins
+#'   \item \code{\link{results}}: Generate a results table
+#' }
+#'
+#' @section proteomeR visualization functions:
+#' \itemize{
+#'   \item \code{\link{single_prot_plot}}: Barplot for a protein of interest
+#'   \item \code{\link{volcano}}: Volcano plot for a specified contrast
+#'   \item \code{\link{plot_heatmap}}: Heatmap of all significant proteins
+#'   \item \code{\link{plot_norm}}: Boxplots to inspect normalization
+#'   \item \code{\link{plot_missval}}: Heatmap to inspect missing values
+#'   \item \code{\link{plot_numbers}}: Barplot of proteins identified
+#'   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between samples
+#' }
+#'
+#' @docType package
+#' @name proteomeR
+#'
+#' @import Rlibstree circlize RColorBrewer ComplexHeatmap ggrepel fdrtool vsn limma MSnbase Biobase magrittr tidyverse grid
+#' @import shinydashboard shiny
+#'
+NULL

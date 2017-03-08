@@ -1,11 +1,25 @@
 Package: proteomeR
-Type: Package
-Title: What the Package Does (Title Case)
+Title: Proteome analysis
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Authors@R: person("Arne", "Smits", email = "arne.smits@embl.de", role = c("aut", "cre"))
+Description: Proteome analysis
+License: Artistic-2.0
+Depends: R (>= 3.1.0)
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    tidyverse,
+    magrittr,
+    Biobase,
+    MSnbase,
+    limma,
+    vsn,
+    fdrtool,
+    ggrepel,
+    ComplexHeatmap,
+    RColorBrewer,
+    circlize,
+    Rlibstree,
+    shiny,
+    shinydashboard,
+    DT

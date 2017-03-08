@@ -1,0 +1,69 @@
+---
+title: "proteomeR report"
+author: "Arne Smits"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(dev = 'pdf')
+```
+
+This report presents an overview of the proteomeR analysis.
+
+## Summary
+
+#### `r nrow(sign[fData(sign)$sign == "+"])` proteins differ significantly between samples.
+
+Parameters used:  
+
+* p <= `r alpha`  
+* lfc >= `r lfc`
+
+
+Original file contains _`r nrow(data)`_ proteins groups, of which _`r nrow(sign)`_ proteins were reproducibly quantified.  
+In total _`r ncol(data)`_ samples were detected.
+
+```{r,echo=FALSE}
+pg_width = ncol(filt) / 5
+```
+
+```{r numbers, echo=FALSE, warning=FALSE, fig.width = pg_width}
+plot_numbers(filt)
+plot_frequency(filt)
+```
+
+## Normalization
+
+The data was normalized using 'vsn'.
+
+```{r,echo=FALSE}
+norm_height = ncol(filt) / 3
+```
+
+```{r norm, echo=FALSE, warning=FALSE, fig.height = norm_height}
+plot_norm(filt, norm)
+```
+
+## Missing values
+
+A heatmap of missing values to asses the type of missing data (random or not).
+If data is randomly missing, use the "knn" option for imputation. If the missing data is biased to certain samples (e.g. controls) which are expected to be devoid of certain proteins, use the "QRILC", "MinProb" or "Perseus" options for imputation.
+
+```{r missval, echo=FALSE}
+plot_missval(norm)
+```
+
+## Output plots of the data
+
+### Heatmaps
+```{r,echo=FALSE}
+len = nrow(sign[fData(sign)$sign == "+"]) / 7
+```
+
+```{r heatmap1, echo=FALSE, fig.width = 4, fig.height = len}
+plot_heatmap(sign, "contrast", k = 6, col_limit = 8)
+plot_heatmap(sign, "centered", k = 6, col_limit = 4)
+```
+
+
