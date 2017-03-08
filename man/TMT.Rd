@@ -11,7 +11,7 @@ TMT(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1)
 
 \item{expdesign}{Data.frame, The experimental design object.}
 
-\item{fun}{Character, Function used for data imputation based on \code{\link{MSnbase::impute}()}.}
+\item{fun}{Character, Function used for data imputation based on \code{\link{impute}}.}
 
 \item{control}{Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).}
 

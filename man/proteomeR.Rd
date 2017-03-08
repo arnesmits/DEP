@@ -53,7 +53,3 @@ The proteomeR package provides all functionalities to analyze label free quantif
 }
 }
 
-\section{proteomeR}{
-NA
-}
-

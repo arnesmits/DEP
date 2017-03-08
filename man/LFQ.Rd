@@ -9,7 +9,7 @@ LFQ(data, fun, control, type, alpha = 0.05, lfc = 1)
 \arguments{
 \item{data}{Data.frame, The data object.}
 
-\item{fun}{Character, Function used for data imputation based on \code{\link{MSnbase::impute}()}.}
+\item{fun}{Character, Function used for data imputation based on \code{\link{impute}}.}
 
 \item{control}{Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).}
 
