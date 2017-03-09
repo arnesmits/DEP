@@ -1,4 +1,19 @@
+library(tidyverse)
+library(magrittr)
+library(ggrepel)
+library(ComplexHeatmap)
+library(RColorBrewer)
+library(circlize)
+library(Rlibstree)
+library(DT)
+library(Biobase)
+library(MSnbase)
+library(limma)
+library(vsn)
+library(fdrtool)
 library(proteomeR)
+library(shiny)
+library(shinydashboard)
 
 ui <- shinyUI(
 	dashboardPage(
@@ -239,8 +254,10 @@ server <- shinyServer(function(input, output) {
     })
 
     selected_plot_input <- reactive ({
-      selected_id <- table()[input$table_rows_selected,1]
-      single_prot_plot(selected(), selected_id, input$pres)
+      if(!is.null(input$table_rows_selected)) {
+        selected_id <- table()[input$table_rows_selected,1]
+        single_prot_plot(selected(), selected_id, input$pres)
+      }
     })
 
     heatmap_input <- reactive({
@@ -250,7 +267,9 @@ server <- shinyServer(function(input, output) {
     })
 
     volcano_input <- reactive({
-      volcano(selected(), input$volcano_cntrst, input$fontsize, input$check_names)
+      if(!is.null(input$volcano_cntrst)) {
+        volcano(selected(), input$volcano_cntrst, input$fontsize, input$check_names)
+      }
     })
 
     norm_input <- reactive({

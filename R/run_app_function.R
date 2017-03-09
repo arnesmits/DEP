@@ -28,5 +28,5 @@ run_app <- function(app) {
 
   # find and launch the app
   appDir <- system.file("shiny_apps", app, package = "proteomeR")
-  shiny::runApp(appDir, display.mode = "normal")
+  suppressWarnings(shiny::runApp(appDir, display.mode = "normal"))
 }
