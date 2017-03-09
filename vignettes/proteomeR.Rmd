@@ -1,58 +1,307 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
+title: "Introduction to the proteomeR package"
+author: "Arne Smits"
+date: "`r doc_date()`"
+package: "`r pkg_ver('proteomeR')`"
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Introduction to the proteomeR package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+output:
+  BiocStyle::html_document
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
-
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
-
-## Vignette Info
-
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r required packages, echo = FALSE, warning=FALSE, results="hide"}
+suppressPackageStartupMessages({library(BiocStyle)
+library(tidyverse)
+library(magrittr)
+library(proteomeR)
+})
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+# Installation
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+Install and load the package
+```{r install, eval = FALSE}
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+devtools::install_git("git@git.embl.de:smits/proteomeR.git")
+library("proteomeR")
 
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
 ```
 
-Also a quote using `>`:
+# Overview of the analysis
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+
+# Interactive analysis using the proteomeR Shiny apps
+
+The package contains two `r CRANpkg("shiny") ` apps, which allow for interactive analysis entailing the entire workflow described below.
+These are especially relevant for users with limited or no experience in R.
+Currently, there are two different apps The first for label-free quantification (LFQ)-based analysis (output from MaxQuant) and the second for tandem-mass-tags (TMT)-based analysis (output from IsobarQuant).
+To run the apps, simply run this single command:
+
+``` {r run_app, eval = FALSE}
+# For LFQ analysis
+run_app("LFQ")
+# For TMT analysis
+run_app("TMT")
+```
+
+# Example dataset: Ubiquitin interactors
+
+We analyze a proteomics dataset in which Ubiquitin-protein interactors were characterized ([Zhang et al. Mol Cell 2017](http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7)).
+The raw mass spectrometry data were first analyzed using MaxQuant ([Cox and Mann, Nat Biotech 2007](http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html)).
+
+## Loading of the data
+
+```{r load data}
+# Loading two packages required for data handling
+library(tidyverse)
+library(magrittr)
+
+# The data is provided with the package
+data <- UbIA_MS
+
+# We filter for contaminant proteins and decoy database hits, which are indicated by "+"
+# in the columns "Potential.contaminants" and "Reverse", respectively. 
+data %<>% filter(Reverse != "+", Potential.contaminant != "+")
+```
+
+
+The data.frame has the following dimensions:
+
+``` {r dimension}
+dim(data)
+```
+
+The data.frame has the following column names:
+
+``` {r colnames}
+colnames(data)
+```
+
+We will use the "LFQ.intensity" columns in our subsequent analysis.
+
+## Data preperation
+
+The dataset has unique Uniprot identifiers, however those are not immediately informative.
+The associated gene names are, however these are not always unique.
+
+``` {r unique}
+# Are there any duplicated gene names?
+data$Gene.names %>% duplicated(.) %>% any(.)
+
+# Make a table of duplicated gene names
+data %>% group_by(Gene.names) %>% summarize(frequency = n()) %>% 
+  arrange(desc(frequency)) %>% filter(frequency > 1)
+```
+
+For further analysis these proteins must get unique names.
+Additionally, some proteins do not have an annotated gene name and for those we will use the Uniprot ID.
+
+``` {r unique_names}
+# Make unique names using the annotation in the "Gene.names" column as primary names
+# and the annotation in "Protein.IDs" as name for those that do not have an gene name.
+data_unique <- unique_names(data, "Gene.names", "Protein.IDs", delim = ";")
+
+# Are there any duplicated names?
+data$name %>% duplicated(.) %>% any(.)
+```
+
+## Generate an ExpressionSet object
+
+Many [Bioconductor](http://www.bioconductor.org/) packages use ExpressionSet objects as input and/or output.
+This class of objects contains and coordinates the actual (expression) data, information on the samples as well as feature annotation.
+We can generate the ExpressionSet object from our data using two different approaches.
+We can extract sample information directly from the column names or we add sample information using an experimental design template.
+For our example dataset, an experimental design is included in the package.
+
+``` {r expdesign, echo = FALSE}
+# Display experimental design
+knitr::kable(ExpDesign_UbIA_MS)
+```
+
+``` {r to_exprset}
+# Generate an ExpressionSet object using sample information from the column names
+LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
+data_exprset <- into_exprset(data_unique, LFQ_columns)
+
+# Generate an ExpressionSet object with an experimental design
+LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
+experimental_design <- ExpDesign_UbIA_MS
+data_exprset <- into_exprset_expdesign(data_unique, LFQ_columns, experimental_design)
+
+# Let's have a look at the ExpressionSet object
+data_exprset
+
+```
+
+## Filter for missing values
+
+The dataset contains proteins which are not quantified in all replicates. Some proteins are even only deteced in a single replicate.
+This leaves our dataset with missing values, which need to be imputed. However, this should not be done for proteins that contain too many missing values.
+Therefore, we first filter out proteins that contain to many missing values. This is done by setting the threshold for the allowed number of missing values per condition in the _miss_val_filter_ function.
+
+``` {r filter_miss_val}
+# Filter for proteins that are identified in all replicates of at least one sample.
+data_filt <- miss_val_filter(data_exprset, thr = 0)
+
+# Less stringent filtering:
+# Filter for proteins that are identified in 2 out of 3 replicates of at least one sample.
+data_filt2 <- miss_val_filter(data_exprset, thr = 1)
+```
+
+After filtering the number of identified proteins per sample can be plotted as well as the overlap in identifications between samples.
+
+``` {r plot_data, , fig.width = 4}
+# Plot a barplot of the number of identified proteins per samples
+plot_numbers(data_filt)
+# Plot a barplot of the protein identification overlap between samples
+plot_frequency(data_filt)
+```
+
+## Normalization
+
+The data is background corrected and normalized by variance stabilization transformation (`r Biocpkg("vsn") `). 
+
+``` {r normalize}
+# Normalize the data
+data_norm <- norm_vsn(data_filt)
+```
+
+The normalization can be inspected by checking the distributions of the samples before and after normalization.
+
+``` {r plot_norm, fig.height = 6}
+# Visualize normalization by boxplots for all samples before and after normalization
+plot_norm(data_filt, data_norm)
+```
+
+## Imputate data for missing values
+
+The remaining missing values in the dataset need to be imputed.
+The data can missing at random (MAR), for example if proteins are quantified in some replicates but not in others,
+or missing not at random (MNAR), for example if proteins which are quantified in some replicates but not in others (e.g. in all replicates of the control).
+MNAR can indicate that the proteins are below the detection limit in specific samples, which could be very well the case for, for example, affinity enrichments.
+For these different conditions, different imputation methods have to be used, as described in the `r Biocpkg("MSnbase") ` vignette and more specifically in the _impute_ function descriptions. 
+First, the missingness pattern of the data is explored by plotting a heatmap indicating whether values are missing (0) or not (1).
+
+``` {r plot_missval, fig.height = 6, fig.width = 5}
+# Plot a heatmap of proteins with missing values
+plot_missval(data_filt)
+```
+
+The example dataset is an affinity enrichment dataset of ubiquitin interactors, which is likely to have proteins which are below the detection limit in specific samples.
+These can be proteins that are specifically enriched in the ubiquitin purifications, but are not enriched in the controls samples, or vice versa.
+This expectation is also reflected in the missingness heatmap; missing values are highly biased to specific samples.  
+
+The imputation method to be used depends on the missingness pattern of the data (see the `r Biocpkg("MSnbase") ` vignette and more specifically in the _impute_ function descriptions for more information).
+Values which are missing not at random (MNAR) should be imputed by left-censored imputation method, such as the quantile regression-based left-consored function ("QRILC") or the manually defined left-shifted distribution function. In contrast, data missing at random (MAR) should be imputed with methods such as k-nearest neighbour ("knn") or maximum likelihood ("MLE") functions.  
+
+As the example data has values missing not at random, QRILC imputation is the method of choice.
+
+``` {r impute, results = "hide", message = FALSE, warning = FALSE}
+# Impute missing data using a quantile regression-based left-censored imputation method (QRILC)
+# (for data not missing at random)
+data_imp_QRILC <- imputation_MSn(data_norm, fun = "QRILC")
+
+# Impute missing data using a manually defined left-shifted distribution
+# (for data not missing at random)
+data_imp_man <- imputation_perseus(data_norm, shift = 1.8, scale = 0.3)
+
+# Impute missing data using the k-nearest neighbour approach
+# (for data missing at random)
+data_imp_knn <- imputation_MSn(data_norm, fun = "knn")
+
+# Impute missing data using the k-nearest neighbour approach
+#(for data missing at random)
+data_imp_MLE <- imputation_MSn(data_norm, fun = "MLE")
+```
+
+## Differential enrichment analysis
+
+Linear models combined with empherical Bayes statistics is used for the analysis of differential enrichment (or differential expression for analysis on expression levels).
+The _linear_model_ wrapper function introduced here uses `r Biocpkg("limma") ` and automatically generates the contrasts to be tested.
+For the contrasts generation, the control sample has to be specified.
+Additionally, the types of contrasts to be produced need to be indication, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control.
+
+``` {r statistics}
+# Differential enrichment analysis  based on linear models and empherical Bayes statistics
+# Test every sample versus control
+data_lm <- linear_model(data_imp_QRILC, control = "Con", type = "control")
+
+# Test all possible comparisons of samples
+data_lm_all_contrasts <- linear_model(data_imp_QRILC, control = "Con", type = "all")
+```
+
+An ANOVA and post-hoc Tukey Honest Significant Differences analysis is also implemented, although the use of _linear_models_ based on `r Biocpkg("limma") ` is recommended.
+
+``` {r statistics2, , results = "hide", message = FALSE}
+# Differential enrichment analysis  based on ANOVA and Tukey
+data_anova <- anova_tukey(data_imp_QRILC, control = "Con", type = "control")
+
+```
+
+Finally, significant proteins are annotated by used defined cutoffs.
+
+``` {r results}
+# Denote significant proteins based on user defined cutoffs
+data_sign <- cutoffs(data_lm, alpha = 0.05, lfc = 1)
+
+# Number of significant proteins
+results(data_sign) %>% filter(sign == "+") %>% nrow()
+
+```
+
+## Visualization of the results
+
+The data resulting from the previous analysis can easily be visualized by a number of functions.
+These visualizations assist in the determination of the optimal cutoffs to be used, highlight the most interesting samples and contrasts, and pinpoint differentially enriched/expressed proteins.
+
+### Heatmap of all significant proteins
+
+The heatmap representation gives an overview of all significant proteins (rows) in all samples (columns).
+This allows to see general trends, e.g. one sample really different or one replicate which is off in all samples.
+Additionally, the clustering of samples (columns) can indicate closer related samples and clustering of proteins (rows) indicates similarly behaving proteins.
+
+``` {r heatmap, fig.height = 8, fig.width = 4}
+# Plot a heatmap of all significant proteins
+plot_heatmap(data_sign, type = "contrast", k = 6, col_limit = 10, labelsize = 3)
+# Plot a heatmap of all significant proteins with the data centered per protein
+plot_heatmap(data_sign, type = "centered", k = 6, col_limit = 4, labelsize = 3)
+```
+
+### Volcano plots of specific contrasts
+
+``` {r volcano, fig.height = 3.7, fig.width = 4}
+# Plot a volcano plot for the contrast X6Ubi vs Con
+volcano(data_sign, contrast = "X6Ubi.Con", labelsize = 2)
+# Plot a volcano plot for the contrast X6Ubi vs Con without labels
+volcano(data_sign, contrast = "X6Ubi.Con", add_names = FALSE)
+```
+
+### Barplots of a protein of interest
+
+``` {r bar, fig.height = 3.7, fig.width = 4}
+# Plot a barplot for the protein USP15
+single_prot_plot(data_sign, protein = "USP15", type = "contrast")
+# Plot a barplot for the protein USP15 with the data centered
+single_prot_plot(data_sign, protein = "USP15", type = "centered")
+```
+
+## Results table
+
+``` {r results_table}
+# Generate a results table
+data_results <- results(data_sign)
+
+# Column names of the results table
+colnames(data_results)
+```
+
+# Wrapper functions for the entire workflow
+
+## LFQ analysis
+
+## TMT analysis
+
+

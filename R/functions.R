@@ -276,6 +276,9 @@ linear_model <- function(data, control, type) {
   if(type == "control") {
     cntrst <- paste(colnames(design)[!colnames(design) %in% control], control, sep = " - ")
   }
+  cat("Tested contrasts: \n")
+  print(cntrst)
+
   eB_fit <- eBayes(contrasts.fit(lmFit(data, design = design), makeContrasts(contrasts = cntrst, levels = design)))
 
   retrieve_fun <- function(comp, fit = eB_fit){

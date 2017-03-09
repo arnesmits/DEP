@@ -25,5 +25,5 @@ Imports: tidyverse,
     rmarkdown
 RoxygenNote: 6.0.1
 Suggests: knitr,
-    rmarkdown
+    BiocStyle
 VignetteBuilder: knitr
