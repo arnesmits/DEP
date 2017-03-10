@@ -4,7 +4,7 @@
 \name{proteomeR}
 \alias{proteomeR}
 \alias{proteomeR-package}
-\title{proteomeR: A package for analysis of proteomics data.}
+\title{proteomeR: A package for integrative analysis of proteomics data.}
 \description{
 The proteomeR package provides all functionalities to analyze label free quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
 }

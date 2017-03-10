@@ -1,4 +1,4 @@
-#' proteomeR: A package for analysis of proteomics data.
+#' proteomeR: A package for integrative analysis of proteomics data.
 #'
 #' The proteomeR package provides all functionalities to analyze label free quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
 #'
