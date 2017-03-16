@@ -156,7 +156,7 @@ server <- shinyServer(function(input, output) {
       imp <- imputation_perseus(norm, shift = 1.8, scale = 0.3)
     }
     if(input$imputation == "k-nearest neighbors") {
-      imp <- imputation_MSn(norm, "knn", rowmax = 0.9)
+      imp <- imputation_MSn(norm, "knn")
     }
     imp
   })

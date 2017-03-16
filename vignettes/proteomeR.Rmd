@@ -160,6 +160,8 @@ After filtering the number of identified proteins per sample can be plotted as w
 # Plot a barplot of the number of identified proteins per samples
 plot_numbers(data_filt)
 # Plot a barplot of the protein identification overlap between samples
+plot_coverage(data_filt)
+# Plot a barplot of the protein identification overlap between samples
 plot_frequency(data_filt)
 ```
 

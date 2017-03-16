@@ -1,10 +1,11 @@
 Package: proteomeR
 Title: Integrative analysis of proteomics data
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: person("Arne", "Smits", email = "arne.smits@embl.de", role = c("aut", "cre"))
 Description: Proteome analysis
 License: Artistic-2.0
-Depends: R (>= 3.1.0)
+Depends: R (>= 3.1.0),
+    tidyverse
 Encoding: UTF-8
 LazyData: true
 Imports: tidyverse,
