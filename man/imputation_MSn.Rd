@@ -22,10 +22,11 @@ example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(example_unique))
-example_exprset <- into_exprset(example_unique, columns)
+exp_design <- ExpDesign_UbIA_MS
+example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 
 example_vsn <- norm_vsn(example_exprset)
 example_filter <- miss_val_filter(example_vsn, thr = 0)
-example_impute_leftShifted <- imputation_MSn(example_filter, fun = "QRILC")
-example_impute_nearestNeighbors <- imputation_MSn(example_filter, fun = "knn")
+example_impute_MinProb <- imputation_MSn(example_filter, fun = "MinProb")
+example_impute_QRILC <- imputation_MSn(example_filter, fun = "QRILC")
 }

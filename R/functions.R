@@ -40,7 +40,7 @@ into_exprset <- function(data, columns) {
   colnames(raw) %<>% gsub(getCommonPrefix(colnames(raw)), "", .) %>% make.names()
   feature_data <- data[,-columns]
   rownames(feature_data) <- feature_data$name
-  pheno_data <- colnames(raw) %>% data.frame(ID = ., stringsAsFactors = F) %>% mutate(replicate = substr(ID, nchar(ID), nchar(ID)), sample = substr(ID,1,nchar(ID)-1))
+  pheno_data <- colnames(raw) %>% data.frame(ID = ., stringsAsFactors = F) %>% mutate(replicate = substr(ID, nchar(ID), nchar(ID)), condition = substr(ID,1,nchar(ID)-1))
   rownames(pheno_data) <- pheno_data$ID
   dataset <- ExpressionSet(as.matrix(raw), phenoData = AnnotatedDataFrame(pheno_data), featureData = AnnotatedDataFrame(feature_data))
   return(dataset)
@@ -68,7 +68,7 @@ into_exprset_expdesign <- function(data, columns, expdesign) {
   raw[raw == 0] <- NA
   raw <- log2(raw)
 
-  expdesign %<>% mutate(sample = make.names(sample)) %>% unite(ID, sample, replicate, remove = F)
+  expdesign %<>% mutate(condition = make.names(condition)) %>% unite(ID, condition, replicate, remove = F)
   rownames(expdesign) <- expdesign$ID
   colnames(raw) <- expdesign$ID[lapply(expdesign$label, function(x) grep(x, colnames(raw))) %>% unlist()]
   raw <- raw[,!is.na(colnames(raw))]
@@ -90,7 +90,8 @@ into_exprset_expdesign <- function(data, columns, expdesign) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 #'
 #' example_vsn <- norm_vsn(example_exprset)
 #' @export
@@ -113,7 +114,8 @@ norm_vsn <- function(data) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 #'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_stringent_filter <- miss_val_filter(example_vsn, thr = 0)
@@ -122,8 +124,8 @@ norm_vsn <- function(data) {
 miss_val_filter <- function(data, thr = 0) {
   bin_data <- exprs(data)
   bin_data[!is.na(exprs(data))] <- 1
-  keep <- bin_data %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, value, 1:(ncol(.)-1)) %>% left_join(., pData(data), by = "ID") %>% group_by(name, sample) %>%
-    summarize(miss_val = n()-sum(value)) %>% filter(miss_val <= thr) %>% spread(sample, miss_val)
+  keep <- bin_data %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, value, 1:(ncol(.)-1)) %>% left_join(., pData(data), by = "ID") %>% group_by(name, condition) %>%
+    summarize(miss_val = n()-sum(value)) %>% filter(miss_val <= thr) %>% spread(condition, miss_val)
   filt <- data[keep$name,]
   return(filt)
 }
@@ -141,7 +143,8 @@ miss_val_filter <- function(data, thr = 0) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 #'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_filter <- miss_val_filter(example_vsn, thr = 0)
@@ -169,12 +172,13 @@ imputation_perseus <- function(data, shift = 1.8, scale = 0.3) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 #'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute_leftShifted <- imputation_MSn(example_filter, fun = "QRILC")
-#' example_impute_nearestNeighbors <- imputation_MSn(example_filter, fun = "knn")
+#' example_impute_MinProb <- imputation_MSn(example_filter, fun = "MinProb")
+#' example_impute_QRILC <- imputation_MSn(example_filter, fun = "QRILC")
 #' @export
 imputation_MSn <- function(data, fun) {
   MSnSet_data <- as(data, "MSnSet")
@@ -189,7 +193,7 @@ imputation_MSn <- function(data, fun) {
 #' \code{anova_tukey} performs an Analysis of Variance fit (\code{\link{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link{TukeyHSD}}).
 #'
 #' @param data ExpressionSet, Data object for which the variance will be analyzed.
-#' @param control Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).
+#' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
 #' @param type all" or "control" The type of contrasts that will be generated.
 #' @return An ExpressionSet object containing FDR estimates of differential expression.
 #' @examples
@@ -197,24 +201,25 @@ imputation_MSn <- function(data, fun) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 #'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "QRILC")
+#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
 #'
-#' example_anova_tukey <- anova_tukey(example_impute, "Con_", "control")
+#' example_anova_tukey <- anova_tukey(example_impute, "Ctrl", "control")
 #' @export
 anova_tukey <- function(data, control, type) {
   long <- exprs(data) %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, val, 1:(ncol(.)-1)) %>% left_join(., pData(data))
 
   cat("  ANOVA test \n")
-  anova_p <- long %>% group_by(name) %>% do(anova = aov(val ~ sample, data = .) %>% summary(.) %>% .[[1]] %>% .$`Pr(>F)` %>% .[1])
+  anova_p <- long %>% group_by(name) %>% do(anova = aov(val ~ condition, data = .) %>% summary(.) %>% .[[1]] %>% .$`Pr(>F)` %>% .[1])
   anova_p %<>% ungroup(name) %>% mutate(p = unlist(anova), padj = p.adjust(p, method = "BH")) %>% select(-anova) %>% data.frame()
   fData(data) <- left_join(fData(data), anova_p)
 
   cat("\n  Post-hoc test (Tukey) \n")
-  tukey <- long %>% group_by(name) %>% do(tukey = aov(val ~ sample, data = .) %>% TukeyHSD(.) %>% .$sample %>% .[,c(1,4)])
+  tukey <- long %>% group_by(name) %>% do(tukey = aov(val ~ condition, data = .) %>% TukeyHSD(.) %>% .$condition %>% .[,c(1,4)])
   tukey_df <- unlist(tukey$tukey) %>% matrix(., nrow = nrow(data), byrow = T) %>% data.frame()
   colnames(tukey_df) <- c(paste(tukey$tukey[[1]] %>% row.names(),"diff",sep="_"),paste(tukey$tukey[[1]] %>% row.names(),"p.adj",sep="_"))
   tukey_df <- cbind(name = tukey$name, tukey_df)
@@ -245,7 +250,7 @@ anova_tukey <- function(data, control, type) {
 #' \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
 #'
 #' @param data ExpressionSet, Data object for which the variance will be analyzed.
-#' @param control Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).
+#' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
 #' @param type all" or "control" The type of contrasts that will be generated.
 #' @return An ExpressionSet object containing FDR estimates of differential expression.
 #' @examples
@@ -253,21 +258,22 @@ anova_tukey <- function(data, control, type) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
 #'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "QRILC")
+#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
 #'
-#' example_lm <- linear_model(example_impute, "Con_", "control")
+#' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' @export
 linear_model <- function(data, control, type) {
-  samples <- factor(pData(data)$sample)
-  design <- model.matrix(~ 0 + samples)
-  colnames(design) <- gsub("samples", "", colnames(design))
+  conditions <- factor(pData(data)$condition)
+  design <- model.matrix(~ 0 + conditions)
+  colnames(design) <- gsub("conditions", "", colnames(design))
 
   if(type == "all") {
-    cntrst <- apply(combn(unique(pData(data)$sample), 2), 2, function(x) paste(x, collapse = " - "))
+    cntrst <- apply(combn(unique(pData(data)$condition), 2), 2, function(x) paste(x, collapse = " - "))
     flip <- grep(paste("^", control, sep =""), cntrst)
     if(length(flip) >= 1) {
       cntrst[flip] %<>% gsub(paste(control, "- ", sep = " "), "", .) %>% paste(" - ", control, sep = "")
@@ -317,12 +323,14 @@ linear_model <- function(data, control, type) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "QRILC")
+#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
 #'
-#' example_lm <- linear_model(example_impute, "Con_", "control")
+#' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
 #' significant_proteins <- example_sign[fData(example_sign)$sign == "+"]
 #' nrow(significant_proteins)
@@ -331,13 +339,8 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
   feat_data <- fData(data)
   cols_p <- grep("_p.adj",colnames(feat_data))
   cols_diff <- grep("_diff", colnames(feat_data))
-  if(length(cols_p) > 1) {
-    sign_df <- ifelse(feat_data[,cols_p] %>% apply(., 2, function(x) x <= alpha) & feat_data[,cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc), "+", "") %>% data.frame()
-    sign_df %<>% mutate(sign = ifelse(apply(., 1, function(x) any(x == "+")),"+",""))
-  } else {
-    sign_df <- ifelse(feat_data[,cols_p] <= alpha & feat_data[,cols_diff] >= lfc | feat_data[,cols_p] <= alpha & feat_data[,cols_diff] <= -lfc, "+", "") %>% data.frame()
-    colnames(sign_df) <- "sign"
-  }
+  sign_df <- ifelse(feat_data[,cols_p] %>% apply(., 2, function(x) x <= alpha) & feat_data[,cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc), "+", "")
+  sign_df <- cbind(sign_df, sign = ifelse(apply(sign_df, 1, function(x) any(x == "+")),"+",""))
   colnames(sign_df) %<>% gsub("_p.adj","_sign",.)
   fData(data) <- cbind(fData(data), sign_df)
   return(data)
@@ -354,12 +357,14 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#'
 #' example_vsn <- norm_vsn(example_exprset)
 #' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "QRILC")
+#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
 #'
-#' example_lm <- linear_model(example_impute, "Con_", "control")
+#' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
 #' example_results <- results(example_sign)
 #' glimpse(example_results)
@@ -368,7 +373,7 @@ results <- function(data) {
   feat_data <- fData(data)
   centered <- exprs(data) - fData(data)$mean
   centered %<>%  data.frame(.) %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., pData(data), by = "ID")
-  centered %<>% group_by(rowname, sample) %>% summarize(val = mean(val)) %>% mutate(val = signif(val, digits = 3)) %>% spread(sample, val)
+  centered %<>% group_by(rowname, condition) %>% summarize(val = mean(val)) %>% mutate(val = signif(val, digits = 3)) %>% spread(condition, val)
   colnames(centered)[2:ncol(centered)] %<>%  paste(., "_centered", sep = "")
 
   ratio <- feat_data[,grep("_diff", colnames(feat_data))] %>% signif(., digits = 3) %>% rownames_to_column(.)

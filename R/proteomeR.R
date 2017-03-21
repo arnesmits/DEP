@@ -36,8 +36,8 @@
 #'   \item \code{\link{plot_norm}}: Boxplots to inspect normalization
 #'   \item \code{\link{plot_missval}}: Heatmap to inspect missing values
 #'   \item \code{\link{plot_numbers}}: Barplot of proteins identified
-#'   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between samples
-#'   \item \code{\link{plot_coverage}}: Barplot of the protein coverage in samples
+#'   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between conditions
+#'   \item \code{\link{plot_coverage}}: Barplot of the protein coverage in conditions
 #' }
 #'
 #' @docType package

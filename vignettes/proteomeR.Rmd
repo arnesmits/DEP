@@ -208,6 +208,10 @@ As the example data has values missing not at random, QRILC imputation is the me
 ``` {r impute, results = "hide", message = FALSE, warning = FALSE}
 # Impute missing data using a quantile regression-based left-censored imputation method (QRILC)
 # (for data not missing at random)
+data_imp <- imputation_MSn(data_norm, fun = "MinProb")
+
+# Impute missing data using a quantile regression-based left-censored imputation method (QRILC)
+# (for data not missing at random)
 data_imp_QRILC <- imputation_MSn(data_norm, fun = "QRILC")
 
 # Impute missing data using a manually defined left-shifted distribution
@@ -233,17 +237,17 @@ Additionally, the types of contrasts to be produced need to be indicated, allowi
 ``` {r statistics}
 # Differential enrichment analysis  based on linear models and empherical Bayes statistics
 # Test every sample versus control
-data_lm <- linear_model(data_imp_QRILC, control = "Con", type = "control")
+data_lm <- linear_model(data_imp, control = "Ctrl", type = "control")
 
 # Test all possible comparisons of samples
-data_lm_all_contrasts <- linear_model(data_imp_QRILC, control = "Con", type = "all")
+data_lm_all_contrasts <- linear_model(data_imp_QRILC, control = "Ctrl", type = "all")
 ```
 
 An ANOVA and post-hoc Tukey Honest Significant Differences analysis is also implemented, although the use of _linear_models_ based on `r Biocpkg("limma") ` is recommended.
 
 ``` {r statistics2, , results = "hide", message = FALSE}
 # Differential enrichment analysis  based on ANOVA and Tukey
-data_anova <- anova_tukey(data_imp_QRILC, control = "Con", type = "control")
+data_anova <- anova_tukey(data_imp, control = "Ctrl", type = "control")
 
 ```
 
@@ -251,7 +255,7 @@ Finally, significant proteins are defined by user-defined cutoffs.
 
 ``` {r results}
 # Denote significant proteins based on user defined cutoffs
-data_sign <- cutoffs(data_lm, alpha = 0.05, lfc = 1)
+data_sign <- cutoffs(data_lm, alpha = 0.05, lfc = log2(1.5))
 
 # Number of significant proteins
 results(data_sign) %>% filter(sign == "+") %>% nrow()
@@ -290,10 +294,10 @@ plot_heatmap(data_sign, type = "contrast", k = 6, col_limit = 10, labelsize = 3)
 Volcano plots can be used to visualize a specific contrast (comparison between two samples). This allows to inspect the enrichment of proteins between the two samples (x axis) and their corresponding adjusted p value (y axis).
 
 ``` {r volcano, fig.height = 5, fig.width = 6}
-# Plot a volcano plot for the contrast "X6Ubi vs Con""
-volcano(data_sign, contrast = "X6Ubi.Con", labelsize = 2)
-# Plot a volcano plot for the contrast "X6Ubi vs Con"" without labels
-volcano(data_sign, contrast = "X6Ubi.Con", add_names = FALSE)
+# Plot a volcano plot for the contrast "Ubi6 vs Ctrl""
+volcano(data_sign, contrast = "Ubi6-Ctrl", labelsize = 2)
+# Plot a volcano plot for the contrast "Ubi6 vs Ctrl"" without labels
+volcano(data_sign, contrast = "Ubi6-Ctrl", add_names = FALSE)
 ```
 
 ### Barplots of a protein of interest
@@ -335,9 +339,11 @@ The package also entails wrapper functions that entail the complete analysis wor
 ``` {r LFQ}
 # The data is provided with the package 
 data <- UbIA_MS
+experimental_design <- ExpDesign_UbIA_MS
 
 # The wrapper function performs the full analysis
-data_results <- LFQ(data, fun = "QRILC", control = "Con_", type = "control", alpha = 0.05, lfc = 1)
+data_results <- LFQ(data, experimental_design, fun = "MinProb", 
+      control = "Ctrl", type = "control", alpha = 0.05, lfc = 1)
 ```
 
 This wrapper produces two reports (pdf and html), which are saved in a generated "Report" folder.
@@ -378,7 +384,7 @@ The full data can be used for the plotting functions as desribed in the chapter 
 full_data <- data_results$data
 
 # Use the full data to generate a volcano plot
-volcano(data_results$data, contrast = "X4Ubi_.Con_", labelsize = 2)
+volcano(data_results$data, contrast = "Ubi4-Ctrl", labelsize = 2)
 ```
 
 ``` {r LFQ_results5, fig.height = 3.5, fig.width = 3.5}

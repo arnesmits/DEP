@@ -37,6 +37,7 @@ TMT <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
 #' \code{LFQ} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 #'
 #' @param data Data.frame, The data object.
+#' @param expdesign Data.frame, The experimental design object.
 #' @param fun Character, Function used for data imputation based on \code{\link{impute}}.
 #' @param control Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).
 #' @param type "all" or "control" The type of contrasts that will be generated.
@@ -47,10 +48,10 @@ TMT <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
 #' example <- UbIA_MS
 #' example_results <- LFQ(example, "QRILC", "Con_", "control", alpha = 0.05, lfc = 1)
 #' @export
-LFQ <- function(data, fun, control, type, alpha = 0.05, lfc = 1) {
+LFQ <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
   data %<>% filter(Reverse != "+", Potential.contaminant != "+")
   cols <- grep("LFQ.", colnames(data))
-  data %<>% unique_names(., "Gene.names", "Protein.IDs", delim = ";") %>% into_exprset(., cols)
+  data %<>% unique_names(., "Gene.names", "Protein.IDs", delim = ";") %>% into_exprset_expdesign(., cols, expdesign)
   filt <- miss_val_filter(data)
   norm <- norm_vsn(filt)
   imp <- imputation_MSn(norm, fun)

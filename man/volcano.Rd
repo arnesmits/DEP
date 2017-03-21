@@ -26,16 +26,18 @@ example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(example_unique))
-example_exprset <- into_exprset(example_unique, columns)
+exp_design <- ExpDesign_UbIA_MS
+example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+
 example_vsn <- norm_vsn(example_exprset)
 example_filter <- miss_val_filter(example_vsn, thr = 0)
-example_impute <- imputation_MSn(example_filter, fun = "QRILC")
+example_impute <- imputation_MSn(example_filter, fun = "MinProb")
 
-example_lm <- linear_model(example_impute, "Con_", "control")
+example_lm <- linear_model(example_impute, "Ctrl", "control")
 example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
 
-volcano(example_sign, "X6Ubi_.Con_", labelsize = 5, add_names = T)
-volcano(example_sign, "X6Ubi_.Con_", add_names = F)
-volcano(example_sign, "X4Ubi_.Con_", labelsize = 5, add_names = T)
-volcano(example_sign, "X4Ubi_.Con_", add_names = F)
+volcano(example_sign, "Ubi6-Ctrl", labelsize = 5, add_names = T)
+volcano(example_sign, "Ubi6-Ctrl", add_names = F)
+volcano(example_sign, "Ubi4-Ctrl", labelsize = 5, add_names = T)
+volcano(example_sign, "Ubi4-Ctrl", add_names = F)
 }

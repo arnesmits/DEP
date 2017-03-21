@@ -7,7 +7,7 @@
 \format{A data.frame with 12 observations and 3 variables:
 \describe{
   \item{label}{Uniprot IDs}
-  \item{sample}{Uniprot IDs of major protein(s) in the protein group}
+  \item{condition}{Uniprot IDs of major protein(s) in the protein group}
   \item{replicate}{Full protein names}
 }}
 \source{
@@ -18,6 +18,6 @@ Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin s
 ExpDesign_UbIA_MS
 }
 \description{
-This dataset annotates the 12 different labels in 4 samples and 3 replicates.
+This dataset annotates 12 different samples in 4 conditions and 3 replicates.
 }
 \keyword{datasets}

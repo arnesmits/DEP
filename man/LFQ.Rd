@@ -4,10 +4,12 @@
 \alias{LFQ}
 \title{LFQ workflow}
 \usage{
-LFQ(data, fun, control, type, alpha = 0.05, lfc = 1)
+LFQ(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1)
 }
 \arguments{
 \item{data}{Data.frame, The data object.}
+
+\item{expdesign}{Data.frame, The experimental design object.}
 
 \item{fun}{Character, Function used for data imputation based on \code{\link{impute}}.}
 
