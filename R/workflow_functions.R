@@ -17,10 +17,10 @@
 TMT <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
   data <- data[-grep("###", data$gene_name),]
   cols <- grep("signal_sum", colnames(data))
-  data %<>% unique_names(., "gene_name", "protein_id", delim = "[|]") %>% into_exprset_expdesign(., cols, expdesign)
-  filt <- miss_val_filter(data)
+  data %<>% unique_names(., "gene_name", "protein_id", delim = "[|]") %>% make_se(., cols, expdesign)
+  filt <- filter_missval(data)
   norm <- norm_vsn(filt)
-  imp <- imputation_MSn(norm, fun)
+  imp <- imputation(norm, fun)
   lm <- linear_model(imp, control, type)
   sign <- cutoffs(lm, alpha, lfc)
   res <- results(sign)
@@ -51,10 +51,10 @@ TMT <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
 LFQ <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
   data %<>% filter(Reverse != "+", Potential.contaminant != "+")
   cols <- grep("LFQ.", colnames(data))
-  data %<>% unique_names(., "Gene.names", "Protein.IDs", delim = ";") %>% into_exprset_expdesign(., cols, expdesign)
-  filt <- miss_val_filter(data)
+  data %<>% unique_names(., "Gene.names", "Protein.IDs", delim = ";") %>% make_se(., cols, expdesign)
+  filt <- filter_missval(data)
   norm <- norm_vsn(filt)
-  imp <- imputation_MSn(norm, fun)
+  imp <- imputation(norm, fun)
   lm <- linear_model(imp, control, type)
   sign <- cutoffs(lm, alpha, lfc)
   res <- results(sign)

@@ -20,14 +20,14 @@ ui <- shinyUI(
 		dashboardHeader(title = "proteomeR - LFQ"),
 		dashboardSidebar(
 		  sidebarMenu(
-		    fileInput('file1', 'ProteinGroups.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-  		  menuItem("Experimental Design",
+		    menuItem("Files", selected = TRUE,
+		      fileInput('file1', 'ProteinGroups.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
   		    fileInput('file2', 'ExperimentalDesign.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
   		    radioButtons("anno", "Sample annotation", choices = list("Parse from columns" = "columns", "Use Experimental Design" = "expdesign"), selected = "columns")
   		  ),
 		    menuItemOutput("columns"),
   			menuItem("Imputation & Stats options",
-  			  radioButtons("imputation", "Imputation type", c("QRILC method", "Minimal probability", "Perseus", "k-nearest neighbors"), selected = "QRILC method"),
+  			  radioButtons("imputation", "Imputation type", choices = list("QRILC" = "QRILC", "Minimal probability" = "MinProb", "Manual" = "man", "k-nearest neighbors" = "knn"), selected = "MinProb"),
   			  radioButtons("stat", "Statistical method", c("Linear model", "ANOVA"), selected = "Linear model")
   			),
   			actionButton("analyze", "Analyze"),
@@ -37,7 +37,7 @@ ui <- shinyUI(
   		  )
 			),
 		dashboardBody(
-		  helpText("Please cite: Smits et al (2017)"),
+		  helpText("Please cite: "),
 		  fluidRow(
 				box(numericInput("p", "P value cut off", min = 0.0001, max = 0.1, value = 0.05), width = 2),
 				box(numericInput("lfc", "Fold change cut off (log2)", min = 0, max = 10, value = 1), width = 2),
@@ -46,39 +46,53 @@ ui <- shinyUI(
 				box(radioButtons("contrasts", "Contrasts", c("control", "all"), selected = "control"), width = 2)
 			),
 			fluidRow(
-			  box(title = "Significant proteins", box(uiOutput("select"), width = 6), box(uiOutput("exclude"), width = 6), DT::dataTableOutput("table"), width = 7),
-				tabBox(title = "Plots", width = 5,
-				  tabPanel(title = "Selected Protein", plotOutput("selected_plot"), downloadButton('downloadPlot', 'Download plot')),
-				  tabPanel(title = "Heatmap",
-				    fluidRow(
-				      box(numericInput("k", "Kmeans clusters", min = 0, max = 15, value = 7), width = 4),
-				      box(numericInput("limit", "Color limit (log2)", min = 0, max = 16, value = 6), width = 4),
-				      box(numericInput("size", "Heatmap size (4-30)", min = 4, max = 30, value = 10), width = 4)
-				    ),
-				    fluidRow(
-				      uiOutput("plot"),
-				      downloadButton('downloadHeatmap', 'Download heatmap'))
+			  column(width = 7,
+			    box(title = "Top Table", box(uiOutput("select"), width = 6), box(uiOutput("exclude"), width = 6), DT::dataTableOutput("table"), width = 12)
+			  ),
+			  column(width = 5,
+  				tabBox(title = "Result Plots", width = 12,
+  				  tabPanel(title = "Selected Protein", plotOutput("selected_plot"), downloadButton('downloadPlot', 'Download plot')),
+  				  tabPanel(title = "Heatmap",
+  				    fluidRow(
+  				      box(numericInput("k", "Kmeans clusters", min = 0, max = 15, value = 7), width = 4),
+  				      box(numericInput("limit", "Color limit (log2)", min = 0, max = 16, value = 6), width = 4),
+  				      box(numericInput("size", "Heatmap size (4-30)", min = 4, max = 30, value = 10), width = 4)
+  				    ),
+  				    fluidRow(
+  				      uiOutput("plot"),
+  				      downloadButton('downloadHeatmap', 'Download heatmap'))
+  				  ),
+  				  tabPanel(title = "Volcano plot",
+  				    fluidRow(
+  				      box(uiOutput("volcano_cntrst"), width = 6),
+  				      box(numericInput("fontsize", "Font size", min = 0, max = 8, value = 4), width = 3),
+  				      box(checkboxInput("check_names", "Display names", value = TRUE), width = 3)
+  				    ),
+  				    fluidRow(
+  				      plotOutput("volcano", height = 600),
+  				      downloadButton('downloadVolcano', 'Download volcano')
+  				    )
+  				  )
 				  ),
-				  tabPanel(title = "Volcano plot",
-				    fluidRow(
-				      box(uiOutput("volcano_cntrst"), width = 6),
-				      box(numericInput("fontsize", "Font size", min = 0, max = 8, value = 4), width = 3),
-				      box(checkboxInput("check_names", "Display names", value = TRUE), width = 3)
-				    ),
-				    fluidRow(
-				      plotOutput("volcano", height = 600),
-				      downloadButton('downloadVolcano', 'Download volcano')
-				    )
-				  ),
-				  tabPanel(title = "Normalization",
-               plotOutput("norm", height = 600),
-	             downloadButton('downloadNorm', 'Download')
-	        ),
-				  tabPanel(title = "Missing values",
-				           plotOutput("missval", height = 600),
-				           downloadButton('downloadMissval', 'Download')
-				  )
-				)
+  				tabBox(title = "QC Plots", width = 12,
+  				  tabPanel(title = "Protein Numbers",
+  				    plotOutput("numbers", height = 600),
+  				    downloadButton('downloadNumbers', 'Download')
+  				  ),
+  				  tabPanel(title = "Sample coverage",
+  				    plotOutput("coverage", height = 600),
+  				    downloadButton('downloadCoverage', 'Download')
+  				  ),
+  			    tabPanel(title = "Normalization",
+  				    plotOutput("norm", height = 600),
+  				    downloadButton('downloadNorm', 'Download')
+  				  ),
+  				  tabPanel(title = "Missing values",
+  				    plotOutput("missval", height = 600),
+  				    downloadButton('downloadMissval', 'Download')
+  				  )
+  				)
+			  )
 			)
 		)
 	)
@@ -98,7 +112,7 @@ server <- shinyServer(function(input, output) {
                prefix <- getCommonPrefix(data()[,cols] %>% colnames())
                selectizeInput("control", "Control", choices=make.names(colnames(data())[cols] %>% gsub(prefix,"",.) %>% substr(., 1, nchar(.)-1)))
              },
-             if (input$anno == "expdesign" & !is.null(expdesign())) { selectizeInput("control", "Control", choices=make.names(expdesign()$sample)) }
+             if (input$anno == "expdesign" & !is.null(expdesign())) { selectizeInput("control", "Control", choices=make.names(expdesign()$condition)) }
     )
   })
 
@@ -131,12 +145,12 @@ server <- shinyServer(function(input, output) {
     data %<>% unique_names(., input$name, input$id)
 
     if (input$anno == "columns") {
-      data %<>% into_exprset(., cols)
+      data %<>% make_se_parse(., cols)
     }
     if (input$anno == "expdesign") {
-      data %<>% into_exprset_expdesign(., cols, expdesign())
+      data %<>% make_se(., cols, expdesign())
     }
-    data %>% miss_val_filter(., 0)
+    data %>% filter_missval(., 0)
   })
 
   norm <- reactive({
@@ -146,19 +160,7 @@ server <- shinyServer(function(input, output) {
 
   imp <- reactive({
     norm <- norm()
-    if(input$imputation == "QRILC method") {
-      imp <- imputation_MSn(norm, "QRILC")
-    }
-    if(input$imputation == "Minimal probability") {
-      imp <- imputation_MSn(norm, "MinProb")
-    }
-    if(input$imputation == "Perseus") {
-      imp <- imputation_perseus(norm, shift = 1.8, scale = 0.3)
-    }
-    if(input$imputation == "k-nearest neighbors") {
-      imp <- imputation_MSn(norm, "knn")
-    }
-    imp
+    imputation(norm, input$imputation)
   })
 
   df <- reactive({
@@ -193,28 +195,28 @@ server <- shinyServer(function(input, output) {
     })
 
     output$signBox <- renderInfoBox({
-      infoBox("Significant proteins", paste(sign() %>% .[fData(.)$sign == "+"] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
+      infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$sign == "+"] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
     })
 
     output$select <- renderUI({
-      feat_data <- fData(sign())
-      cols <- grep("_sign",colnames(feat_data))
-      names <- colnames(feat_data)[cols]
+      row_data <- rowData(sign())
+      cols <- grep("_sign",colnames(row_data))
+      names <- colnames(row_data)[cols]
       names %<>% gsub("_sign","",.)
       selectizeInput("select", "Select direct comparisons", choices=names, multiple = TRUE)
     })
 
     output$exclude <- renderUI({
-      feat_data <- fData(sign())
-      cols <- grep("_sign",colnames(feat_data))
-      names <- colnames(feat_data)[cols]
+      row_data <- rowData(sign())
+      cols <- grep("_sign",colnames(row_data))
+      names <- colnames(row_data)[cols]
       names %<>% gsub("_sign","",.)
       selectizeInput("exclude", "Exclude direct comparisons", choices=names, multiple = TRUE)
     })
 
     output$volcano_cntrst <- renderUI({
       if (!is.null(selected())) {
-        df <- fData(selected())
+        df <- rowData(selected())
         cols <- grep("_sign$",colnames(df))
         selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
       }
@@ -226,11 +228,11 @@ server <- shinyServer(function(input, output) {
         excluded <- sign()
       } else {
         if(length(input$exclude) == 1) {
-          df <- fData(sign())
+          df <- rowData(sign())
           col <- grep(paste(input$exclude, "_sign", sep = ""), colnames(df))
           excluded <- sign()[df[,col] != "+",]
         } else {
-          df <- fData(sign())
+          df <- rowData(sign())
           cols <- grep(paste(input$exclude, "_sign", sep = "", collapse = "|"), colnames(df))
           excluded <- sign()[apply(df[,cols] != "+", 1, all)]
         }
@@ -243,11 +245,11 @@ server <- shinyServer(function(input, output) {
         selected <- excluded()
       } else {
         if(length(input$select) == 1) {
-          df <- fData(excluded())
+          df <- rowData(excluded())
           col <- grep(paste(input$select, "_sign", sep = ""), colnames(df))
           selected <- sign()[df[,col] == "+",]
         } else {
-          df <- fData(excluded())
+          df <- rowData(excluded())
           cols <- grep(paste(input$select, "_sign", sep = "", collapse = "|"), colnames(df))
           selected <- sign()[apply(df[,cols] == "+", 1, all)]
         }
@@ -281,7 +283,7 @@ server <- shinyServer(function(input, output) {
     selected_plot_input <- reactive ({
       if(!is.null(input$table_rows_selected)) {
         selected_id <- table()[input$table_rows_selected,1]
-        single_prot_plot(selected(), selected_id, input$pres)
+        plot_single(selected(), selected_id, input$pres)
       }
     })
 
@@ -293,7 +295,7 @@ server <- shinyServer(function(input, output) {
 
     volcano_input <- reactive({
       if(!is.null(input$volcano_cntrst)) {
-        volcano(selected(), input$volcano_cntrst, input$fontsize, input$check_names)
+        plot_volcano(selected(), input$volcano_cntrst, input$fontsize, input$check_names)
       }
     })
 
@@ -303,6 +305,14 @@ server <- shinyServer(function(input, output) {
 
     missval_input <- reactive({
       plot_missval(norm())
+    })
+
+    numbers_input <- reactive({
+      plot_numbers(norm())
+    })
+
+    coverage_input <- reactive({
+      plot_coverage(norm())
     })
 
     ### Output functions ### ----------------------------------------------------------------------------------------------
@@ -328,6 +338,14 @@ server <- shinyServer(function(input, output) {
 
     output$missval <- renderPlot({
       missval_input()
+    })
+
+    output$numbers <- renderPlot({
+      numbers_input()
+    })
+
+    output$coverage <- renderPlot({
+      coverage_input()
     })
 
     observe({
@@ -391,6 +409,24 @@ server <- shinyServer(function(input, output) {
       content = function(file) {
         pdf(file)
         print(missval_input())
+        dev.off()
+      }
+    )
+
+    output$downloadNumbers <- downloadHandler(
+      filename = "numbers.pdf",
+      content = function(file) {
+        pdf(file)
+        print(numbers_input())
+        dev.off()
+      }
+    )
+
+    output$downloadCoverage <- downloadHandler(
+      filename = "coverage.pdf",
+      content = function(file) {
+        pdf(file)
+        print(coverage_input())
         dev.off()
       }
     )

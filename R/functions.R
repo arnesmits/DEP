@@ -18,51 +18,54 @@ unique_names <- function(data, name, ids, delim = ";") {
   return(data)
 }
 
-#' Data.frame to ExpressionSet
+#' Data.frame to SummerizedExperiment parsing from column names
 #'
-#' \code{into_exprset} creates an ExpressionSet object based on a data.frame.
+#' \code{make_se_parse} creates a SummerizedExperiment object based on a single data.frame
 #'
-#' @param data Data.frame, The data object which will be turned into an ExpressionSet.
-#' @param columns Vector of integers, Number of the columns that contain the Expression data.
-#' @return An ExpressionSet object.
+#' @param data Data.frame, Data object which will be turned into a SummerizedExperiment
+#' @param columns Vector of integers, Number of the columns that contain the assay data.
+#' @return A SummerizedExperiment object.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- into_exprset(example_unique, columns)
+#' example_exprset <- make_se_parse(example_unique, columns)
 #' @export
-into_exprset <- function(data, columns) {
+make_se_parse <- function(data, columns) {
   rownames(data) <- data$name
   raw <- data[,columns]
   raw[raw == 0] <- NA
   raw <- log2(raw)
+
   colnames(raw) %<>% gsub(getCommonPrefix(colnames(raw)), "", .) %>% make.names()
-  feature_data <- data[,-columns]
-  rownames(feature_data) <- feature_data$name
-  pheno_data <- colnames(raw) %>% data.frame(ID = ., stringsAsFactors = F) %>% mutate(replicate = substr(ID, nchar(ID), nchar(ID)), condition = substr(ID,1,nchar(ID)-1))
-  rownames(pheno_data) <- pheno_data$ID
-  dataset <- ExpressionSet(as.matrix(raw), phenoData = AnnotatedDataFrame(pheno_data), featureData = AnnotatedDataFrame(feature_data))
+  row_data <- data[,-columns]
+  rownames(row_data) <- row_data$name
+
+  col_data <- colnames(raw) %>% data.frame(ID = ., stringsAsFactors = F) %>% mutate(replicate = substr(ID, nchar(ID), nchar(ID)), condition = substr(ID,1,nchar(ID)-1))
+  rownames(col_data) <- col_data$ID
+
+  dataset <- SummarizedExperiment(assays = as.matrix(raw), colData = col_data, rowData = row_data)
   return(dataset)
 }
 
-#' Data.frame to ExpressionSet using an experimental design
+#' Data.frame to SummerizedExperiment using an experimental design
 #'
-#' \code{into_exprset_expdesign} creates an ExpressionSet object based on two data.frames: the data and experimental design.
+#' \code{make_se} creates a SummerizedExperiment object based on two data.frames: the data and experimental design.
 #'
-#' @param data Data.frame, Data object which will be turned into an ExpressionSet.
-#' @param columns Vector of integers, Number of the columns that contain the Expression data.
+#' @param data Data.frame, Data object which will be turned into a SummerizedExperiment
+#' @param columns Vector of integers, Number of the columns that contain the assay data.
 #' @param expdesign Data.frame, Experimental design object
-#' @return An ExpressionSet object.
+#' @return A SummerizedExperiment object.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #' @export
-into_exprset_expdesign <- function(data, columns, expdesign) {
+make_se <- function(data, columns, expdesign) {
   rownames(data) <- data$name
   raw <- data[,columns]
   raw[raw == 0] <- NA
@@ -73,118 +76,183 @@ into_exprset_expdesign <- function(data, columns, expdesign) {
   colnames(raw) <- expdesign$ID[lapply(expdesign$label, function(x) grep(x, colnames(raw))) %>% unlist()]
   raw <- raw[,!is.na(colnames(raw))]
 
-  feature_data <- data[,-columns]
-  rownames(feature_data) <- feature_data$name
-  dataset <- ExpressionSet(as.matrix(raw), phenoData = AnnotatedDataFrame(expdesign), featureData = AnnotatedDataFrame(feature_data))
+  row_data <- data[,-columns]
+  rownames(row_data) <- row_data$name
+  dataset <- SummarizedExperiment(assays = as.matrix(raw), colData = expdesign, rowData = row_data)
   return(dataset)
-}
-
-#' Data normalization using vsn
-#'
-#' \code{norm_vsn} nomralizes an ExpressionSet object using \code{\link{vsn}}.
-#'
-#' @param data ExpressionSet, Data object which will be normalized.
-#' @return An normalized ExpressionSet object.
-#' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
-#' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
-#'
-#' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
-#'
-#' example_vsn <- norm_vsn(example_exprset)
-#' @export
-norm_vsn <- function(data) {
-  data_vsn <- data
-  vsn.fit <- vsnMatrix(2^exprs(data_vsn))
-  exprs(data_vsn) <- predict(vsn.fit, 2^exprs(data_vsn))
-  return(data_vsn)
 }
 
 #' Filter on missing values
 #'
-#' \code{miss_val_filter} filters an ExpressionSet object based on missing values.
+#' \code{filter_missval} filters an SummerizedExperiment object based on missing values.
 #'
-#' @param data ExpressionSet, Data object which will be filtered.
+#' @param data SummerizedExperiment, Data object which will be filtered.
 #' @param thr Integer, sets the threshold for the allowed number of missing values per condition.
-#' @return An filtered ExpressionSet object.
+#' @return An filtered SummerizedExperiment object.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_stringent_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_less_stringent_filter <- miss_val_filter(example_vsn, thr = 1)
+#' example_stringent_filter <- filter_missval(example_exprset, thr = 0)
+#' example_less_stringent_filter <- filter_missval(example_exprset, thr = 1)
 #' @export
-miss_val_filter <- function(data, thr = 0) {
-  bin_data <- exprs(data)
-  bin_data[!is.na(exprs(data))] <- 1
-  keep <- bin_data %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, value, 1:(ncol(.)-1)) %>% left_join(., pData(data), by = "ID") %>% group_by(name, condition) %>%
+filter_missval <- function(data, thr = 0) {
+  bin_data <- assay(data)
+  bin_data[!is.na(assay(data))] <- 1
+  keep <- bin_data %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, value, 2:ncol(.)) %>% left_join(., data.frame(colData(data)), by = "ID") %>% group_by(rowname, condition) %>%
     summarize(miss_val = n()-sum(value)) %>% filter(miss_val <= thr) %>% spread(condition, miss_val)
-  filt <- data[keep$name,]
+  filt <- data[keep$rowname,]
   return(filt)
 }
 
-#' Impute missing values manually
+#' Data normalization using vsn
 #'
-#' \code{imputation_perseus} imputes missing values by a distribution of values which is left-shifted and scaled from the original distribution.
+#' \code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link{vsn}}.
 #'
-#' @param data ExpressionSet, Data object for which missing values will be imputed.
-#' @param shift Integer, sets the left-shift based on the original distribution (1 corresponds to 1 sd left-shift from median).
-#' @param scale Integer, sets the widht based on the original distribution sd.
-#' @return An imputed ExpressionSet object.
+#' @param data SummerizedExperiment, Data object which will be normalized.
+#' @return An normalized SummerizedExperiment object.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_imp <- imputation_perseus(example_filter, shift = 1.8, scale = 0.3)
+#' example_filter <- filter_missval(example_vsn, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
 #' @export
-imputation_perseus <- function(data, shift = 1.8, scale = 0.3) {
-  stat <- exprs(data) %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(samples, value, 1:(ncol(.)-1)) %>% filter(!is.na(value))  %>% group_by(samples) %>%
-    summarise(mean = mean(value), median = median(value), sd = sd(value), n = n(), infin = nrow(exprs(data))-n)
-  for(a in 1:nrow(stat)) {
-    exprs(data)[is.na(exprs(data)[,stat$samples[a]]),stat$samples[a]] <- rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
-  }
-  fData(data)$mean <- rowMeans(exprs(data))
-  return(data)
+norm_vsn <- function(data) {
+  data_vsn <- data
+  vsn.fit <- vsnMatrix(2^assay(data_vsn))
+  assay(data_vsn) <- predict(vsn.fit, 2^assay(data_vsn))
+  return(data_vsn)
 }
 
 #' Impute missing values
 #'
-#' \code{imputation_MSn} imputes missing values based on \code{\link{impute}}.
+#' \code{imputation} imputes missing values based on a manual \code{\link{impute}}.
 #'
-#' @param data ExpressionSet, Data object for which missing values will be imputed.
-#' @param fun Character, Function used for data imputation based on \code{\link{impute}}.
-#' @return An imputed ExpressionSet object.
+#' @param data SummerizedExperiment, Data object for which missing values will be imputed.
+#' @param fun "man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link{impute}}.
+#' @param ... Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link{impute}}.
+#' @return An imputed SummerizedExperiment object.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute_MinProb <- imputation_MSn(example_filter, fun = "MinProb")
-#' example_impute_QRILC <- imputation_MSn(example_filter, fun = "QRILC")
+#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
+#'
+#' example_impute_MinProb <- imputation(example_filter, fun = "MinProb", q = 0.05)
+#' example_impute_QRILC <- imputation(example_filter, fun = "QRILC")
+#'
+#' example_impute_knn <- imputation(example_filter, fun = "knn", k = 10, rowmax = 0.9)
+#' example_impute_MLE <- imputation(example_filter, fun = "MLE")
+#'
+#' example_impute_manual <- imputation(example_filter, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
-imputation_MSn <- function(data, fun) {
-  MSnSet_data <- as(data, "MSnSet")
-  MSnSet_imputed <- impute(MSnSet_data, method = fun)
-  exprs(data) <- exprs(MSnSet_imputed)
-  fData(data)$mean <- rowMeans(exprs(data))
+imputation <- function(data, fun, ...) {
+
+  manual_impute <- function(data, scale = 0.3, shift = 1.8) {
+    stat <- assay(data) %>% data.frame() %>% rownames_to_column(.) %>% gather(samples, value, 2:ncol(.)) %>% filter(!is.na(value))  %>% group_by(samples) %>%
+      summarise(mean = mean(value), median = median(value), sd = sd(value), n = n(), infin = nrow(assay(data))-n)
+    for(a in 1:nrow(stat)) {
+      assay(data)[is.na(assay(data)[,stat$samples[a]]),stat$samples[a]] <- rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
+    }
+    rowData(data)$mean <- rowMeans(assay(data))
+    return(data)
+  }
+  se2msn <- function(data) {
+    raw <- assay(data)
+    feat_data <- data.frame(rowData(data))
+    rownames(feat_data) <- feat_data$name
+    pheno_data <- data.frame(colData(data))
+    msn <- MSnSet(exprs = as.matrix(raw), pData = AnnotatedDataFrame(pheno_data), fData = AnnotatedDataFrame(feat_data))
+    return(msn)
+  }
+
+  if (fun == "man") {
+    imputed <- manual_impute(data, ...)
+  }
+  else {
+    MSnSet_data <- se2msn(data)
+    MSnSet_imputed <- impute(MSnSet_data, method = fun, ...)
+    assay(data) <- exprs(MSnSet_imputed)
+    rowData(data)$mean <- rowMeans(assay(data))
+    return(data)
+  }
+}
+
+#' Linear model test
+#'
+#' \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
+#'
+#' @param data SummerizedExperiment, Data object for which the variance will be analyzed.
+#' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
+#' @param type all" or "control" The type of contrasts that will be generated.
+#' @return An SummerizedExperiment object containing FDR estimates of differential expression.
+#' @examples
+#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' columns <- grep("LFQ.", colnames(example_unique))
+#' exp_design <- ExpDesign_UbIA_MS
+#' example_exprset <- make_se(example_unique, columns, exp_design)
+#'
+#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
+#' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
+#'
+#' example_lm <- linear_model(example_impute, "Ctrl", "control")
+#' @export
+linear_model <- function(data, control, type) {
+  conditions <- factor(colData(data)$condition)
+  design <- model.matrix(~ 0 + conditions)
+  colnames(design) <- gsub("conditions", "", colnames(design))
+
+  if(type == "all") {
+    cntrst <- apply(combn(colnames(design), 2), 2, function(x) paste(x, collapse = " - "))
+    flip <- grep(paste("^", control, sep = ""), cntrst)
+    if(length(flip) >= 1) {
+      cntrst[flip] %<>% gsub(paste(control, "- ", sep = " "), "", .) %>% paste(" - ", control, sep = "")
+    }
+  }
+  if(type == "control") {
+    cntrst <- paste(colnames(design)[!colnames(design) %in% control], control, sep = " - ")
+  }
+  cat("Tested contrasts: \n")
+  print(gsub(" - ", "_vs_", cntrst))
+
+  eB_fit <- eBayes(contrasts.fit(lmFit(assay(data), design = design), makeContrasts(contrasts = cntrst, levels = design)))
+
+  retrieve_fun <- function(comp, fit = eB_fit){
+    res <- topTable(fit, sort.by = "t", coef = comp, number = Inf)
+    fdr_res <- fdrtool(res$t, plot = FALSE, verbose = FALSE)
+    res$qval <- fdr_res$qval
+    res$lfdr <- fdr_res$lfdr
+    res$comparison <- rep(comp, dim(res)[1])
+    res <- rownames_to_column(res)
+    return(res)
+  }
+
+  limma_res <- map_df(cntrst, retrieve_fun)
+
+  limma_res_small <- limma_res %>% select(rowname, logFC, qval, comparison) %>% mutate(comparison = gsub(" - ", "_vs_", comparison))
+  table_diff <- limma_res_small %>% select(rowname, logFC, comparison) %>% spread(comparison, logFC)
+  colnames(table_diff)[2:ncol(table_diff)] <- paste(colnames(table_diff)[2:ncol(table_diff)], "diff", sep = "_")
+  table_padj <- limma_res_small %>% select(rowname, qval, comparison) %>% spread(comparison, qval)
+  colnames(table_padj)[2:ncol(table_padj)] <- paste(colnames(table_padj)[2:ncol(table_padj)], "p.adj", sep = "_")
+  table <- left_join(table_diff, table_padj, by = "rowname")
+  rowData(data) <- merge(rowData(data), table, by.x = "name", by.y = "rowname")
   return(data)
 }
 
@@ -192,31 +260,31 @@ imputation_MSn <- function(data, fun) {
 #'
 #' \code{anova_tukey} performs an Analysis of Variance fit (\code{\link{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link{TukeyHSD}}).
 #'
-#' @param data ExpressionSet, Data object for which the variance will be analyzed.
+#' @param data SummerizedExperiment, Data object for which the variance will be analyzed.
 #' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
 #' @param type all" or "control" The type of contrasts that will be generated.
-#' @return An ExpressionSet object containing FDR estimates of differential expression.
+#' @return An SummerizedExperiment object containing FDR estimates of differential expression.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
+#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
+#' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
 #' example_anova_tukey <- anova_tukey(example_impute, "Ctrl", "control")
 #' @export
 anova_tukey <- function(data, control, type) {
-  long <- exprs(data) %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, val, 1:(ncol(.)-1)) %>% left_join(., pData(data))
+  long <- assay(data) %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, val, 1:(ncol(.)-1)) %>% left_join(., data.frame(colData(data)), by = "ID")
 
   cat("  ANOVA test \n")
   anova_p <- long %>% group_by(name) %>% do(anova = aov(val ~ condition, data = .) %>% summary(.) %>% .[[1]] %>% .$`Pr(>F)` %>% .[1])
   anova_p %<>% ungroup(name) %>% mutate(p = unlist(anova), padj = p.adjust(p, method = "BH")) %>% select(-anova) %>% data.frame()
-  fData(data) <- left_join(fData(data), anova_p)
+  rowData(data) <- merge(rowData(data), anova_p, by = "name")
 
   cat("\n  Post-hoc test (Tukey) \n")
   tukey <- long %>% group_by(name) %>% do(tukey = aov(val ~ condition, data = .) %>% TukeyHSD(.) %>% .$condition %>% .[,c(1,4)])
@@ -240,117 +308,52 @@ anova_tukey <- function(data, control, type) {
   order <- tukey_df %>% select(cols_p) %>% names() %>% c("name",.)
   tukey_padj <- tukey_df[,c(1,cols_p)] %>% gather(., comparison, p, 2:ncol(.)) %>% mutate(padj = p.adjust(p, method = "BH")) %>% select(-p) %>% spread(., comparison, padj)
   final <- merge(tukey_df[,-cols_p],tukey_padj[,order], by = "name")
-  fData(data) <- merge(fData(data), final, by="name")
-  rownames(fData(data)) <- fData(data)$name
+  rowData(data) <- merge(rowData(data), final, by="name")
   return(data)
 }
-
-#' Linear model test
-#'
-#' \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
-#'
-#' @param data ExpressionSet, Data object for which the variance will be analyzed.
-#' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
-#' @param type all" or "control" The type of contrasts that will be generated.
-#' @return An ExpressionSet object containing FDR estimates of differential expression.
-#' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
-#' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
-#'
-#' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
-#'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
-#'
-#' example_lm <- linear_model(example_impute, "Ctrl", "control")
-#' @export
-linear_model <- function(data, control, type) {
-  conditions <- factor(pData(data)$condition)
-  design <- model.matrix(~ 0 + conditions)
-  colnames(design) <- gsub("conditions", "", colnames(design))
-
-  if(type == "all") {
-    cntrst <- apply(combn(unique(pData(data)$condition), 2), 2, function(x) paste(x, collapse = " - "))
-    flip <- grep(paste("^", control, sep =""), cntrst)
-    if(length(flip) >= 1) {
-      cntrst[flip] %<>% gsub(paste(control, "- ", sep = " "), "", .) %>% paste(" - ", control, sep = "")
-    }
-  }
-  if(type == "control") {
-    cntrst <- paste(colnames(design)[!colnames(design) %in% control], control, sep = " - ")
-  }
-  cat("Tested contrasts: \n")
-  print(cntrst)
-
-  eB_fit <- eBayes(contrasts.fit(lmFit(data, design = design), makeContrasts(contrasts = cntrst, levels = design)))
-
-  retrieve_fun <- function(comp, fit = eB_fit){
-    res <- topTable(fit, sort.by = "t", coef = comp, number = Inf)
-    fdr_res <- fdrtool(res$t, plot = FALSE, verbose = FALSE)
-    res$qval <- fdr_res$qval
-    res$lfdr <- fdr_res$lfdr
-    res$comparison <- rep(comp, dim(res)[1])
-    return(res)
-  }
-
-  limma_res <- map_df(cntrst, retrieve_fun)
-
-  limma_res_small <- limma_res %>% select(name, logFC, qval, comparison) %>% mutate(comparison = gsub(" - ", "-", comparison))
-  table_diff <- limma_res_small %>% select(name, logFC, comparison) %>% spread(comparison, logFC)
-  colnames(table_diff)[2:ncol(table_diff)] <- paste(colnames(table_diff)[2:ncol(table_diff)], "diff", sep = "_")
-  table_padj <- limma_res_small %>% select(name, qval, comparison) %>% spread(comparison, qval)
-  colnames(table_padj)[2:ncol(table_padj)] <- paste(colnames(table_padj)[2:ncol(table_padj)], "p.adj", sep = "_")
-  table <- left_join(table_diff, table_padj, by = "name")
-  fData(data) <- merge(fData(data), table, by = "name")
-  rownames(fData(data)) <- fData(data)$name
-  return(data)
-}
-
 
 #' Denote significant proteins
 #'
 #' \code{cutoffs} denotes significant proteins based on defined cutoffs.
 #'
-#' @param data ExpressionSet, Data object which will be filtered for significant proteins.
+#' @param data SummerizedExperiment, Data object which will be filtered for significant proteins.
 #' @param alpha Integer, sets the threshold for the false discovery rate (FDR).
 #' @param lfc Integer, sets the threshold for the log fold change (lfc).
-#' @return An ExpressionSet object containing a variable "sign" denoting the significant proteins.
+#' @return An SummerizedExperiment object containing a variable "sign" denoting the significant proteins.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
+#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
+#' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
 #' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
-#' significant_proteins <- example_sign[fData(example_sign)$sign == "+"]
+#' significant_proteins <- example_sign[rowData(example_sign)$sign == "+", ]
 #' nrow(significant_proteins)
 #' @export
 cutoffs <- function(data, alpha = 0.05, lfc = 1) {
-  feat_data <- fData(data)
-  cols_p <- grep("_p.adj",colnames(feat_data))
-  cols_diff <- grep("_diff", colnames(feat_data))
-  sign_df <- ifelse(feat_data[,cols_p] %>% apply(., 2, function(x) x <= alpha) & feat_data[,cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc), "+", "")
+  row_data <- rowData(data)
+  cols_p <- grep("_p.adj",colnames(row_data))
+  cols_diff <- grep("_diff", colnames(row_data))
+  sign_df <- ifelse(row_data[,cols_p] %>% apply(., 2, function(x) x <= alpha) & row_data[,cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc), "+", "")
   sign_df <- cbind(sign_df, sign = ifelse(apply(sign_df, 1, function(x) any(x == "+")),"+",""))
   colnames(sign_df) %<>% gsub("_p.adj","_sign",.)
-  fData(data) <- cbind(fData(data), sign_df)
+  sign_df <- cbind(name = row_data$name, sign_df)
+  rowData(data) <- merge(rowData(data), sign_df, by = "name")
   return(data)
 }
 
 #' Generate a results table
 #'
-#' \code{results} generates a results table (data.frame) from a ExpressionSet object which has been generated by \code{\link{linear_model}} followed by \code{\link{cutoffs}}.
+#' \code{results} generates a results table (data.frame) from a SummerizedExperiment object which has been generated by \code{\link{linear_model}} followed by \code{\link{cutoffs}}.
 #'
-#' @param data ExpressionSet, Data object which has been generated by \code{\link{linear_model}} and \code{\link{cutoffs}}.
+#' @param data SummerizedExperiment, Data object which has been generated by \code{\link{linear_model}} and \code{\link{cutoffs}}.
 #' @return An data.frame object containing all results variables from the performed analysis.
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
@@ -358,11 +361,11 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+#' example_exprset <- make_se(example_unique, columns, exp_design)
 #'
-#' example_vsn <- norm_vsn(example_exprset)
-#' example_filter <- miss_val_filter(example_vsn, thr = 0)
-#' example_impute <- imputation_MSn(example_filter, fun = "MinProb")
+#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
+#' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
 #' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
@@ -370,19 +373,19 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #' glimpse(example_results)
 #' @export
 results <- function(data) {
-  feat_data <- fData(data)
-  centered <- exprs(data) - fData(data)$mean
-  centered %<>%  data.frame(.) %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., pData(data), by = "ID")
+  row_data <- data.frame(rowData(data))
+  centered <- assay(data) - rowData(data)$mean
+  centered %<>%  data.frame(.) %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(data)), by = "ID")
   centered %<>% group_by(rowname, condition) %>% summarize(val = mean(val)) %>% mutate(val = signif(val, digits = 3)) %>% spread(condition, val)
   colnames(centered)[2:ncol(centered)] %<>%  paste(., "_centered", sep = "")
 
-  ratio <- feat_data[,grep("_diff", colnames(feat_data))] %>% signif(., digits = 3) %>% rownames_to_column(.)
+  ratio <- row_data %>% column_to_rownames("name") %>% .[,grep("_diff$", colnames(.))] %>% signif(., digits = 3) %>% rownames_to_column(.)
   colnames(ratio)[2:ncol(ratio)] %<>% gsub("_diff", "_ratio", .)
   df <- left_join(ratio, centered, by = "rowname")
 
-  ids <- feat_data %>% select(name, ID)
+  ids <- row_data %>% select(name, ID)
 
-  pval <- feat_data[,grep("p.adj|sign", colnames(feat_data))] %>% rownames_to_column(.)
+  pval <- row_data %>% column_to_rownames("name") %>% .[,grep("p.adj$|sign$", colnames(.))] %>% rownames_to_column(.)
   pval[,grep("p.adj", colnames(pval))] %<>%  signif(., digits = 3) %>% format(., scientific = T)
 
   table <- left_join(ids, pval, by = c("name" = "rowname"))
