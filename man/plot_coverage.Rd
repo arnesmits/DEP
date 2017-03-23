@@ -21,9 +21,9 @@ example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";"
 
 columns <- grep("LFQ.", colnames(example_unique))
 exp_design <- ExpDesign_UbIA_MS
-example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+example_exprset <- make_se(example_unique, columns, exp_design)
 plot_coverage(example_exprset)
 
-example_filter <- miss_val_filter(example_vsn, thr = 0)
+example_filter <- filter_missval(example_exprset, thr = 0)
 plot_coverage(example_filter)
 }

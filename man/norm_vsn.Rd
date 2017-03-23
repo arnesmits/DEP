@@ -7,13 +7,13 @@
 norm_vsn(data)
 }
 \arguments{
-\item{data}{ExpressionSet, Data object which will be normalized.}
+\item{data}{SummerizedExperiment, Data object which will be normalized.}
 }
 \value{
-An normalized ExpressionSet object.
+An normalized SummerizedExperiment object.
 }
 \description{
-\code{norm_vsn} nomralizes an ExpressionSet object using \code{\link{vsn}}.
+\code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link{vsn}}.
 }
 \examples{
 example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
@@ -21,7 +21,8 @@ example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";"
 
 columns <- grep("LFQ.", colnames(example_unique))
 exp_design <- ExpDesign_UbIA_MS
-example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+example_exprset <- make_se(example_unique, columns, exp_design)
 
-example_vsn <- norm_vsn(example_exprset)
+example_filter <- filter_missval(example_vsn, thr = 0)
+example_vsn <- norm_vsn(example_filter)
 }

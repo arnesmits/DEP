@@ -23,7 +23,8 @@ Imports: tidyverse,
     shiny,
     shinydashboard,
     DT,
-    rmarkdown
+    rmarkdown,
+    SummarizedExperiment
 RoxygenNote: 6.0.1
 Suggests: knitr,
     BiocStyle

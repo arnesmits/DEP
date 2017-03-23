@@ -11,17 +11,17 @@
 #' \itemize{
 #'   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
 #'   \item \code{\link{TMT}}: Tandem-mass-tags (TMT) workflow
+#'   \item \code{\link{report}}: Create a rmarkdown report
 #' }
 #'
 #' @section proteomeR functions:
 #' \itemize{
 #'   \item \code{\link{unique_names}}: Generate unique names
-#'   \item \code{\link{into_exprset}}: Turn data.frame into ExpressionSet
-#'   \item \code{\link{into_exprset_expdesign}}: Turn data.frame into ExpressionSet using an experimental design
-#'   \item \code{\link{miss_val_filter}}: Filter on missing values
+#'   \item \code{\link{make_se_parse}}: Turn data.frame into SummarizedExperiment by parsing column names
+#'   \item \code{\link{make_se}}: Turn data.frame into SummarizedExperiment using an experimental design
+#'   \item \code{\link{filter_missval}}: Filter on missing values
 #'   \item \code{\link{norm_vsn}}: Normalize data using vsn
-#'   \item \code{\link{imputation_MSn}}: Impute missing values
-#'   \item \code{\link{imputation_perseus}}: Impute missing values manually
+#'   \item \code{\link{imputation}}: Impute missing values
 #'   \item \code{\link{linear_model}}: Differential expression analysis (limma)
 #'   \item \code{\link{anova_tukey}}: Differential expression analysis (anova - tukey)
 #'   \item \code{\link{cutoffs}}: Denote significant proteins
@@ -30,8 +30,8 @@
 #'
 #' @section proteomeR visualization functions:
 #' \itemize{
-#'   \item \code{\link{single_prot_plot}}: Barplot for a protein of interest
-#'   \item \code{\link{volcano}}: Volcano plot for a specified contrast
+#'   \item \code{\link{plot_single}}: Barplot for a protein of interest
+#'   \item \code{\link{plot_volcano}}: Volcano plot for a specified contrast
 #'   \item \code{\link{plot_heatmap}}: Heatmap of all significant proteins
 #'   \item \code{\link{plot_norm}}: Boxplots to inspect normalization
 #'   \item \code{\link{plot_missval}}: Heatmap to inspect missing values
@@ -43,7 +43,7 @@
 #' @docType package
 #' @name proteomeR
 #'
-#' @import Rlibstree circlize RColorBrewer ComplexHeatmap ggrepel fdrtool vsn limma MSnbase Biobase magrittr tidyverse grid
+#' @import Rlibstree circlize RColorBrewer ComplexHeatmap ggrepel fdrtool vsn limma MSnbase Biobase magrittr tidyverse grid SummarizedExperiment
 #' @import shinydashboard shiny
 #'
 NULL

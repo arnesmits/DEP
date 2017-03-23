@@ -6,8 +6,6 @@ output:
     toc: true
     toc_float: true
     theme: united
-  pdf_document:
-    toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -18,12 +16,12 @@ This report presents an overview of the proteomeR analysis.
 
 ## Summary
 
-#### `r nrow(sign[fData(sign)$sign == "+"])` proteins differ significantly between samples.
+#### `r nrow(sign[rowData(sign)$sign == "+"])` proteins differ significantly between samples.
 
 Parameters used:  
 
-* p <= `r alpha`  
-* lfc >= `r lfc`
+* adjusted p <= `r param$alpha`  
+* |logFC| >= `r param$lfc`
 
 
 Original file contains _`r nrow(data)`_ proteins groups, of which _`r nrow(sign)`_ proteins were reproducibly quantified.  
@@ -31,11 +29,15 @@ In total _`r ncol(data)`_ samples were detected.
 
 ```{r,echo=FALSE}
 pg_width = ncol(filt) / 3
+if (pg_width > 10) { pg_width = 10 }
 ```
 
 ```{r numbers, echo=FALSE, warning=FALSE, fig.width = pg_width}
 plot_numbers(filt)
-plot_frequency(filt)
+```
+
+```{r coverage, echo=FALSE, warning=FALSE, fig.width = 3}
+plot_coverage(filt)
 ```
 
 ## Normalization
@@ -63,11 +65,19 @@ plot_missval(norm)
 
 ### Heatmaps
 ```{r,echo=FALSE}
-len = nrow(sign[fData(sign)$sign == "+"]) / 7
+len = nrow(sign[rowData(sign)$sign == "+"]) / 7
 ```
 
-```{r heatmap1, echo=FALSE, fig.width = 4, fig.height = len}
+```{r heatmap1, echo=FALSE, fig.width = 5, fig.height = len}
 plot_heatmap(sign, "contrast", k = 6, col_limit = 8)
+```
+
+```{r,echo=FALSE}
+width = ncol(filt) / 3
+if (width > 10) { width = 10 }
+```
+
+```{r heatmap2, echo=FALSE, fig.width = width, fig.height = len}
 plot_heatmap(sign, "centered", k = 6, col_limit = 4)
 ```
 

@@ -7,14 +7,14 @@
 linear_model(data, control, type)
 }
 \arguments{
-\item{data}{ExpressionSet, Data object for which the variance will be analyzed.}
+\item{data}{SummerizedExperiment, Data object for which the variance will be analyzed.}
 
 \item{control}{Character, The condition to which the contrasts are generated (the control would be most appropriate).}
 
 \item{type}{all" or "control" The type of contrasts that will be generated.}
 }
 \value{
-An ExpressionSet object containing FDR estimates of differential expression.
+An SummerizedExperiment object containing FDR estimates of differential expression.
 }
 \description{
 \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
@@ -25,11 +25,11 @@ example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";"
 
 columns <- grep("LFQ.", colnames(example_unique))
 exp_design <- ExpDesign_UbIA_MS
-example_exprset <- into_exprset_expdesign(example_unique, columns, exp_design)
+example_exprset <- make_se(example_unique, columns, exp_design)
 
-example_vsn <- norm_vsn(example_exprset)
-example_filter <- miss_val_filter(example_vsn, thr = 0)
-example_impute <- imputation_MSn(example_filter, fun = "MinProb")
+example_filter <- filter_missval(example_exprset, thr = 0)
+example_vsn <- norm_vsn(example_filter)
+example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 
 example_lm <- linear_model(example_impute, "Ctrl", "control")
 }
