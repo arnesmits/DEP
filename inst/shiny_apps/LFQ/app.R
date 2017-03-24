@@ -8,6 +8,7 @@ library(Rlibstree)
 library(DT)
 library(Biobase)
 library(MSnbase)
+library(SummarizedExperiment)
 library(limma)
 library(vsn)
 library(fdrtool)
@@ -360,7 +361,7 @@ server <- shinyServer(function(input, output) {
              "results" = results(sign()),
              "significant_proteins" = results(sign()) %>% filter(sign == "+") %>% select(-sign),
              "displayed_subset" = res() %>% filter(sign == "+") %>% select(-sign),
-             "full_dataset" = left_join(rownames_to_column(exprs(sign()) %>% data.frame()), fData(sign()), by = c("rowname" = "name")))
+             "full_dataset" = left_join(rownames_to_column(exprs(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
 
     output$downloadData <- downloadHandler(

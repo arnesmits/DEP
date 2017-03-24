@@ -125,17 +125,17 @@ knitr::kable(ExpDesign_UbIA_MS)
 ```
 
 ``` {r to_exprset}
-# Generate an ExpressionSet object using sample information from the column names
-LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
-data_exprset <- into_exprset(data_unique, LFQ_columns)
-
-# Generate an ExpressionSet object with an experimental design
+# Generate an SummarizedExperiment object with an experimental design
 LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
 experimental_design <- ExpDesign_UbIA_MS
-data_exprset <- into_exprset_expdesign(data_unique, LFQ_columns, experimental_design)
+data_se <- make_se(data_unique, LFQ_columns, experimental_design)
 
-# Let's have a look at the ExpressionSet object
-data_exprset
+# Generate an SummarizedExperiment object by parsing condition information from the column names
+LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
+data_se_parsed <- make_se_parse(data_unique, LFQ_columns)
+
+# Let's have a look at the SummarizedExperiment object
+data_se
 
 ```
 
@@ -147,11 +147,11 @@ Therefore, we first filter out proteins that contain to many missing values. Thi
 
 ``` {r filter_miss_val}
 # Filter for proteins that are identified in all replicates of at least one sample.
-data_filt <- miss_val_filter(data_exprset, thr = 0)
+data_filt <- filter_missval(data_se, thr = 0)
 
 # Less stringent filtering:
 # Filter for proteins that are identified in 2 out of 3 replicates of at least one sample.
-data_filt2 <- miss_val_filter(data_exprset, thr = 1)
+data_filt2 <- filter_missval(data_se, thr = 1)
 ```
 
 After filtering the number of identified proteins per sample can be plotted as well as the overlap in identifications between samples.
@@ -206,25 +206,25 @@ Values which are missing not at random (MNAR) should be imputed by left-censored
 As the example data has values missing not at random, QRILC imputation is the method of choice.
 
 ``` {r impute, results = "hide", message = FALSE, warning = FALSE}
-# Impute missing data using a quantile regression-based left-censored imputation method (QRILC)
+# Impute missing data using random draws from a Gaussian distribution centered around a minimal value
 # (for data not missing at random)
-data_imp <- imputation_MSn(data_norm, fun = "MinProb")
+data_imp <- imputation(data_norm, fun = "MinProb", q = 0.01)
 
 # Impute missing data using a quantile regression-based left-censored imputation method (QRILC)
 # (for data not missing at random)
-data_imp_QRILC <- imputation_MSn(data_norm, fun = "QRILC")
+data_imp_QRILC <- imputation(data_norm, fun = "QRILC")
 
-# Impute missing data using a manually defined left-shifted distribution
+# Impute missing data using radom drwas from a manually defined left-shifted Gaussian distribution
 # (for data not missing at random)
-data_imp_man <- imputation_perseus(data_norm, shift = 1.8, scale = 0.3)
+data_imp_man <- imputation(data_norm, fun = "man", shift = 1.8, scale = 0.3)
 
 # Impute missing data using the k-nearest neighbour approach
 # (for data missing at random)
-data_imp_knn <- imputation_MSn(data_norm, fun = "knn")
+data_imp_knn <- imputation(data_norm, fun = "knn")
 
 # Impute missing data using the k-nearest neighbour approach
 #(for data missing at random)
-data_imp_MLE <- imputation_MSn(data_norm, fun = "MLE")
+data_imp_MLE <- imputation(data_norm, fun = "MLE")
 ```
 
 ## Differential enrichment analysis
@@ -295,9 +295,9 @@ Volcano plots can be used to visualize a specific contrast (comparison between t
 
 ``` {r volcano, fig.height = 5, fig.width = 6}
 # Plot a volcano plot for the contrast "Ubi6 vs Ctrl""
-volcano(data_sign, contrast = "Ubi6-Ctrl", labelsize = 2)
+plot_volcano(data_sign, contrast = "Ubi6_vs_Ctrl", labelsize = 2)
 # Plot a volcano plot for the contrast "Ubi6 vs Ctrl"" without labels
-volcano(data_sign, contrast = "Ubi6-Ctrl", add_names = FALSE)
+plot_volcano(data_sign, contrast = "Ubi6_vs_Ctrl", add_names = FALSE)
 ```
 
 ### Barplots of a protein of interest
@@ -306,10 +306,10 @@ It can also be useful to plot the data of a single protein, for example if this 
 
 ``` {r bar, fig.height = 3.5, fig.width = 3.5}
 # Plot a barplot for the protein USP15 with the data centered
-single_prot_plot(data_sign, protein = "USP15", type = "centered")
+plot_single(data_sign, protein = "USP15", type = "centered")
 
 # Plot a barplot for the protein USP15
-single_prot_plot(data_sign, protein = "USP15", type = "contrast")
+plot_single(data_sign, protein = "USP15", type = "contrast")
 ```
 
 ## Results table
@@ -346,25 +346,26 @@ data_results <- LFQ(data, experimental_design, fun = "MinProb",
       control = "Ctrl", type = "control", alpha = 0.05, lfc = 1)
 ```
 
-This wrapper produces two reports (pdf and html), which are saved in a generated "Report" folder.
-Additionally, the resulting object contains the _results table_ (data.frame object) and the _full data set_ (ExpressionSet object).
+This wrapper produces a list of objects, which can be used to create a report and/or for further analysis.
+The reports function produces two reports (pdf and html) and a results table, which are saved in a generated "Report" folder.
 
-``` {r LFQ_results}
-# data_results contains two objects
+``` {r report}
+# See all objects saved within the results object
 names(data_results)
 
+# Make a markdown report and save the results
+report(data_results)
+```
+
+The results generated by the LFQ function contain, among others, the _results_ object (data.frame object) and the _sign_ object (SummarizedExperiment object).
+The _results_ object contains the essential results and the _sign_ object contains the full SummarizedExperiment object which can be used for further visualization.
+
+``` {r LFQ_results}
 # Colnames of the results object
 colnames(data_results$results)
 
-# data object
-data_results$data
-```
-
-To save the results table in the Reports folder:
-
-``` {r LFQ_results2}
-write.table(data_results$results, paste(getwd(), "Report", "results.txt", sep = "/"), 
-    row.names = FALSE, sep = "\t")
+# the sign object
+data_results$sign
 ```
 
 The results table can be explored by selecting the _$results_ object
@@ -380,16 +381,16 @@ results_table %>% filter(sign == "+") %>% nrow()
 The full data can be used for the plotting functions as desribed in the chapter ["Visualization of the results"](#visualization-of-the-results).
 
 ``` {r LFQ_results4, fig.height = 5, fig.width = 6}
-# Extract the full data object
-full_data <- data_results$data
+# Extract the sign object
+full_data <- data_results$sign
 
 # Use the full data to generate a volcano plot
-volcano(data_results$data, contrast = "Ubi4-Ctrl", labelsize = 2)
+plot_volcano(full_data, contrast = "Ubi4_vs_Ctrl", labelsize = 2)
 ```
 
 ``` {r LFQ_results5, fig.height = 3.5, fig.width = 3.5}
 # Use the full data to generate a barplot 
-single_prot_plot(data_results$data, protein = "PSMD14", type = "centered")
+plot_single(full_data, protein = "PSMD14", type = "centered")
 
 ```
 

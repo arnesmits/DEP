@@ -19,6 +19,12 @@ LFQ(data, expdesign, fun, control, type, filter = c("Reverse",
 
 \item{type}{"all" or "control" The type of contrasts that will be generated.}
 
+\item{filter}{Character, Name(s) of the column(s) to be filtered on.}
+
+\item{name}{Character, Name of the column representing gene names.}
+
+\item{ids}{"Character, Name of the column representing protein IDs.}
+
 \item{alpha}{Numeric, sets the false discovery rate threshold.}
 
 \item{lfc}{Numeric, sets the log fold change threshold.}

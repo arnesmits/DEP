@@ -68,7 +68,7 @@ plot_missval(norm)
 len = nrow(sign[rowData(sign)$sign == "+"]) / 7
 ```
 
-```{r heatmap1, echo=FALSE, fig.width = 5, fig.height = len}
+```{r heatmap_1, echo=FALSE, fig.width = 5, fig.height = len}
 plot_heatmap(sign, "contrast", k = 6, col_limit = 8)
 ```
 
@@ -77,7 +77,7 @@ width = ncol(filt) / 3
 if (width > 10) { width = 10 }
 ```
 
-```{r heatmap2, echo=FALSE, fig.width = width, fig.height = len}
+```{r heatmap_2, echo=FALSE, fig.width = width, fig.height = len}
 plot_heatmap(sign, "centered", k = 6, col_limit = 4)
 ```
 
