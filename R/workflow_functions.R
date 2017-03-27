@@ -14,22 +14,27 @@
 #'
 #' TMT_res <- TMT()
 #' @export
-TMT <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
+TMT <- function(data, expdesign, fun, control, type, name = "gene_name", ids = "protein_id", alpha = 0.05, lfc = 1) {
+  # Filter the data for Reverse hits (indicated by "###" in the gene_name)
   data <- data[-grep("###", data$gene_name),]
-  cols <- grep("signal_sum", colnames(data))
-  data %<>% unique_names(., "gene_name", "protein_id", delim = "[|]") %>% make_se(., cols, expdesign)
+  # Make unique names and turn the data into a SummarizedExperiment
+  cols <- grep("signal_sum", colnames(data)) # The reporter signal columns
+  data %<>% unique_names(., name, ids, delim = "[|]") %>% make_se(., cols, expdesign)
+  # Filter on missing values
   filt <- filter_missval(data)
+  # Variance stabilization
   norm <- norm_vsn(filt)
+  # Impute missing values
   imp <- imputation(norm, fun)
+  # Test for differential expression by empirical Bayes moderation of a linear model and defined contrasts
   lm <- linear_model(imp, control, type)
+  # Denote differential expressed proteins
   sign <- cutoffs(lm, alpha, lfc)
+  # Generate a results table
   res <- results(sign)
 
-  wd <- paste(getwd(), "/Report", sep = "")
-  dir.create(wd)
-  file <- paste(system.file(package = "proteomeR"), "/Report.Rmd", sep = "")
-  rmarkdown::render(file, output_format = "all", output_dir = wd, quiet = T)
-  return(list(results = res, data = sign))
+  param <- data.frame(alpha, lfc)
+  return(list(se = data, filt = filt, norm = norm, imputed = imp, lm = lm, sign = sign, results = res, param = param))
 }
 
 #' LFQ workflow
@@ -53,9 +58,8 @@ TMT <- function(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1) {
 #' results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
 #' @export
 LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1) {
-  cols <- grep("^LFQ", colnames(data))
-  cols_filt <- grep(paste("^", filter, "$", sep = "", collapse = "|"), colnames(data))
-
+  # Filter out the positive proteins (indicated by "+") in the pre-defined columns
+  cols_filt <- grep(paste("^", filter, "$", sep = "", collapse = "|"), colnames(data)) # The columns to filter on
   if (!is.null(cols_filt)) {
     if (length(cols_filt) == 1) {
       data %<>% filter(.[,cols_filt] != "+")
@@ -64,12 +68,20 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
     }
   }
 
+  # Make unique names and turn the data into a SummarizedExperiment
+  cols <- grep("^LFQ", colnames(data)) # The LFQ intensity columns
   data %<>% unique_names(., name, ids, delim = ";") %>% make_se(., cols, expdesign)
+  # Filter on missing values
   filt <- filter_missval(data)
+  # Variance stabilization
   norm <- norm_vsn(filt)
+  # Impute missing values
   imp <- imputation(norm, fun)
+  # Test for differential expression by empirical Bayes moderation of a linear model and defined contrasts
   lm <- linear_model(imp, control, type)
+  # Denote differential expressed proteins
   sign <- cutoffs(lm, alpha, lfc)
+  # Generate a results table
   res <- results(sign)
 
   param <- data.frame(alpha, lfc)
@@ -91,6 +103,7 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
 #'
 #' @export
 report <- function(results) {
+  # Extract the objects used in the Rmarkdown report from the results object
   data <- results$se
   filt <- results$filt
   norm <- results$norm
@@ -98,10 +111,12 @@ report <- function(results) {
   param <- results$param
   table <- results$results
 
+  # Render the Rmarkdown report
   wd <- paste(getwd(), "/Report", sep = "")
   dir.create(wd)
   file <- paste(system.file(package = "proteomeR"), "/Report.Rmd", sep = "")
   rmarkdown::render(file, output_format = "all", output_dir = wd, quiet = T)
 
+  # Save the results table in a tab-delimited txt file
   write.table(table, paste(wd, "results.txt", sep = "/"), row.names = FALSE, sep = "\t")
 }

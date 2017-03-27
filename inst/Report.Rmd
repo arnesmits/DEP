@@ -66,6 +66,7 @@ plot_missval(norm)
 ### Heatmaps
 ```{r,echo=FALSE}
 len = nrow(sign[rowData(sign)$sign == "+"]) / 7
+if (len < 2) { len = 2 }
 ```
 
 ```{r heatmap_1, echo=FALSE, fig.width = 5, fig.height = len}

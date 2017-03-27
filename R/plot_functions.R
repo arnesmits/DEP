@@ -25,20 +25,28 @@
 #' plot_single(example_sign, "USP15", "contrast")
 #' @export
 plot_single <- function(data, protein, type) {
+  # Plot either the average protein-centered enrichment values per condition ("centered") or
+  # the average enrichments of conditions versus the control condition ("contrast") for a single protein
   if(type == "centered") {
+    # Obtain protein-centered enrichment values
     df <- assay(data) - rowData(data)$mean
     df %<>% data.frame(.) %>% rownames_to_column(.)
+    # Select values for a single protein in long format and add sample annotation
     df %<>% filter(rowname == protein) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(data)), by = "ID")
     df$replicate <- as.factor(df$replicate)
+    # Plot the centered enrichment values for the replicates as well as the mean
     p1 <- ggplot(df, aes(condition, val, col = replicate)) + geom_hline(yintercept = 0) + theme_bw() +
       stat_summary(fun.y = "mean", colour = "black", size = 0, geom = "bar", fill = "black") +
       geom_point(shape = 17, size = 4) + labs(title = unique(df$rowname), x = "Baits", y = "Enrichment (log2)") +
       theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1), axis.title=element_text(size=14,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=14,face="bold"), legend.position="top")
   }
   if(type == "contrast") {
-    df <- rowData(data) %>% data.frame() %>% column_to_rownames(var = "name") %>% .[, grep("_diff$", colnames(.))] %>% rownames_to_column(.)
+    # Obtain average enrichments of conditions versus the control condition
+    df <- rowData(data) %>% data.frame() %>% column_to_rownames(var = "name") %>% select(ends_with("_diff")) %>% rownames_to_column(.)
     colnames(df)[2:ncol(df)] %<>%  gsub("_diff", "", .) %>% gsub("_vs_", " - ", .)
+    # Select values for a single protein in long format
     df %<>% filter(rowname == protein) %>% gather(condition, LFC, 2:ncol(.))
+    # Plot the average enrichments of conditions versus the control condition
     p1 <- ggplot(df, aes(condition, LFC)) + geom_hline(yintercept = 0) + theme_bw() +
       geom_bar(stat = "unique", size = 0, col = "black", fill = "black") + labs(title = unique(df$rowname), x = "", y = "Enrichment (log2)") +
       theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1), axis.title=element_text(size=14,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=14,face="bold"), legend.position="top")
@@ -75,26 +83,36 @@ plot_single <- function(data, protein, type) {
 #' plot_heatmap(example_sign, "contrast", k = 6, col_limit = 10, labelsize = 3)
 #' @export
 plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
+  # Filter for significant proteins only
   data <- data[rowData(data)$sign == "+", ]
 
+  # Plot a heatmap of the average protein-centered enrichment values per condition ("centered") or
+  # the average enrichments of conditions versus the control condition ("contrast")
   if(type == "centered") {
+    # Obtain protein-centered enrichment values
     df <- assay(data) - rowData(data)$mean
 
+    # Perform k-means clustering
     set.seed(1)
     kmeans <- kmeans(df,k)
+    # Order the k-means clusters according to the maximum enrichment in all samples averaged over the proteins in the cluster
     order <- df %>% data.frame() %>% cbind(., cluster = kmeans$cluster) %>% mutate(row = apply(.[,1:(ncol(.)-1)], 1, function(x) max(x))) %>% group_by(cluster) %>% summarize(index=sum(row)/n()) %>% arrange(desc(index)) %>% collect %>% .[[1]] %>% match(seq(1:k),.)
     kmeans$cluster <- order[kmeans$cluster]
   }
   if(type == "contrast") {
+    # Obtain average enrichments of conditions versus the control condition
     df <- rowData(data) %>% data.frame() %>% column_to_rownames(var = "name") %>% select(ends_with("_diff"))
     colnames(df) %<>% gsub("_diff","" , .) %>% gsub("_vs_", " - ", .)
 
+    # Perform k-means clustering
     set.seed(1)
     kmeans <- kmeans(df,k)
+    # Order the k-means clusters according to their average enrichment
     order <- cbind(df, cluster = kmeans$cluster) %>% gather(condition, diff, 1:(ncol(.)-1)) %>% group_by(cluster) %>% summarize(row = mean(diff)) %>% arrange(desc(row)) %>% collect %>% .[[1]] %>% match(seq(1:k),.)
     kmeans$cluster <- order[kmeans$cluster]
   }
 
+  # Plot the heatmap
   ht1 = Heatmap(df, col = colorRamp2(seq(-col_limit, col_limit, (col_limit/5)), rev(brewer.pal(11, "RdBu"))), split = kmeans$cluster,
                 cluster_columns = T, cluster_rows = T, na_col = "grey", clustering_distance_rows = "pearson",clustering_distance_columns = "pearson",
                 row_names_side = "left", column_names_side = "top", show_row_names = T, show_column_names = T,
@@ -135,19 +153,26 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
 plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
   row_data <- rowData(data)
 
+  # Show error if an unvalid contrast is given
   if(length(grep(paste(contrast, "_diff", sep = ""), colnames(row_data))) == 0) {
-    cat("Contrasts in the data:\n")
-    print(row_data %>% data.frame() %>% select(ends_with("_diff")) %>% colnames(.) %>% gsub("_diff", "", .))
-    stop("Not a valid contrast")
-  }
+    valid_cntrsts <- row_data %>% data.frame() %>% select(ends_with("_diff")) %>% colnames(.) %>% gsub("_diff", "", .)
+    valid_cntrsts_msg <- paste("Valid contrasts are: '", paste0(valid_cntrsts, collapse = "', '"), "'")
+    stop(
+      "Not a valid contrast, please run `plot_volcano()` with a valid contrast as argument\n",
+      valid_cntrsts_msg,
+      call. = FALSE)
+    }
 
-  diff <- grep(paste(contrast, "_diff", sep = ""), colnames(row_data))
-  padj <- grep(paste(contrast, "_p.adj", sep = ""), colnames(row_data))
-  sign <- grep(paste(contrast, "_sign", sep = ""), colnames(row_data))
+  # Generate a data.frame containing all info for the volcano plot
+  diff <- grep(paste(contrast, "_diff", sep = ""), colnames(row_data)) # All log2 fold change columns
+  padj <- grep(paste(contrast, "_p.adj", sep = ""), colnames(row_data)) # All adjusted p-value columns
+  sign <- grep(paste(contrast, "_sign", sep = ""), colnames(row_data)) # All significance columns
   df <- data.frame(x = row_data[,diff], y = -log10(row_data[,padj]) , z = row_data[,sign], name = row_data$name)
   sign <- df %>% filter(z == "+")
   name1 <- gsub("_vs_.*", "", contrast)
   name2 <- gsub(".*_vs_", "", contrast)
+
+  # Plot volcano with or without labels
   if(add_names) {
     p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = sign, col = "black") + geom_text_repel(data = sign, aes(label = name), size = labelsize, point.padding = unit(0.3, "lines")) + theme_bw() +
       theme(legend.position="none", axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold")) + labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") +
@@ -181,9 +206,11 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
 #' plot_norm(example_filter, example_vsn)
 #' @export
 plot_norm <- function(raw, norm) {
+  # Get a long data.frame of the assay data (original and normalized) annotated with sample info
   df1 <- assay(raw) %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(raw)), by = "ID") %>% mutate(var = "original")
   df2 <- assay(norm) %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(norm)), by = "ID") %>% mutate(var = "normalized")
   df <- rbind(df1, df2)
+  # Boxplots for conditions with facet_wrap for the original and normalized values
   ggplot(df, aes(x = ID, y = val, fill = condition)) + geom_boxplot(notch = T, na.rm=TRUE) + coord_flip() + facet_wrap(~var, ncol = 1) + theme_bw() + labs(x = "", y = "Log2 Intensity") +
     theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=14,face="bold"), legend.position="right")
 }
@@ -206,9 +233,11 @@ plot_norm <- function(raw, norm) {
 #' plot_missval(example_filter)
 #' @export
 plot_missval <- function(data) {
+  # Make assay data binary (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame(.)
   missval <- df[apply(df, 1, function(x) any(is.na(x))),]
   missval <- ifelse(is.na(missval), 0, 1)
+  # Plot binary heatmap
   ht2 = Heatmap(missval, col = c("white","black"), row_names_side = "left", column_names_side = "top", show_row_names = F, show_column_names = T,
                 name = "Missingness Pattern", row_names_gp = gpar(fontsize = 10), column_names_gp = gpar(fontsize = 16))
   draw(ht2, heatmap_legend_side = "top")
@@ -233,7 +262,9 @@ plot_missval <- function(data) {
 #' plot_numbers(example_filter)
 #' @export
 plot_numbers <- function(data) {
+  # Make a binary long data.frame (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
+  # Summarize the number of proteins identified per sample and generate a barplot
   stat <- df %>% group_by(ID) %>% summarize(n = n(), sum = sum(bin)) %>% left_join(., data.frame(colData(data)), by = "ID")
   ggplot(stat, aes(x = ID, y = sum, fill = condition)) + geom_bar(stat = "identity") + theme_bw() + labs(title = "Proteins per condition", x = "", y = "Number of ProteinGroups") + geom_hline(yintercept = unique(stat$n)) +
     theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1, size=10), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=10), legend.title = element_text(size=12,face="bold"), legend.position="right")
@@ -258,8 +289,11 @@ plot_numbers <- function(data) {
 #' plot_frequency(example_filter)
 #' @export
 plot_frequency <- function(data) {
+  # Make a binary long data.frame (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
+  # Identify the number of experiments a protein was observed
   stat <- df %>% group_by(rowname) %>% summarize(sum = sum(bin))
+  # Get the frequency of the number of experiments proteins were observerd and plot these numbers
   table <- table(stat$sum) %>% data.frame()
   ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) + geom_bar(stat = "identity") + theme_bw() + labs(title = "Protein identifications overlap", x = "Identified in number of conditions", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
     theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1, size=12), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=12,face="bold"), legend.position="none")
@@ -284,8 +318,11 @@ plot_frequency <- function(data) {
 #' plot_coverage(example_filter)
 #' @export
 plot_coverage <- function(data) {
+  # Make a binary long data.frame (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
+  # Identify the number of experiments a protein was observed
   stat <- df %>% group_by(rowname) %>% summarize(sum = sum(bin))
+  # Get the frequency of the number of experiments proteins were observerd and plot the cumulative sum of these numbers
   table <- table(stat$sum) %>% data.frame() %>% mutate(sum = rev(cumsum(rev(Freq))), pos = sum - (Freq / 2))
   ggplot(table, aes(x = "all", y = Freq, fill = Var1)) + geom_col(col = "white") + theme_bw() + labs(title = "Protein coverage in conditions", x = "", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
     theme(axis.text=element_text(size=12), axis.text.x = element_blank(), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=12,face="bold"), legend.position="right") +

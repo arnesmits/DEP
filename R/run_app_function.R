@@ -8,7 +8,7 @@
 #' run_app("TMT")
 #' @export
 run_app <- function(app) {
-  # locate all the shiny apps that exist
+  # Locate all the shiny apps that exist
   valid_apps <- list.files(system.file("shiny_apps", package = "proteomeR"))
 
   valid_apps_msg <-
@@ -17,16 +17,16 @@ run_app <- function(app) {
       paste(valid_apps, collapse = "', '"),
       "'")
 
-  # if an invalid app is given, throw an error
+  # Show error if an unvalid app-name is given
   if (missing(app) || !nzchar(app) ||
       !app %in% valid_apps) {
     stop(
-      'Please run `run_app()` with a valid app as an argument.n',
+      'Please run `run_app()` with a valid app as argument\n',
       valid_apps_msg,
       call. = FALSE)
   }
 
-  # find and launch the app
+  # Launch the app
   appDir <- system.file("shiny_apps", app, package = "proteomeR")
   suppressWarnings(shiny::runApp(appDir, display.mode = "normal"))
 }
