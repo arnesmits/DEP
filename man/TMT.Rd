@@ -4,7 +4,8 @@
 \alias{TMT}
 \title{TMT workflow}
 \usage{
-TMT(data, expdesign, fun, control, type, alpha = 0.05, lfc = 1)
+TMT(data, expdesign, fun, control, type, name = "gene_name",
+  ids = "protein_id", alpha = 0.05, lfc = 1)
 }
 \arguments{
 \item{data}{Data.frame, The data object.}

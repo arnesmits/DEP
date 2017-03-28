@@ -22,5 +22,5 @@ example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(example_unique))
-example_exprset <- make_se_parse(example_unique, columns)
+example_se <- make_se_parse(example_unique, columns)
 }

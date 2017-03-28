@@ -25,5 +25,5 @@ example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";"
 
 columns <- grep("LFQ.", colnames(example_unique))
 exp_design <- ExpDesign_UbIA_MS
-example_exprset <- make_se(example_unique, columns, exp_design)
+example_se <- make_se(example_unique, columns, exp_design)
 }

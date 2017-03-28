@@ -21,8 +21,8 @@ example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";"
 
 columns <- grep("LFQ.", colnames(example_unique))
 exp_design <- ExpDesign_UbIA_MS
-example_exprset <- make_se(example_unique, columns, exp_design)
+example_se <- make_se(example_unique, columns, exp_design)
 
-example_filter <- filter_missval(example_vsn, thr = 0)
+example_filter <- filter_missval(example_se, thr = 0)
 example_vsn <- norm_vsn(example_filter)
 }
