@@ -15,6 +15,7 @@ library(fdrtool)
 library(proteomeR)
 library(shiny)
 library(shinydashboard)
+
 ui <- shinyUI(
   dashboardPage(
     dashboardHeader(title = "proteomeR - LFQ"),
@@ -139,7 +140,7 @@ server <- shinyServer(function(input, output) {
     norm <- norm()
     imputation(norm, input$imputation)
   })
-  
+
   df <- reactive({
     imp <- imp()
     if(input$stat == "ANOVA") {
@@ -152,29 +153,29 @@ server <- shinyServer(function(input, output) {
     }
     df
   })
-  
+
   sign <- reactive({
     df <- df()
     cutoffs(df, input$p, input$lfc)
   })
-  
+
   ### All object and functions upon 'Analyze' input  ### ---------------------------------------------------------------------------
-  
+
   observeEvent(input$analyze, {
-    
+
     ### Interactive UI functions ### ----------------------------------------------------------------------------------------------
     output$downloadTable <- renderUI({
       selectizeInput("dataset", "Choose a dataset to download" , c("results","significant_proteins","displayed_subset","full_dataset"))
     })
-    
+
     output$downloadButton <- renderUI({
       downloadButton('downloadData', 'Download')
     })
-    
+
     output$signBox <- renderInfoBox({
       infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$sign == "+"] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
     })
-    
+
     output$select <- renderUI({
       row_data <- rowData(sign())
       cols <- grep("_sign",colnames(row_data))
@@ -182,7 +183,7 @@ server <- shinyServer(function(input, output) {
       names %<>% gsub("_sign","",.)
       selectizeInput("select", "Select direct comparisons", choices=names, multiple = TRUE)
     })
-    
+
     output$exclude <- renderUI({
       row_data <- rowData(sign())
       cols <- grep("_sign",colnames(row_data))
@@ -190,7 +191,7 @@ server <- shinyServer(function(input, output) {
       names %<>% gsub("_sign","",.)
       selectizeInput("exclude", "Exclude direct comparisons", choices=names, multiple = TRUE)
     })
-    
+
     output$volcano_cntrst <- renderUI({
       if (!is.null(selected())) {
         df <- rowData(selected())
@@ -198,7 +199,7 @@ server <- shinyServer(function(input, output) {
         selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
       }
     })
-    
+
     ### Reactive functions ### ----------------------------------------------------------------------------------------------
     excluded <- reactive({
       if(is.null(input$exclude)) {
@@ -216,7 +217,7 @@ server <- shinyServer(function(input, output) {
       }
       excluded
     })
-    
+
     selected <- reactive({
       if(is.null(input$select)) {
         selected <- excluded()
@@ -233,11 +234,11 @@ server <- shinyServer(function(input, output) {
       }
       selected
     })
-    
+
     res <- reactive({
       results(selected())
     })
-    
+
     table <- reactive({
       res <- res() %>% filter(sign == "+") %>% select(-sign)
       if(input$pres == "centered") {
@@ -256,81 +257,81 @@ server <- shinyServer(function(input, output) {
       }
       table
     })
-    
+
     selected_plot_input <- reactive ({
       if(!is.null(input$table_rows_selected)) {
         selected_id <- table()[input$table_rows_selected,1]
         plot_single(selected(), selected_id, input$pres)
       }
     })
-    
+
     heatmap_input <- reactive({
       withProgress(message = 'Plotting', value = 0.66, {
         plot_heatmap(selected(), input$pres, input$k, input$limit)
       })
     })
-    
+
     volcano_input <- reactive({
       if(!is.null(input$volcano_cntrst)) {
         plot_volcano(selected(), input$volcano_cntrst, input$fontsize, input$check_names)
       }
     })
-    
+
     norm_input <- reactive({
       plot_norm(filt(), norm())
     })
-    
+
     missval_input <- reactive({
       plot_missval(norm())
     })
-    
+
     numbers_input <- reactive({
       plot_numbers(norm())
     })
-    
+
     coverage_input <- reactive({
       plot_coverage(norm())
     })
-    
+
     ### Output functions ### ----------------------------------------------------------------------------------------------
     output$table <- DT::renderDataTable({
       table()
     }, options = list(pageLength = 25, scrollX = T), selection = list(mode = 'single', selected = c(1)))
-    
+
     output$selected_plot <- renderPlot({
       selected_plot_input()
     })
-    
+
     output$heatmap <- renderPlot({
       heatmap_input()
     })
-    
+
     output$volcano <- renderPlot({
       volcano_input()
     })
-    
+
     output$norm <- renderPlot({
       norm_input()
     })
-    
+
     output$missval <- renderPlot({
       missval_input()
     })
-    
+
     output$numbers <- renderPlot({
       numbers_input()
     })
-    
+
     output$coverage <- renderPlot({
       coverage_input()
     })
-    
+
     observe({
       output$plot <- renderUI({
         plotOutput("heatmap", height = (100 * as.numeric(input$size)))
       })
     })
-    
+
     ### Download objects and functions ### ---------------------------------------------------------------------------------
     datasetInput <- reactive({
       switch(input$dataset,
@@ -339,12 +340,12 @@ server <- shinyServer(function(input, output) {
              "displayed_subset" = res() %>% filter(sign == "+") %>% select(-sign),
              "full_dataset" = left_join(rownames_to_column(exprs(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
-    
+
     output$downloadData <- downloadHandler(
       filename = function() { paste(input$dataset, ".txt", sep = "") },
       content = function(file) { write.table(datasetInput(), file, col.names = T, row.names = F, sep ="\t") }
     )
-    
+
     output$downloadPlot <- downloadHandler(
       filename = function() { paste("Barplot_", table()[input$table_rows_selected,1], ".pdf", sep = "") },
       content = function(file) {
@@ -353,7 +354,7 @@ server <- shinyServer(function(input, output) {
         dev.off()
       }
     )
-    
+
     output$downloadHeatmap <- downloadHandler(
       filename = 'Heatmap.pdf',
       content = function(file) {
@@ -362,7 +363,7 @@ server <- shinyServer(function(input, output) {
         dev.off()
       }
     )
-    
+
     output$downloadVolcano <- downloadHandler(
       filename = function() { paste("Volcano_", input$contrast, ".pdf", sep = "") },
       content = function(file) {
@@ -371,7 +372,7 @@ server <- shinyServer(function(input, output) {
         dev.off()
       }
     )
-    
+
     output$downloadNorm <- downloadHandler(
       filename = "normalization.pdf",
       content = function(file) {
@@ -380,7 +381,7 @@ server <- shinyServer(function(input, output) {
         dev.off()
       }
     )
-    
+
     output$downloadMissval <- downloadHandler(
       filename = "missing_values_heatmap.pdf",
       content = function(file) {
@@ -389,7 +390,7 @@ server <- shinyServer(function(input, output) {
         dev.off()
       }
     )
-    
+
     output$downloadNumbers <- downloadHandler(
       filename = "numbers.pdf",
       content = function(file) {
@@ -398,7 +399,7 @@ server <- shinyServer(function(input, output) {
         dev.off()
       }
     )
-    
+
     output$downloadCoverage <- downloadHandler(
       filename = "coverage.pdf",
       content = function(file) {

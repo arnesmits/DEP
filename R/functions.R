@@ -31,7 +31,7 @@ unique_names <- function(data, name, ids, delim = ";") {
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' example_exprset <- make_se_parse(example_unique, columns)
+#' example_se <- make_se_parse(example_unique, columns)
 #' @export
 make_se_parse <- function(data, columns) {
   # Select the assay data
@@ -39,7 +39,7 @@ make_se_parse <- function(data, columns) {
   raw <- data[,columns]
   raw[raw == 0] <- NA
   raw <- log2(raw)
-  colnames(raw) %<>% gsub(getCommonPrefix(colnames(raw)), "", .) %>% make.names()
+  colnames(raw) %<>% gsub(Rlibstree::getCommonPrefix(colnames(raw)), "", .) %>% make.names()
 
   # Select the rowData
   row_data <- data[,-columns]
@@ -68,7 +68,7 @@ make_se_parse <- function(data, columns) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #' @export
 make_se <- function(data, columns, expdesign) {
   # Select the assay data
@@ -105,10 +105,10 @@ make_se <- function(data, columns, expdesign) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_stringent_filter <- filter_missval(example_exprset, thr = 0)
-#' example_less_stringent_filter <- filter_missval(example_exprset, thr = 1)
+#' example_stringent_filter <- filter_missval(example_se, thr = 0)
+#' example_less_stringent_filter <- filter_missval(example_se, thr = 1)
 #' @export
 filter_missval <- function(data, thr = 0) {
   # Make assay data binary (1 = valid value)
@@ -134,16 +134,16 @@ filter_missval <- function(data, thr = 0) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_vsn, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' @export
 norm_vsn <- function(data) {
   # Variance stabilization transformation on assay data
   data_vsn <- data
-  vsn.fit <- vsnMatrix(2^assay(data_vsn))
-  assay(data_vsn) <- predict(vsn.fit, 2^assay(data_vsn))
+  vsn.fit <- vsn::vsnMatrix(2^assay(data_vsn))
+  assay(data_vsn) <- vsn::predict(vsn.fit, 2^assay(data_vsn))
   return(data_vsn)
 }
 
@@ -161,9 +161,9 @@ norm_vsn <- function(data) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #'
 #' example_impute_MinProb <- imputation(example_filter, fun = "MinProb", q = 0.05)
@@ -195,7 +195,7 @@ imputation <- function(data, fun, ...) {
     feat_data <- data.frame(rowData(data))
     rownames(feat_data) <- feat_data$name
     pheno_data <- data.frame(colData(data))
-    msn <- MSnSet(exprs = as.matrix(raw), pData = AnnotatedDataFrame(pheno_data), fData = AnnotatedDataFrame(feat_data))
+    msn <- MSnbase::MSnSet(exprs = as.matrix(raw), pData = Biobase::AnnotatedDataFrame(pheno_data), fData = Biobase::AnnotatedDataFrame(feat_data))
     return(msn)
   }
 
@@ -206,8 +206,8 @@ imputation <- function(data, fun, ...) {
   # else use the MSnSet::impute function
   else {
     MSnSet_data <- se2msn(data)
-    MSnSet_imputed <- impute(MSnSet_data, method = fun, ...)
-    assay(data) <- exprs(MSnSet_imputed)
+    MSnSet_imputed <- MSnbase::impute(MSnSet_data, method = fun, ...)
+    assay(data) <- MSnbase::exprs(MSnSet_imputed)
     rowData(data)$mean <- rowMeans(assay(data))
     return(data)
   }
@@ -227,9 +227,9 @@ imputation <- function(data, fun, ...) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -264,7 +264,7 @@ linear_model <- function(data, control, type) {
   # function to retrieve the results of the differential expression test using 'fdrtool'
   retrieve_fun <- function(comp, fit = eB_fit){
     res <- topTable(fit, sort.by = "t", coef = comp, number = Inf)
-    fdr_res <- fdrtool(res$t, plot = FALSE, verbose = FALSE)
+    fdr_res <- fdrtool::fdrtool(res$t, plot = FALSE, verbose = FALSE)
     res$qval <- fdr_res$qval
     res$lfdr <- fdr_res$lfdr
     res$comparison <- rep(comp, dim(res)[1])
@@ -303,9 +303,9 @@ linear_model <- function(data, control, type) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -365,9 +365,9 @@ anova_tukey <- function(data, control, type) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -382,14 +382,19 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
   cols_diff <- grep("_diff", colnames(row_data)) # get all columns with log2 fold changes
 
   # Denote differential expressed proteins by applying the alpha and logFC parameters per protein
-  sign_df <- ifelse(row_data[,cols_p] %>% apply(., 2, function(x) x <= alpha) & row_data[,cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc), "+", "")
+  if(length(cols_p) == 1) {
+    rowData(data)$sign <- ifelse(row_data[,cols_p] <= alpha & row_data[,cols_diff] >= lfc | row_data[,cols_p] <= alpha & row_data[,cols_diff] <= -lfc, "+", "")
+    rowData(data)$contrast_sign <- rowData(data)$sign
+    colnames(rowData(data))[ncol(rowData(data))] <- gsub("p.adj", "sign", colnames(row_data)[cols_p])
+  }
+  if(length(cols_p) > 1) {
+    sign_df <- ifelse(row_data[,cols_p] %>% apply(., 2, function(x) x <= alpha) & row_data[,cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc), "+", "")
+    sign_df <- cbind(sign_df, sign = ifelse(apply(sign_df, 1, function(x) any(x == "+")),"+",""))
+    colnames(sign_df) %<>% gsub("_p.adj","_sign",.)
 
-  # Denote proteins differentially expressed in any of the conditions
-  sign_df <- cbind(sign_df, sign = ifelse(apply(sign_df, 1, function(x) any(x == "+")),"+",""))
-  colnames(sign_df) %<>% gsub("_p.adj","_sign",.)
-
-  sign_df <- cbind(name = row_data$name, sign_df)
-  rowData(data) <- merge(rowData(data), sign_df, by = "name")
+    sign_df <- cbind(name = row_data$name, sign_df)
+    rowData(data) <- merge(rowData(data), sign_df, by = "name")
+  }
   return(data)
 }
 
@@ -405,9 +410,9 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -426,12 +431,12 @@ results <- function(data) {
   colnames(centered)[2:ncol(centered)] %<>%  paste(., "_centered", sep = "")
 
   # Obtain average enrichments of conditions versus the control condition
-  ratio <- row_data %>% column_to_rownames("name") %>% .[,grep("_diff$", colnames(.))] %>% signif(., digits = 3) %>% rownames_to_column(.)
+  ratio <- row_data %>% column_to_rownames("name") %>% select(ends_with("diff")) %>% signif(., digits = 3) %>% rownames_to_column(.)
   colnames(ratio)[2:ncol(ratio)] %<>% gsub("_diff", "_ratio", .)
   df <- left_join(ratio, centered, by = "rowname")
 
   # Select the adjusted p-values and significance columns
-  pval <- row_data %>% column_to_rownames("name") %>% .[,grep("p.adj$|sign$", colnames(.))] %>% rownames_to_column(.)
+  pval <- row_data %>% column_to_rownames("name") %>% select(ends_with("p.adj"), ends_with("sign")) %>% rownames_to_column(.)
   pval[,grep("p.adj", colnames(pval))] %<>%  signif(., digits = 3) %>% format(., scientific = T)
 
   # Join into a results table

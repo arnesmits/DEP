@@ -43,7 +43,7 @@
 #' @docType package
 #' @name proteomeR
 #'
-#' @import Rlibstree circlize RColorBrewer ComplexHeatmap ggrepel fdrtool vsn limma MSnbase Biobase magrittr tidyverse grid SummarizedExperiment
+#' @import ComplexHeatmap limma magrittr tidyverse grid SummarizedExperiment
 #' @import shinydashboard shiny
 #'
 NULL

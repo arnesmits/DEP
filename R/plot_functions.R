@@ -12,9 +12,9 @@
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -25,6 +25,19 @@
 #' plot_single(example_sign, "USP15", "contrast")
 #' @export
 plot_single <- function(data, protein, type) {
+
+  # Show error if an unvalid protein name is given
+  if(length(which(rowData(data)$name == protein)) == 0) {
+    possibilities <- rowData(data)$name[grep(substr(protein, 1, nchar(protein)-1), rowData(data)$name)]
+    if (length(possibilities) > 0){
+      possibilities_msg <- paste0("Do you mean: '", paste0(possibilities, collapse = "', '"), "'")
+    } else { possibilities_msg <- NULL}
+    stop(
+      "Not a valid protein, please run `plot_single()` with a valid protein name as argument\n",
+      possibilities_msg,
+      call. = FALSE)
+  }
+
   # Plot either the average protein-centered enrichment values per condition ("centered") or
   # the average enrichments of conditions versus the control condition ("contrast") for a single protein
   if(type == "centered") {
@@ -70,9 +83,9 @@ plot_single <- function(data, protein, type) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -113,7 +126,7 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
   }
 
   # Plot the heatmap
-  ht1 = Heatmap(df, col = colorRamp2(seq(-col_limit, col_limit, (col_limit/5)), rev(brewer.pal(11, "RdBu"))), split = kmeans$cluster,
+  ht1 = Heatmap(df, col = circlize::colorRamp2(seq(-col_limit, col_limit, (col_limit/5)), rev(RColorBrewer::brewer.pal(11, "RdBu"))), split = kmeans$cluster,
                 cluster_columns = T, cluster_rows = T, na_col = "grey", clustering_distance_rows = "pearson",clustering_distance_columns = "pearson",
                 row_names_side = "left", column_names_side = "top", show_row_names = T, show_column_names = T,
                 heatmap_legend_param = list(color_bar = "continuous", legend_direction = "horizontal", legend_width = unit(5, "cm"), title_position = "lefttop"),
@@ -136,9 +149,9 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #' example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 #'
@@ -156,7 +169,7 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
   # Show error if an unvalid contrast is given
   if(length(grep(paste(contrast, "_diff", sep = ""), colnames(row_data))) == 0) {
     valid_cntrsts <- row_data %>% data.frame() %>% select(ends_with("_diff")) %>% colnames(.) %>% gsub("_diff", "", .)
-    valid_cntrsts_msg <- paste("Valid contrasts are: '", paste0(valid_cntrsts, collapse = "', '"), "'")
+    valid_cntrsts_msg <- paste0("Valid contrasts are: '", paste0(valid_cntrsts, collapse = "', '"), "'")
     stop(
       "Not a valid contrast, please run `plot_volcano()` with a valid contrast as argument\n",
       valid_cntrsts_msg,
@@ -174,7 +187,7 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
 
   # Plot volcano with or without labels
   if(add_names) {
-    p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = sign, col = "black") + geom_text_repel(data = sign, aes(label = name), size = labelsize, point.padding = unit(0.3, "lines")) + theme_bw() +
+    p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = sign, col = "black") + ggrepel::geom_text_repel(data = sign, aes(label = name), size = labelsize, point.padding = unit(0.3, "lines")) + theme_bw() +
       theme(legend.position="none", axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold")) + labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") +
       geom_text(data = data.frame(), aes(x = c(Inf, -Inf), y = c(-Inf, -Inf), hjust = c(1, 0), vjust = c(-1, -1), label = c(name1, name2), size = 5, fontface = "bold"))
   } else {
@@ -198,9 +211,9 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #'
 #' plot_norm(example_filter, example_vsn)
@@ -227,9 +240,9 @@ plot_norm <- function(raw, norm) {
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
+#' example_se <- make_se(example_unique, columns, exp_design)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' plot_missval(example_filter)
 #' @export
 plot_missval <- function(data) {
@@ -245,20 +258,20 @@ plot_missval <- function(data) {
 
 #' Plot protein numbers
 #'
-#' \code{plot_numbers} generates a barplot of the number of identified proteins per condition.
+#' \code{plot_numbers} generates a barplot of the number of identified proteins per sample.
 #'
 #' @param data SummerizedExperiment, Data object for which to plot protein numbers.
-#' @return Barplot of the number of identified proteins per condition (generated by \code{\link{ggplot}})
+#' @return Barplot of the number of identified proteins per sample (generated by \code{\link{ggplot}})
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
-#' plot_numbers(example_exprset)
+#' example_se <- make_se(example_unique, columns, exp_design)
+#' plot_numbers(example_se)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' plot_numbers(example_filter)
 #' @export
 plot_numbers <- function(data) {
@@ -266,26 +279,26 @@ plot_numbers <- function(data) {
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
   # Summarize the number of proteins identified per sample and generate a barplot
   stat <- df %>% group_by(ID) %>% summarize(n = n(), sum = sum(bin)) %>% left_join(., data.frame(colData(data)), by = "ID")
-  ggplot(stat, aes(x = ID, y = sum, fill = condition)) + geom_bar(stat = "identity") + theme_bw() + labs(title = "Proteins per condition", x = "", y = "Number of ProteinGroups") + geom_hline(yintercept = unique(stat$n)) +
+  ggplot(stat, aes(x = ID, y = sum, fill = condition)) + geom_bar(stat = "identity") + theme_bw() + labs(title = "Proteins per sample", x = "", y = "Number of ProteinGroups") + geom_hline(yintercept = unique(stat$n)) +
     theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1, size=10), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=10), legend.title = element_text(size=12,face="bold"), legend.position="right")
 }
 
-#' Plot protein overlap between conditions
+#' Plot protein overlap between samples
 #'
-#' \code{plot_frequency} generates a barplot of the protein overlap between conditions.
+#' \code{plot_frequency} generates a barplot of the protein overlap between samples
 #'
 #' @param data ExpressionSet, Data object for which to plot observation frequency.
-#' @return Barplot of overlap of protein identifications between conditions (generated by \code{\link{ggplot}})
+#' @return Barplot of overlap of protein identifications between samples (generated by \code{\link{ggplot}})
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
-#' plot_frequency(example_exprset)
+#' example_se <- make_se(example_unique, columns, exp_design)
+#' plot_frequency(example_se)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' plot_frequency(example_filter)
 #' @export
 plot_frequency <- function(data) {
@@ -295,26 +308,26 @@ plot_frequency <- function(data) {
   stat <- df %>% group_by(rowname) %>% summarize(sum = sum(bin))
   # Get the frequency of the number of experiments proteins were observerd and plot these numbers
   table <- table(stat$sum) %>% data.frame()
-  ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) + geom_bar(stat = "identity") + theme_bw() + labs(title = "Protein identifications overlap", x = "Identified in number of conditions", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
+  ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) + geom_bar(stat = "identity") + theme_bw() + labs(title = "Protein identifications overlap", x = "Identified in number of samples", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
     theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1, size=12), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=12,face="bold"), legend.position="none")
 }
 
 #' Plot protein coverage in conditions
 #'
-#' \code{plot_coverage} generates a barplot of the protein coverage in conditions.
+#' \code{plot_coverage} generates a barplot of the protein coverage in samples.
 #'
 #' @param data ExpressionSet, Data object for which to plot observation frequency.
-#' @return Barplot of protein coverage in conditions (generated by \code{\link{ggplot}})
+#' @return Barplot of protein coverage in samples (generated by \code{\link{ggplot}})
 #' @examples
 #' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
 #' exp_design <- ExpDesign_UbIA_MS
-#' example_exprset <- make_se(example_unique, columns, exp_design)
-#' plot_coverage(example_exprset)
+#' example_se <- make_se(example_unique, columns, exp_design)
+#' plot_coverage(example_se)
 #'
-#' example_filter <- filter_missval(example_exprset, thr = 0)
+#' example_filter <- filter_missval(example_se, thr = 0)
 #' plot_coverage(example_filter)
 #' @export
 plot_coverage <- function(data) {
@@ -324,7 +337,7 @@ plot_coverage <- function(data) {
   stat <- df %>% group_by(rowname) %>% summarize(sum = sum(bin))
   # Get the frequency of the number of experiments proteins were observerd and plot the cumulative sum of these numbers
   table <- table(stat$sum) %>% data.frame() %>% mutate(sum = rev(cumsum(rev(Freq))), pos = sum - (Freq / 2))
-  ggplot(table, aes(x = "all", y = Freq, fill = Var1)) + geom_col(col = "white") + theme_bw() + labs(title = "Protein coverage in conditions", x = "", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
+  ggplot(table, aes(x = "all", y = Freq, fill = Var1)) + geom_col(col = "white") + theme_bw() + labs(title = "Protein coverage in samples", x = "", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
     theme(axis.text=element_text(size=12), axis.text.x = element_blank(), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=12,face="bold"), legend.position="right") +
-    guides(fill=guide_legend(title="# conditions"))
+    guides(fill=guide_legend(title="samples"))
 }
