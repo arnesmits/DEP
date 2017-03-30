@@ -22,6 +22,6 @@ A data.frame containing an addiontal variable "name" that contains unique names.
 \code{unique_names} generates unique identifiers for a dataset based on a "name" and "id" column.
 }
 \examples{
-example <- UbIA_MS
+example <- UbiLength
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 }

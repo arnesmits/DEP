@@ -8,7 +8,7 @@
 #' @param delim Character, Delimiter seperating the proteins within on protein group.
 #' @return A data.frame containing an addiontal variable "name" that contains unique names.
 #' @examples
-#' example <- UbIA_MS
+#' example <- UbiLength
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #' @export
 unique_names <- function(data, name, ids, delim = ";") {
@@ -27,7 +27,7 @@ unique_names <- function(data, name, ids, delim = ";") {
 #' @param columns Vector of integers, Number of the columns that contain the assay data.
 #' @return A SummerizedExperiment object.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
@@ -63,11 +63,11 @@ make_se_parse <- function(data, columns) {
 #' @param expdesign Data.frame, Experimental design object
 #' @return A SummerizedExperiment object.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #' @export
 make_se <- function(data, columns, expdesign) {
@@ -100,11 +100,11 @@ make_se <- function(data, columns, expdesign) {
 #' @param thr Integer, sets the threshold for the allowed number of missing values per condition.
 #' @return An filtered SummerizedExperiment object.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_stringent_filter <- filter_missval(example_se, thr = 0)
@@ -129,11 +129,11 @@ filter_missval <- function(data, thr = 0) {
 #' @param data SummerizedExperiment, Data object which will be normalized.
 #' @return An normalized SummerizedExperiment object.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_filter <- filter_missval(example_se, thr = 0)
@@ -156,11 +156,11 @@ norm_vsn <- function(data) {
 #' @param ... Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link{impute}}.
 #' @return An imputed SummerizedExperiment object.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_filter <- filter_missval(example_se, thr = 0)
@@ -222,11 +222,11 @@ imputation <- function(data, fun, ...) {
 #' @param type all" or "control" The type of contrasts that will be generated.
 #' @return An SummerizedExperiment object containing FDR estimates of differential expression.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_filter <- filter_missval(example_se, thr = 0)
@@ -298,11 +298,11 @@ linear_model <- function(data, control, type) {
 #' @param type all" or "control" The type of contrasts that will be generated.
 #' @return An SummerizedExperiment object containing FDR estimates of differential expression.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_filter <- filter_missval(example_se, thr = 0)
@@ -360,11 +360,11 @@ anova_tukey <- function(data, control, type) {
 #' @param lfc Integer, sets the threshold for the log fold change (lfc).
 #' @return An SummerizedExperiment object containing a variable "sign" denoting the significant proteins.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_filter <- filter_missval(example_se, thr = 0)
@@ -405,11 +405,11 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #' @param data SummerizedExperiment, Data object which has been generated by \code{\link{linear_model}} and \code{\link{cutoffs}}.
 #' @return An data.frame object containing all results variables from the performed analysis.
 #' @examples
-#' example <- UbIA_MS %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(example_unique))
-#' exp_design <- ExpDesign_UbIA_MS
+#' exp_design <- UbiLength_ExpDesign
 #' example_se <- make_se(example_unique, columns, exp_design)
 #'
 #' example_filter <- filter_missval(example_se, thr = 0)

@@ -18,7 +18,7 @@ A SummerizedExperiment object.
 \code{make_se_parse} creates a SummerizedExperiment object based on a single data.frame
 }
 \examples{
-example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
+example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(example_unique))

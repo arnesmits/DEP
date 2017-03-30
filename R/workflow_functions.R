@@ -53,8 +53,8 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name", ids = "
 #' @param lfc Numeric, sets the log fold change threshold.
 #' @return A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset. Additionally, a \code{\link{rmarkdown}} report is generated and saved.
 #' @examples
-#' data <- UbIA_MS
-#' expdesign <- ExpDesign_UbIA_MS
+#' data <- UbiLength
+#' expdesign <- UbiLength_ExpDesign
 #' results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
 #' @export
 LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1) {
@@ -95,8 +95,8 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
 #' @param results List of SummerizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.
 #' @return A \code{\link{rmarkdown}} report is generated and saved.
 #' @examples
-#' data <- UbIA_MS
-#' expdesign <- ExpDesign_UbIA_MS
+#' data <- UbiLength
+#' expdesign <- UbiLength_ExpDesign
 #'
 #' results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
 #' report(results)

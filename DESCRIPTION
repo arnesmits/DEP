@@ -1,6 +1,6 @@
 Package: proteomeR
 Title: Integrative analysis of proteomics data
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: person("Arne", "Smits", email = "arne.smits@embl.de", role = c("aut", "cre"))
 Description: Proteome analysis
 License: Artistic-2.0

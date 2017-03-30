@@ -20,11 +20,11 @@ An SummerizedExperiment object containing FDR estimates of differential expressi
 \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
 }
 \examples{
-example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
+example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(example_unique))
-exp_design <- ExpDesign_UbIA_MS
+exp_design <- UbiLength_ExpDesign
 example_se <- make_se(example_unique, columns, exp_design)
 
 example_filter <- filter_missval(example_se, thr = 0)

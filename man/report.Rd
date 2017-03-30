@@ -16,8 +16,8 @@ A \code{\link{rmarkdown}} report is generated and saved.
 \code{report} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 }
 \examples{
-data <- UbIA_MS
-expdesign <- ExpDesign_UbIA_MS
+data <- UbiLength
+expdesign <- UbiLength_ExpDesign
 
 results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
 report(results)

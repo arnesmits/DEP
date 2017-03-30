@@ -63,7 +63,7 @@ library(tidyverse)
 library(magrittr)
 
 # The data is provided with the package
-data <- UbIA_MS
+data <- UbiLength
 
 # We filter for contaminant proteins and decoy database hits, which are indicated by "+"
 # in the columns "Potential.contaminants" and "Reverse", respectively. 
@@ -121,13 +121,13 @@ For our example dataset, an experimental design is included in the package.
 
 ``` {r expdesign, echo = FALSE}
 # Display experimental design
-knitr::kable(ExpDesign_UbIA_MS)
+knitr::kable(UbiLength_ExpDesign)
 ```
 
 ``` {r to_exprset}
 # Generate an SummarizedExperiment object with an experimental design
 LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
-experimental_design <- ExpDesign_UbIA_MS
+experimental_design <- UbiLength_ExpDesign
 data_se <- make_se(data_unique, LFQ_columns, experimental_design)
 
 # Generate an SummarizedExperiment object by parsing condition information from the column names
@@ -338,8 +338,8 @@ The package also entails wrapper functions that entail the complete analysis wor
 
 ``` {r LFQ}
 # The data is provided with the package 
-data <- UbIA_MS
-experimental_design <- ExpDesign_UbIA_MS
+data <- UbiLength
+experimental_design <- UbiLength_ExpDesign
 
 # The wrapper function performs the full analysis
 data_results <- LFQ(data, experimental_design, fun = "MinProb", 

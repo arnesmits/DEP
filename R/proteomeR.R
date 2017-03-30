@@ -46,9 +46,11 @@
 #'   \item \code{\link{stoichiometry}}: Calculate relative stoichiometry of all significant proteins
 #'   \item \code{\link{plot_stoi}}: Barplot of the relative stoichiometries
 #'   \item \code{\link{results_stoi}}: Generate a results table of relative stoichiometry values
+#' }
+#'
 #' @docType package
 #' @name proteomeR
-#'}
+#'
 #'
 #' @import ComplexHeatmap limma magrittr tidyverse grid SummarizedExperiment
 #' @import shinydashboard shiny

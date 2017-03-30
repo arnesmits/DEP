@@ -18,11 +18,11 @@ An filtered SummerizedExperiment object.
 \code{filter_missval} filters an SummerizedExperiment object based on missing values.
 }
 \examples{
-example <- UbIA_MS \%>\% filter(Reverse != "+", Potential.contaminant != "+")
+example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
 example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(example_unique))
-exp_design <- ExpDesign_UbIA_MS
+exp_design <- UbiLength_ExpDesign
 example_se <- make_se(example_unique, columns, exp_design)
 
 example_stringent_filter <- filter_missval(example_se, thr = 0)

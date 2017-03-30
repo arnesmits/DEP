@@ -36,7 +36,7 @@ A list of two data.frames: 1) \code{results} object containing the significant p
 \code{LFQ} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 }
 \examples{
-data <- UbIA_MS
-expdesign <- ExpDesign_UbIA_MS
+data <- UbiLength
+expdesign <- UbiLength_ExpDesign
 results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
 }
