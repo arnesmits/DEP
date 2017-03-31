@@ -64,7 +64,7 @@ ibaq_merge <- function(data, peptides) {
   merge_sum <- function(rows) {
     sub <- data %>% filter(grepl(paste("^", rows, "$", collapse = "|", sep = ""), id))
     sub[1,columns] <- colSums(sub[,columns])
-    sub$name[1] <- paste(unique(sub$name), collapse = ";")
+    sub$name[1] <- paste(sort(unique(sub$name)), collapse = ";")
     return(sub[1,] %>% select(name, columns))
   }
   merged <- apply(rows2merge, 1, merge_sum) %>% bind_rows()
@@ -166,13 +166,6 @@ stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
   return(final)
 }
 
-stoi2df <- function(data, thr = 0.01) {
-  df <- data %>% group_by(name, condition) %>% summarize(mean = mean(iBAQ), sd = sd(iBAQ)) %>% arrange(desc(mean)) %>% filter(mean >= thr) %>% ungroup(name)
-  df %<>% mutate(name = ifelse(nchar(name) > 20, paste(substr(name, 1, 20), "~", sep = ""), name), ymin = mean - sd, ymax = mean + sd)
-  df$name <- parse_factor(df$name, levels = unique(df$name))
-  return(df)
-}
-
 #' Plot the relative stoichiometry
 #'
 #' \code{plot_stoi} plots a barplot of the relative stoichiometries of all proteins.
@@ -215,7 +208,9 @@ stoi2df <- function(data, thr = 0.01) {
 #'
 #' @export
 plot_stoi <- function(data, thr = 0.01, max_y = NULL) {
-  df <- stoi2df(data, thr)
+  df <- data %>% group_by(name, condition) %>% summarize(mean = mean(iBAQ), sd = sd(iBAQ)) %>% arrange(desc(mean)) %>% filter(mean >= thr) %>% ungroup(name)
+  df %<>% mutate(name = ifelse(nchar(name) > 20, paste(substr(name, 1, 20), "...", sep = ""), name), ymin = mean - sd, ymax = mean + sd)
+  df$name <- parse_factor(df$name, levels = unique(df$name))
   if(is.null(max_y)) {max <- max(df$ymax)} else { max <- max_y}
   bait <- df %>% filter(mean == 1) %>% .$name %>% unique()
   ggplot(df, aes(x = name, y = mean)) + geom_bar(stat = "identity") + geom_errorbar(aes(ymax = ymax, ymin = ymin), width = 0.2) + theme_bw() + labs(title = unique(df$condition), x = "", y = paste("Stoichiometry (vs ", bait, ")", sep ="")) + ylim(0,max) +
@@ -264,6 +259,8 @@ plot_stoi <- function(data, thr = 0.01, max_y = NULL) {
 #'
 #' @export
 results_stoi <- function(data, thr = 0.01) {
-  df <- stoi2df(data, thr)
+  df <- data %>% group_by(name, condition) %>% summarize(mean = mean(iBAQ), sd = sd(iBAQ)) %>% arrange(desc(mean)) %>% filter(mean >= thr) %>% ungroup(name)
+  df %<>% mutate(ymin = mean - sd, ymax = mean + sd)
+  df$name <- parse_factor(df$name, levels = unique(df$name))
   df %>% select(-condition, -ymax, -ymin) %>% data.frame()
 }
