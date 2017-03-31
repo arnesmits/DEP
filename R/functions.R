@@ -46,8 +46,10 @@ make_se_parse <- function(data, columns) {
   rownames(row_data) <- row_data$name
 
   # Generate the colData
-  col_data <- colnames(raw) %>% data.frame(ID = ., stringsAsFactors = F) %>% mutate(replicate = substr(ID, nchar(ID), nchar(ID)), condition = substr(ID,1,nchar(ID)-1))
+  col_data <- colnames(raw) %>% data.frame(label = ., stringsAsFactors = F) %>% mutate(condition = substr(label,1,nchar(label)-1), replicate = substr(label, nchar(label), nchar(label))) %>% unite(ID, condition, replicate, remove = F)
   rownames(col_data) <- col_data$ID
+  colnames(raw) <- col_data$ID[lapply(col_data$label, function(x) grep(x, colnames(raw))) %>% unlist()]
+  raw <- raw[,!is.na(colnames(raw))]
 
   # Generate the SummarizedExperiment object
   dataset <- SummarizedExperiment(assays = as.matrix(raw), colData = col_data, rowData = row_data)
