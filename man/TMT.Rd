@@ -12,23 +12,30 @@ TMT(data, expdesign, fun, control, type, name = "gene_name",
 
 \item{expdesign}{Data.frame, The experimental design object.}
 
-\item{fun}{Character, Function used for data imputation based on \code{\link{impute}}.}
+\item{fun}{Character, Function used for data imputation based on \code{\link[MSnbase]{impute}}.}
 
 \item{control}{Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).}
 
 \item{type}{"all" or "control" The type of contrasts that will be generated.}
+
+\item{name}{Character, Name of the column representing gene names.}
+
+\item{ids}{"Character, Name of the column representing protein IDs.}
 
 \item{alpha}{Numeric, sets the false discovery rate threshold.}
 
 \item{lfc}{Numeric, sets the log fold change threshold.}
 }
 \value{
-A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset. Additionally, a \code{\link{rmarkdown}} report is generated and saved.
+A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset.
 }
 \description{
 \code{TMT} is a wrapper function running the entire analysis workflow for TMT-based proteomics data.
 }
 \examples{
+\dontrun{
 
 TMT_res <- TMT()
+
+}
 }

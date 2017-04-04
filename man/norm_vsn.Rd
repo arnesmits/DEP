@@ -13,7 +13,7 @@ norm_vsn(data)
 An normalized SummerizedExperiment object.
 }
 \description{
-\code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link{vsn}}.
+\code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

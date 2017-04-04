@@ -10,16 +10,19 @@ report(results)
 \item{results}{List of SummerizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.}
 }
 \value{
-A \code{\link{rmarkdown}} report is generated and saved.
+A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 }
 \description{
 \code{report} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 }
 \examples{
+\dontrun{
+
 data <- UbiLength
 expdesign <- UbiLength_ExpDesign
 
 results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
 report(results)
 
+}
 }

@@ -9,15 +9,15 @@ imputation(data, fun, ...)
 \arguments{
 \item{data}{SummerizedExperiment, Data object for which missing values will be imputed.}
 
-\item{fun}{"man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link{impute}}.}
+\item{fun}{"man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link[MSnbase]{impute}}.}
 
-\item{...}{Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link{impute}}.}
+\item{...}{Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link[MSnbase]{impute}}.}
 }
 \value{
 An imputed SummerizedExperiment object.
 }
 \description{
-\code{imputation} imputes missing values based on a manual \code{\link{impute}}.
+\code{imputation} imputes missing values based on a manual \code{\link[MSnbase]{impute}}.
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

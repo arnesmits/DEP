@@ -13,7 +13,7 @@ LFQ(data, expdesign, fun, control, type, filter = c("Reverse",
 
 \item{expdesign}{Data.frame, The experimental design object.}
 
-\item{fun}{Character, Function used for data imputation based on \code{\link{impute}}.}
+\item{fun}{Character, Function used for data imputation based on \code{\link[MSnbase]{impute}}.}
 
 \item{control}{Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).}
 
@@ -30,13 +30,17 @@ LFQ(data, expdesign, fun, control, type, filter = c("Reverse",
 \item{lfc}{Numeric, sets the log fold change threshold.}
 }
 \value{
-A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset. Additionally, a \code{\link{rmarkdown}} report is generated and saved.
+A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset.
 }
 \description{
 \code{LFQ} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 }
 \examples{
+\dontrun{
+
 data <- UbiLength
 expdesign <- UbiLength_ExpDesign
 results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
+
+}
 }

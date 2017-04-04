@@ -17,7 +17,7 @@ linear_model(data, control, type)
 An SummerizedExperiment object containing FDR estimates of differential expression.
 }
 \description{
-\code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
+\code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link[limma]{limma}}).
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

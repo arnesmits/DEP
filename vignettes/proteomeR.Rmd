@@ -111,11 +111,11 @@ data_unique <- unique_names(data, "Gene.names", "Protein.IDs", delim = ";")
 data$name %>% duplicated(.) %>% any(.)
 ```
 
-## Generate an ExpressionSet object
+## Generate an SummarizedExperiment object
 
-Many [Bioconductor](http://www.bioconductor.org/) packages use ExpressionSet objects as input and/or output.
-This class of objects contains and coordinates the actual (expression) data, information on the samples as well as feature annotation.
-We can generate the ExpressionSet object from our data using two different approaches.
+Many [Bioconductor](http://www.bioconductor.org/) packages use SummarizedExperiment objects as input and/or output.
+This class of objects contains and coordinates the actual (assay) data, information on the samples as well as feature annotation.
+We can generate the SummarizedExperiment object from our data using two different approaches.
 We can extract sample information directly from the column names or we add sample information using an experimental design template.
 For our example dataset, an experimental design is included in the package.
 
@@ -143,14 +143,14 @@ data_se
 
 The dataset contains proteins which are not quantified in all replicates. Some proteins are even only deteced in a single replicate.
 This leaves our dataset with missing values, which need to be imputed. However, this should not be done for proteins that contain too many missing values.
-Therefore, we first filter out proteins that contain to many missing values. This is done by setting the threshold for the allowed number of missing values per condition in the _miss_val_filter_ function.
+Therefore, we first filter out proteins that contain to many missing values. This is done by setting the threshold for the allowed number of missing values per condition in the _filter_missval_ function.
 
-``` {r filter_miss_val}
-# Filter for proteins that are identified in all replicates of at least one sample.
+``` {r filter_missval}
+# Filter for proteins that are identified in all replicates of at least one condition
 data_filt <- filter_missval(data_se, thr = 0)
 
 # Less stringent filtering:
-# Filter for proteins that are identified in 2 out of 3 replicates of at least one sample.
+# Filter for proteins that are identified in 2 out of 3 replicates of at least one condition
 data_filt2 <- filter_missval(data_se, thr = 1)
 ```
 
@@ -200,8 +200,8 @@ The example dataset is an affinity enrichment dataset of ubiquitin interactors, 
 These can be proteins that are specifically enriched in the ubiquitin purifications, but are not enriched in the controls samples, or vice versa.
 This expectation is also reflected in the missingness heatmap; missing values are highly biased to specific samples.  
 
-The imputation method to be used depends on the missingness pattern of the data (see the `r Biocpkg("MSnbase") ` vignette and more specifically in the _impute_ function descriptions for more information).
-Values which are missing not at random (MNAR) should be imputed by left-censored imputation method, such as the quantile regression-based left-consored function ("QRILC") or the manually defined left-shifted distribution function. In contrast, data missing at random (MAR) should be imputed with methods such as k-nearest neighbour ("knn") or maximum likelihood ("MLE") functions.  
+The imputation method to be used depends on the missingness pattern of the data (see the `r Biocpkg("MSnbase") ` vignette and more specifically the _impute_ function description for more information).
+Values which are missing not at random (MNAR) should be imputed by left-censored imputation method, such as the quantile regression-based left-consored function ("QRILC") or random draws from a left-shifted distribution "(MinProb"). In contrast, data missing at random (MAR) should be imputed with methods such as k-nearest neighbour ("knn") or maximum likelihood ("MLE") functions.  
 
 As the example data has values missing not at random, QRILC imputation is the method of choice.
 

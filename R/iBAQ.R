@@ -7,13 +7,16 @@
 #' @return A data.frame with iBAQ intensities per protein group from peptides unique to this group
 #' @examples
 #' data <- GFPip
+#' data_unique <- unique_names(data, "Gene.names", "Protein.IDs")
 #' peptides <- GFPip_pep
 #'
-#' ibaq <- ibaq_merge(data, peptides)
+#' ibaq <- ibaq_merge(data_unique, peptides)
 #' colnames(ibaq)
 #' head(ibaq)
 #' @export
 ibaq_merge <- function(data, peptides) {
+  assert_that(is.data.frame(data), is.data.frame(peptides))
+
   # Filter for peptides not unique to a single protein group and sort their protein group IDs
   shared_pep <- peptides %>% filter(Unique..Groups. == "no")
   sorted_pep <- shared_pep %>% select(Protein.group.IDs) %>% mutate(Protein.group.IDs = lapply(Protein.group.IDs, function (x) strsplit(x, ";")[[1]] %>% as.numeric() %>% sort() %>% paste(., collapse = ";")))
@@ -101,7 +104,8 @@ ibaq_merge <- function(data, peptides) {
 #' data_unique <- data %>% unique_names(., "Gene.names", "Protein.IDs")
 #' data_filt <- data_unique %>% filter(Reverse != "+", Contaminant != "+")
 #'
-#' # Make a SummarizedExperiment and perform filtering on missing values, variance stabilization and imputation on this object
+#' # Make a SummarizedExperiment and perform filtering on missing values,
+#' # variance stabilization and imputation on this object
 #' cols <- grep("LFQ", colnames(data_filt))
 #' se <- make_se(data_filt, cols, exp_design)
 #' filt <- filter_missval(se)
@@ -124,6 +128,9 @@ ibaq_merge <- function(data, peptides) {
 #'
 #' @export
 stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
+  if(is.integer(level)) level <- as.numeric(level)
+  assert_that(inherits(data, "SummarizedExperiment"), is.data.frame(ibaq), is.character(contrast), is.character(bait), is.numeric(level))
+
   row_data <- rowData(data)
 
   # Show error if an unvalid contrast is given
@@ -184,7 +191,8 @@ stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
 #' data_unique <- data %>% unique_names(., "Gene.names", "Protein.IDs")
 #' data_filt <- data_unique %>% filter(Reverse != "+", Contaminant != "+")
 #'
-#' # Make a SummarizedExperiment and perform filtering on missing values, variance stabilization and imputation on this object
+#' # Make a SummarizedExperiment and perform filtering on missing values,
+#' # variance stabilization and imputation on this object
 #' cols <- grep("LFQ", colnames(data_filt))
 #' se <- make_se(data_filt, cols, exp_design)
 #' filt <- filter_missval(se)
@@ -208,6 +216,9 @@ stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
 #'
 #' @export
 plot_stoi <- function(data, thr = 0.01, max_y = NULL) {
+  if(is.integer(thr)) thr <- as.numeric(thr)
+  assert_that(is.data.frame(data), is.numeric(thr))
+
   df <- data %>% group_by(name, condition) %>% summarize(mean = mean(iBAQ), sd = sd(iBAQ)) %>% arrange(desc(mean)) %>% filter(mean >= thr) %>% ungroup(name)
   df %<>% mutate(name = ifelse(nchar(name) > 20, paste(substr(name, 1, 20), "...", sep = ""), name), ymin = mean - sd, ymax = mean + sd)
   df$name <- parse_factor(df$name, levels = unique(df$name))
@@ -234,7 +245,8 @@ plot_stoi <- function(data, thr = 0.01, max_y = NULL) {
 #' data_unique <- data %>% unique_names(., "Gene.names", "Protein.IDs")
 #' data_filt <- data_unique %>% filter(Reverse != "+", Contaminant != "+")
 #'
-#' # Make a SummarizedExperiment and perform filtering on missing values, variance stabilization and imputation on this object
+#' # Make a SummarizedExperiment and perform filtering on missing values,
+#' # variance stabilization and imputation on this object
 #' cols <- grep("LFQ", colnames(data_filt))
 #' se <- make_se(data_filt, cols, exp_design)
 #' filt <- filter_missval(se)
@@ -259,6 +271,9 @@ plot_stoi <- function(data, thr = 0.01, max_y = NULL) {
 #'
 #' @export
 results_stoi <- function(data, thr = 0.01) {
+  if(is.integer(thr)) thr <- as.numeric(thr)
+  assert_that(is.data.frame(data), is.numeric(thr))
+
   df <- data %>% group_by(name, condition) %>% summarize(mean = mean(iBAQ), sd = sd(iBAQ)) %>% arrange(desc(mean)) %>% filter(mean >= thr) %>% ungroup(name)
   df %<>% mutate(ymin = mean - sd, ymax = mean + sd)
   df$name <- parse_factor(df$name, levels = unique(df$name))

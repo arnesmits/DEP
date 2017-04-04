@@ -17,7 +17,7 @@ anova_tukey(data, control, type)
 An SummerizedExperiment object containing FDR estimates of differential expression.
 }
 \description{
-\code{anova_tukey} performs an Analysis of Variance fit (\code{\link{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link{TukeyHSD}}).
+\code{anova_tukey} performs an Analysis of Variance fit (\code{\link[stats]{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link[stats]{TukeyHSD}}).
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

@@ -33,6 +33,6 @@ example_impute <- imputation(example_filter, fun = "MinProb", q = 0.01)
 
 example_lm <- linear_model(example_impute, "Ctrl", "control")
 example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
-significant_proteins <- example_sign[rowData(example_sign)$sign == "+", ]
+significant_proteins <- example_sign[SummarizedExperiment::rowData(example_sign)$sign == "+", ]
 nrow(significant_proteins)
 }

@@ -12,6 +12,7 @@
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #' @export
 unique_names <- function(data, name, ids, delim = ";") {
+  assert_that(is.data.frame(data), is.character(name), is.character(ids), is.character(delim))
   # Select the name and id columns, take the first identifier per row and make unique names. If there is no name, the ID will be taken.
   names <- data %>% select(matches(name), matches(paste("^", ids, sep = ""))) %>%
     mutate(name = gsub(paste(delim, ".*", sep = ""), "", .[,1]), ID = gsub(paste(delim, ".*", sep = ""), "", .[,2]), name = make.unique(ifelse(name == "", ID, name)))
@@ -34,6 +35,7 @@ unique_names <- function(data, name, ids, delim = ";") {
 #' example_se <- make_se_parse(example_unique, columns)
 #' @export
 make_se_parse <- function(data, columns) {
+  assert_that(is.data.frame(data), is.integer(columns))
   # Select the assay data
   rownames(data) <- data$name
   raw <- data[,columns]
@@ -46,7 +48,9 @@ make_se_parse <- function(data, columns) {
   rownames(row_data) <- row_data$name
 
   # Generate the colData
-  col_data <- colnames(raw) %>% data.frame(label = ., stringsAsFactors = F) %>% mutate(condition = substr(label,1,nchar(label)-1), replicate = substr(label, nchar(label), nchar(label))) %>% unite(ID, condition, replicate, remove = F)
+  col_data <- colnames(raw) %>% data.frame(label = ., stringsAsFactors = F) %>%
+    mutate(condition = substr(label,1,nchar(label)-1), replicate = substr(label, nchar(label), nchar(label))) %>%
+    unite(ID, condition, replicate, remove = F)
   rownames(col_data) <- col_data$ID
   colnames(raw) <- col_data$ID[lapply(col_data$label, function(x) grep(x, colnames(raw))) %>% unlist()]
   raw <- raw[,!is.na(colnames(raw))]
@@ -73,6 +77,7 @@ make_se_parse <- function(data, columns) {
 #' example_se <- make_se(example_unique, columns, exp_design)
 #' @export
 make_se <- function(data, columns, expdesign) {
+  assert_that(is.data.frame(data), is.integer(columns), is.data.frame(expdesign))
   # Select the assay data
   rownames(data) <- data$name
   raw <- data[,columns]
@@ -113,12 +118,16 @@ make_se <- function(data, columns, expdesign) {
 #' example_less_stringent_filter <- filter_missval(example_se, thr = 1)
 #' @export
 filter_missval <- function(data, thr = 0) {
+  if(is.integer(thr)) thr <- as.numeric(thr)
+  assert_that(inherits(data, "SummarizedExperiment"), is.numeric(thr))
+
   # Make assay data binary (1 = valid value)
   bin_data <- assay(data)
   bin_data[!is.na(assay(data))] <- 1
 
   # Filter data on the maximum allowed number of missing values per condition (defined by thr)
-  keep <- bin_data %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, value, 2:ncol(.)) %>% left_join(., data.frame(colData(data)), by = "ID") %>% group_by(rowname, condition) %>%
+  keep <- bin_data %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, value, 2:ncol(.)) %>%
+    left_join(., data.frame(colData(data)), by = "ID") %>% group_by(rowname, condition) %>%
     summarize(miss_val = n()-sum(value)) %>% filter(miss_val <= thr) %>% spread(condition, miss_val)
   filt <- data[keep$rowname,]
   return(filt)
@@ -126,7 +135,7 @@ filter_missval <- function(data, thr = 0) {
 
 #' Data normalization using vsn
 #'
-#' \code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link{vsn}}.
+#' \code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
 #'
 #' @param data SummerizedExperiment, Data object which will be normalized.
 #' @return An normalized SummerizedExperiment object.
@@ -142,6 +151,7 @@ filter_missval <- function(data, thr = 0) {
 #' example_vsn <- norm_vsn(example_filter)
 #' @export
 norm_vsn <- function(data) {
+  assert_that(inherits(data, "SummarizedExperiment"))
   # Variance stabilization transformation on assay data
   data_vsn <- data
   vsn.fit <- vsn::vsnMatrix(2^assay(data_vsn))
@@ -151,11 +161,11 @@ norm_vsn <- function(data) {
 
 #' Impute missing values
 #'
-#' \code{imputation} imputes missing values based on a manual \code{\link{impute}}.
+#' \code{imputation} imputes missing values based on a manual \code{\link[MSnbase]{impute}}.
 #'
 #' @param data SummerizedExperiment, Data object for which missing values will be imputed.
-#' @param fun "man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link{impute}}.
-#' @param ... Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link{impute}}.
+#' @param fun "man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link[MSnbase]{impute}}.
+#' @param ... Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link[MSnbase]{impute}}.
 #' @return An imputed SummerizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
@@ -177,15 +187,19 @@ norm_vsn <- function(data) {
 #' example_impute_manual <- imputation(example_filter, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
 imputation <- function(data, fun, ...) {
+  assert_that(inherits(data, "SummarizedExperiment"), is.character(fun))
 
   # function for imputation by random draws from a manually defined distribution
   manual_impute <- function(data, scale = 0.3, shift = 1.8) {
     # Get descriptive parameters of the current sample distributions
-    stat <- assay(data) %>% data.frame() %>% rownames_to_column(.) %>% gather(samples, value, 2:ncol(.)) %>% filter(!is.na(value))  %>% group_by(samples) %>%
+    stat <- assay(data) %>% data.frame() %>% rownames_to_column(.) %>% gather(samples, value, 2:ncol(.)) %>%
+      filter(!is.na(value))  %>% group_by(samples) %>%
       summarise(mean = mean(value), median = median(value), sd = sd(value), n = n(), infin = nrow(assay(data))-n)
-    # Impute missing values by random draws from a distribution which is left-shifted by parameters 'shift' * sd and scaled by parameter 'scale' * sd.
+    # Impute missing values by random draws from a distribution
+    # which is left-shifted by parameters 'shift' * sd and scaled by parameter 'scale' * sd.
     for(a in 1:nrow(stat)) {
-      assay(data)[is.na(assay(data)[,stat$samples[a]]),stat$samples[a]] <- rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
+      assay(data)[is.na(assay(data)[,stat$samples[a]]),stat$samples[a]] <-
+        rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
     }
     rowData(data)$mean <- rowMeans(assay(data))
     return(data)
@@ -197,7 +211,9 @@ imputation <- function(data, fun, ...) {
     feat_data <- data.frame(rowData(data))
     rownames(feat_data) <- feat_data$name
     pheno_data <- data.frame(colData(data))
-    msn <- MSnbase::MSnSet(exprs = as.matrix(raw), pData = Biobase::AnnotatedDataFrame(pheno_data), fData = Biobase::AnnotatedDataFrame(feat_data))
+    msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
+                           pData = Biobase::AnnotatedDataFrame(pheno_data),
+                           fData = Biobase::AnnotatedDataFrame(feat_data))
     return(msn)
   }
 
@@ -217,7 +233,7 @@ imputation <- function(data, fun, ...) {
 
 #' Linear model test
 #'
-#' \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link{limma}}).
+#' \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link[limma]{limma}}).
 #'
 #' @param data SummerizedExperiment, Data object for which the variance will be analyzed.
 #' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
@@ -238,6 +254,8 @@ imputation <- function(data, fun, ...) {
 #' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' @export
 linear_model <- function(data, control, type) {
+  assert_that(inherits(data, "SummarizedExperiment"), is.character(control), is.character(type))
+
   # Make an appropriate design matrix
   conditions <- factor(colData(data)$condition)
   design <- model.matrix(~ 0 + conditions)
@@ -293,7 +311,7 @@ linear_model <- function(data, control, type) {
 
 #' ANOVA and post-hoc Tukey
 #'
-#' \code{anova_tukey} performs an Analysis of Variance fit (\code{\link{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link{TukeyHSD}}).
+#' \code{anova_tukey} performs an Analysis of Variance fit (\code{\link[stats]{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link[stats]{TukeyHSD}}).
 #'
 #' @param data SummerizedExperiment, Data object for which the variance will be analyzed.
 #' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
@@ -314,8 +332,11 @@ linear_model <- function(data, control, type) {
 #' example_anova_tukey <- anova_tukey(example_impute, "Ctrl", "control")
 #' @export
 anova_tukey <- function(data, control, type) {
+  assert_that(inherits(data, "SummarizedExperiment"), is.character(control), is.character(type))
+
   # Generate a long format data.frame containing the assay data
-  long <- assay(data) %>% data.frame() %>% mutate(name = rownames(.)) %>% gather(ID, val, 1:(ncol(.)-1)) %>% left_join(., data.frame(colData(data)), by = "ID")
+  long <- assay(data) %>% data.frame() %>% mutate(name = rownames(.)) %>%
+    gather(ID, val, 1:(ncol(.)-1)) %>% left_join(., data.frame(colData(data)), by = "ID")
 
   # Perform a rowwise ANOVA and extract the raw p-value which is adjusted for multiple testing
   cat("  ANOVA test \n")
@@ -340,14 +361,16 @@ anova_tukey <- function(data, control, type) {
     flip_col <- grep(paste("^", control, ".*_diff", sep = ""), colnames(tukey_df))
     if(length(flip_col) >= 1) {
       tukey_df[,flip_col] <- -tukey_df[,flip_col]
-      colnames(tukey_df)[flip_col] <- gsub(paste(control, "-", sep = ""), "", colnames(tukey_df)[flip_col]) %>% gsub("_diff", "", .) %>% paste("-", control, "_diff", sep = "")
+      colnames(tukey_df)[flip_col] <- gsub(paste(control, "-", sep = ""), "", colnames(tukey_df)[flip_col]) %>%
+        gsub("_diff", "", .) %>% paste("-", control, "_diff", sep = "")
     }
   }
 
   # Generate a wide table containing the adjusted p-values and log2 fold changes
   cols_p <- grep("p.adj",colnames(tukey_df))
   order <- tukey_df %>% select(cols_p) %>% names() %>% c("name",.) # save the order of the columns
-  tukey_padj <- tukey_df[,c(1,cols_p)] %>% gather(., comparison, p, 2:ncol(.)) %>% mutate(padj = p.adjust(p, method = "BH")) %>% select(-p) %>% spread(., comparison, padj)
+  tukey_padj <- tukey_df[,c(1,cols_p)] %>% gather(., comparison, p, 2:ncol(.)) %>%
+    mutate(padj = p.adjust(p, method = "BH")) %>% select(-p) %>% spread(., comparison, padj)
   final <- merge(tukey_df[,-cols_p],tukey_padj[,order], by = "name")
   rowData(data) <- merge(rowData(data), final, by="name")
   return(data)
@@ -375,10 +398,14 @@ anova_tukey <- function(data, control, type) {
 #'
 #' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' example_sign <- cutoffs(example_lm, alpha = 0.05, lfc = 1)
-#' significant_proteins <- example_sign[rowData(example_sign)$sign == "+", ]
+#' significant_proteins <- example_sign[SummarizedExperiment::rowData(example_sign)$sign == "+", ]
 #' nrow(significant_proteins)
 #' @export
 cutoffs <- function(data, alpha = 0.05, lfc = 1) {
+  if(is.integer(alpha)) alpha <- as.numeric(alpha)
+  if(is.integer(lfc)) lfc <- as.numeric(lfc)
+  assert_that(inherits(data, "SummarizedExperiment"), is.numeric(alpha), is.numeric(lfc))
+
   row_data <- rowData(data)
   cols_p <- grep("_p.adj",colnames(row_data)) # get all columns with adjusted p-values
   cols_diff <- grep("_diff", colnames(row_data)) # get all columns with log2 fold changes
@@ -424,6 +451,7 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #' glimpse(example_results)
 #' @export
 results <- function(data) {
+  assert_that(inherits(data, "SummarizedExperiment"))
   row_data <- data.frame(rowData(data))
 
   # Obtain average protein-centered enrichment values per condition

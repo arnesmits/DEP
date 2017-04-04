@@ -33,7 +33,8 @@ peptides <- GFPip_pep
 data_unique <- data \%>\% unique_names(., "Gene.names", "Protein.IDs")
 data_filt <- data_unique \%>\% filter(Reverse != "+", Contaminant != "+")
 
-# Make a SummarizedExperiment and perform filtering on missing values, variance stabilization and imputation on this object
+# Make a SummarizedExperiment and perform filtering on missing values,
+# variance stabilization and imputation on this object
 cols <- grep("LFQ", colnames(data_filt))
 se <- make_se(data_filt, cols, exp_design)
 filt <- filter_missval(se)

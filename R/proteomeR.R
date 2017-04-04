@@ -52,7 +52,7 @@
 #' @name proteomeR
 #'
 #'
-#' @import ComplexHeatmap limma magrittr tidyverse grid SummarizedExperiment
+#' @import ComplexHeatmap limma magrittr tidyverse grid SummarizedExperiment assertthat
 #' @import shinydashboard shiny
 #'
 NULL

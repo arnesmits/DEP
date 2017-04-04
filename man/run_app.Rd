@@ -13,6 +13,11 @@ run_app(app)
 \code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
 }
 \examples{
+\dontrun{
+# Run the app
 run_app("LFQ")
+
 run_app("TMT")
+
+}
 }

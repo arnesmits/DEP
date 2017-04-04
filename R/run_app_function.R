@@ -4,8 +4,13 @@
 #'
 #' @param app The name of the app. Currently supporting "LFQ" or "TMT".
 #' @examples
+#' \dontrun{
+#' # Run the app
 #' run_app("LFQ")
+#'
 #' run_app("TMT")
+#'
+#' }
 #' @export
 run_app <- function(app) {
   # Locate all the shiny apps that exist

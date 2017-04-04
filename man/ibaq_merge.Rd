@@ -19,9 +19,10 @@ A data.frame with iBAQ intensities per protein group from peptides unique to thi
 }
 \examples{
 data <- GFPip
+data_unique <- unique_names(data, "Gene.names", "Protein.IDs")
 peptides <- GFPip_pep
 
-ibaq <- ibaq_merge(data, peptides)
+ibaq <- ibaq_merge(data_unique, peptides)
 colnames(ibaq)
 head(ibaq)
 }
