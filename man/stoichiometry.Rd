@@ -50,7 +50,7 @@ results <- results(sign)
 results \%>\% filter(sign == "+") \%>\% nrow()
 
 # Merge iBAQ intensities of proteins that have shared peptides
-ibaq <- ibaq_merge(data_unique, peptides)
+ibaq <- merge_ibaq(data_unique, peptides)
 
 # Calculate relative stoichiometry versus "Suz12" in the "GFP_vs_WT" contrast
 stoi <- stoichiometry(sign, ibaq, contrast = "GFP_vs_WT", bait = "Suz12")

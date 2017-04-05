@@ -7,13 +7,13 @@
 norm_vsn(data)
 }
 \arguments{
-\item{data}{SummerizedExperiment, Data object which will be normalized.}
+\item{data}{SummerizedExperiment, Data object which will be normalized with log2-transformed assay data.}
 }
 \value{
 An normalized SummerizedExperiment object.
 }
 \description{
-\code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
+\code{norm_vsn} normalizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

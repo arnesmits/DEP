@@ -11,7 +11,7 @@ make_se(data, columns, expdesign)
 
 \item{columns}{Vector of integers, Number of the columns that contain the assay data.}
 
-\item{expdesign}{Data.frame, Experimental design object}
+\item{expdesign}{Data.frame, Experimental design object containing 'label', 'condition' and 'replicate' information}
 }
 \value{
 A SummerizedExperiment object.

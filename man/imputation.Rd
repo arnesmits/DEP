@@ -17,7 +17,7 @@ imputation(data, fun, ...)
 An imputed SummerizedExperiment object.
 }
 \description{
-\code{imputation} imputes missing values based on a manual \code{\link[MSnbase]{impute}}.
+\code{imputation} imputes missing values based on \code{\link[MSnbase]{impute}}.
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

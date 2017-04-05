@@ -7,7 +7,7 @@
 run_app(app)
 }
 \arguments{
-\item{app}{The name of the app. Currently supporting "LFQ" or "TMT".}
+\item{app}{"LFQ", "TMT" or "iBAQ", The name of the app.}
 }
 \description{
 \code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
@@ -18,6 +18,8 @@ run_app(app)
 run_app("LFQ")
 
 run_app("TMT")
+
+run_app("iBAQ")
 
 }
 }
