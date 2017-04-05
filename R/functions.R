@@ -12,9 +12,19 @@
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
 #' @export
 unique_names <- function(data, name, ids, delim = ";") {
-  assert_that(is.data.frame(data), is.character(name), is.character(ids), is.character(delim))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(is.data.frame(data), is.character(name), is.character(ids), is.character(delim))
+
+  # Show error if inputs do not contain required columns
+  if (length(grep(paste("^", name, "$", sep = ""), colnames(data))) < 1) {
+    stop("name input is not present in data", call. = FALSE)
+  }
+  if (length(grep(paste("^", ids, "$", sep = ""), colnames(data))) < 1) {
+    stop("ids input is not present in data", call. = FALSE)
+  }
+
   # Select the name and id columns, take the first identifier per row and make unique names. If there is no name, the ID will be taken.
-  names <- data %>% select(matches(name), matches(paste("^", ids, sep = ""))) %>%
+  names <- data %>% select(matches(paste("^", name, "$", sep = "")), matches(paste("^", ids, "$", sep = ""))) %>%
     mutate(name = gsub(paste(delim, ".*", sep = ""), "", .[,1]), ID = gsub(paste(delim, ".*", sep = ""), "", .[,2]), name = make.unique(ifelse(name == "", ID, name)))
   data <- left_join(data, names)
   return(data)
@@ -35,7 +45,14 @@ unique_names <- function(data, name, ids, delim = ";") {
 #' example_se <- make_se_parse(example_unique, columns)
 #' @export
 make_se_parse <- function(data, columns) {
-  assert_that(is.data.frame(data), is.integer(columns))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(is.data.frame(data), is.integer(columns))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(data))) {
+    stop("'name' and/or 'ID' columns are not present in data;\nRun data_unique() to obtain the required data", call. = FALSE)
+  }
+
   # Select the assay data
   rownames(data) <- data$name
   raw <- data[,columns]
@@ -66,7 +83,7 @@ make_se_parse <- function(data, columns) {
 #'
 #' @param data Data.frame, Data object which will be turned into a SummerizedExperiment
 #' @param columns Vector of integers, Number of the columns that contain the assay data.
-#' @param expdesign Data.frame, Experimental design object
+#' @param expdesign Data.frame, Experimental design object containing 'label', 'condition' and 'replicate' information
 #' @return A SummerizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
@@ -77,7 +94,17 @@ make_se_parse <- function(data, columns) {
 #' example_se <- make_se(example_unique, columns, exp_design)
 #' @export
 make_se <- function(data, columns, expdesign) {
-  assert_that(is.data.frame(data), is.integer(columns), is.data.frame(expdesign))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(is.data.frame(data), is.integer(columns), is.data.frame(expdesign))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(data))) {
+    stop("'name' and/or 'ID' columns are not present in data;\nRun data_unique() to obtain the required data", call. = FALSE)
+  }
+  if (any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in expdesign", call. = FALSE)
+  }
+
   # Select the assay data
   rownames(data) <- data$name
   raw <- data[,columns]
@@ -118,8 +145,17 @@ make_se <- function(data, columns, expdesign) {
 #' example_less_stringent_filter <- filter_missval(example_se, thr = 1)
 #' @export
 filter_missval <- function(data, thr = 0) {
+  # Show error if inputs are not the required classes
   if(is.integer(thr)) thr <- as.numeric(thr)
-  assert_that(inherits(data, "SummarizedExperiment"), is.numeric(thr))
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.numeric(thr))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data (rowData);\nRun data_unique() and make_se() (or make_se_parse()) to obtain the required data", call. = FALSE)
+  }
+  if (any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in data (colData);\nRun make_se() or make_se_parse() to obtain the required data ", call. = FALSE)
+  }
 
   # Make assay data binary (1 = valid value)
   bin_data <- assay(data)
@@ -135,9 +171,9 @@ filter_missval <- function(data, thr = 0) {
 
 #' Data normalization using vsn
 #'
-#' \code{norm_vsn} nomralizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
+#' \code{norm_vsn} normalizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
 #'
-#' @param data SummerizedExperiment, Data object which will be normalized.
+#' @param data SummerizedExperiment, Data object which will be normalized with log2-transformed assay data.
 #' @return An normalized SummerizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
@@ -151,7 +187,9 @@ filter_missval <- function(data, thr = 0) {
 #' example_vsn <- norm_vsn(example_filter)
 #' @export
 norm_vsn <- function(data) {
-  assert_that(inherits(data, "SummarizedExperiment"))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
+
   # Variance stabilization transformation on assay data
   data_vsn <- data
   vsn.fit <- vsn::vsnMatrix(2^assay(data_vsn))
@@ -159,9 +197,23 @@ norm_vsn <- function(data) {
   return(data_vsn)
 }
 
+#####
+
+# function to obtain a MSnSet object from a SummarizedExperiment object
+se2msn <- function(data) {
+  raw <- assay(data)
+  feat_data <- data.frame(rowData(data))
+  rownames(feat_data) <- feat_data$name
+  pheno_data <- data.frame(colData(data))
+  msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
+                         pData = Biobase::AnnotatedDataFrame(pheno_data),
+                         fData = Biobase::AnnotatedDataFrame(feat_data))
+  return(msn)
+}
+
 #' Impute missing values
 #'
-#' \code{imputation} imputes missing values based on a manual \code{\link[MSnbase]{impute}}.
+#' \code{imputation} imputes missing values based on \code{\link[MSnbase]{impute}}.
 #'
 #' @param data SummerizedExperiment, Data object for which missing values will be imputed.
 #' @param fun "man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link[MSnbase]{impute}}.
@@ -187,7 +239,13 @@ norm_vsn <- function(data) {
 #' example_impute_manual <- imputation(example_filter, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
 imputation <- function(data, fun, ...) {
-  assert_that(inherits(data, "SummarizedExperiment"), is.character(fun))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.character(fun))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data (rowData);\nRun data_unique() and make_se() (or make_se_parse()) to obtain the required data", call. = FALSE)
+  }
 
   # function for imputation by random draws from a manually defined distribution
   manual_impute <- function(data, scale = 0.3, shift = 1.8) {
@@ -201,20 +259,7 @@ imputation <- function(data, fun, ...) {
       assay(data)[is.na(assay(data)[,stat$samples[a]]),stat$samples[a]] <-
         rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
     }
-    rowData(data)$mean <- rowMeans(assay(data))
     return(data)
-  }
-
-  # function to obtain a MSnSet object from a SummarizedExperiment object
-  se2msn <- function(data) {
-    raw <- assay(data)
-    feat_data <- data.frame(rowData(data))
-    rownames(feat_data) <- feat_data$name
-    pheno_data <- data.frame(colData(data))
-    msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
-                           pData = Biobase::AnnotatedDataFrame(pheno_data),
-                           fData = Biobase::AnnotatedDataFrame(feat_data))
-    return(msn)
   }
 
   # if the "man" function is selected, use the manual impution method
@@ -226,7 +271,6 @@ imputation <- function(data, fun, ...) {
     MSnSet_data <- se2msn(data)
     MSnSet_imputed <- MSnbase::impute(MSnSet_data, method = fun, ...)
     assay(data) <- MSnbase::exprs(MSnSet_imputed)
-    rowData(data)$mean <- rowMeans(assay(data))
     return(data)
   }
 }
@@ -254,7 +298,23 @@ imputation <- function(data, fun, ...) {
 #' example_lm <- linear_model(example_impute, "Ctrl", "control")
 #' @export
 linear_model <- function(data, control, type) {
-  assert_that(inherits(data, "SummarizedExperiment"), is.character(control), is.character(type))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.character(control), is.character(type))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data (rowData);\nRun data_unique() and make_se() (or make_se_parse()) to obtain the required data", call. = FALSE)
+  }
+  if (any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in data (colData);\nRun make_se() or make_se_parse() to obtain the required data ", call. = FALSE)
+  }
+  # Show error if inputs are not valid
+  if (!type %in% c("all", "control")) {
+    stop("Not a valid type, run linear_model() with a valid type\nValid types are: 'all', 'control'", call. = FALSE)
+  }
+  if (!control %in% unique(colData(data)$condition)) {
+    stop("Not a valid control; Run linear_model() with a valid control", paste0("\nValid controls are: '", paste0(unique(colData(data)$condition), collapse = "', '"), "'"), call. = FALSE)
+  }
 
   # Make an appropriate design matrix
   conditions <- factor(colData(data)$condition)
@@ -332,7 +392,23 @@ linear_model <- function(data, control, type) {
 #' example_anova_tukey <- anova_tukey(example_impute, "Ctrl", "control")
 #' @export
 anova_tukey <- function(data, control, type) {
-  assert_that(inherits(data, "SummarizedExperiment"), is.character(control), is.character(type))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.character(control), is.character(type))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data (rowData);\nRun data_unique() and make_se() (or make_se_parse()) to obtain the required data", call. = FALSE)
+  }
+  if (any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in data (colData);\nRun make_se() or make_se_parse() to obtain the required data ", call. = FALSE)
+  }
+  # Show error if inputs are not valid
+  if (!type %in% c("all", "control")) {
+    stop("Not a valid type, run linear_model() with a valid type\nValid types are: 'all', 'control'", call. = FALSE)
+  }
+  if (!control %in% unique(colData(data)$condition)) {
+    stop("Not a valid control; Run linear_model() with a valid control", paste0("\nValid controls are: '", paste0(unique(colData(data)$condition), collapse = "', '"), "'"), call. = FALSE)
+  }
 
   # Generate a long format data.frame containing the assay data
   long <- assay(data) %>% data.frame() %>% mutate(name = rownames(.)) %>%
@@ -402,9 +478,18 @@ anova_tukey <- function(data, control, type) {
 #' nrow(significant_proteins)
 #' @export
 cutoffs <- function(data, alpha = 0.05, lfc = 1) {
+  # Show error if inputs are not the required classes
   if(is.integer(alpha)) alpha <- as.numeric(alpha)
   if(is.integer(lfc)) lfc <- as.numeric(lfc)
-  assert_that(inherits(data, "SummarizedExperiment"), is.numeric(alpha), is.numeric(lfc))
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.numeric(alpha), is.numeric(lfc))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data", call. = FALSE)
+  }
+  if (length(grep("_p.adj|_diff", colnames(rowData(data)))) < 1) {
+    stop("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in data;\nRun linear_model() to obtain the required data", call. = FALSE)
+  }
 
   row_data <- rowData(data)
   cols_p <- grep("_p.adj",colnames(row_data)) # get all columns with adjusted p-values
@@ -451,10 +536,21 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 #' glimpse(example_results)
 #' @export
 results <- function(data) {
+  # Show error if inputs are not the required classes
   assert_that(inherits(data, "SummarizedExperiment"))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data", call. = FALSE)
+  }
+  if (length(grep("_p.adj|_diff", colnames(rowData(data)))) < 1) {
+    stop("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in data;\nRun linear_model() to obtain the required data", call. = FALSE)
+  }
+
   row_data <- data.frame(rowData(data))
 
   # Obtain average protein-centered enrichment values per condition
+  rowData(data)$mean <- rowMeans(assay(data))
   centered <- assay(data) - rowData(data)$mean
   centered %<>%  data.frame(.) %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(data)), by = "ID")
   centered %<>% group_by(rowname, condition) %>% summarize(val = mean(val)) %>% mutate(val = signif(val, digits = 3)) %>% spread(condition, val)

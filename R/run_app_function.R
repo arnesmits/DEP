@@ -2,13 +2,15 @@
 #'
 #' \code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
 #'
-#' @param app The name of the app. Currently supporting "LFQ" or "TMT".
+#' @param app "LFQ", "TMT" or "iBAQ", The name of the app.
 #' @examples
 #' \dontrun{
 #' # Run the app
 #' run_app("LFQ")
 #'
 #' run_app("TMT")
+#'
+#' run_app("iBAQ")
 #'
 #' }
 #' @export
@@ -23,8 +25,7 @@ run_app <- function(app) {
       "'")
 
   # Show error if an unvalid app-name is given
-  if (missing(app) || !nzchar(app) ||
-      !app %in% valid_apps) {
+  if (missing(app) || !nzchar(app) || !app %in% valid_apps) {
     stop(
       'Please run `run_app()` with a valid app as argument\n',
       valid_apps_msg,

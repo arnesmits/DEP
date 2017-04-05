@@ -25,8 +25,20 @@
 #' plot_single(example_sign, "USP15", "contrast")
 #' @export
 plot_single <- function(data, protein, type) {
-  assert_that(inherits(data, "SummarizedExperiment"), is.character(protein), is.character(type))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.character(protein), is.character(type))
 
+  # Show error if inputs do not contain required columns
+  if (any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in data (colData)", call. = FALSE)
+  }
+  if (length(grep("_p.adj|_diff", colnames(rowData(data)))) < 1) {
+    stop("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
+  }
+  # Show error if an unvalid type is given
+  if (!type %in% c("centered", "contrast")) {
+    stop("Not a valid type, run plot_single() with a valid type\nValid types are: 'centered', 'contrast'", call. = FALSE)
+  }
   # Show error if an unvalid protein name is given
   if(length(which(rowData(data)$name == protein)) == 0) {
     possibilities <- rowData(data)$name[grep(substr(protein, 1, nchar(protein)-1), rowData(data)$name)]
@@ -43,6 +55,7 @@ plot_single <- function(data, protein, type) {
   # the average enrichments of conditions versus the control condition ("contrast") for a single protein
   if(type == "centered") {
     # Obtain protein-centered enrichment values
+    rowData(data)$mean <- rowMeans(assay(data))
     df <- assay(data) - rowData(data)$mean
     df %<>% data.frame(.) %>% rownames_to_column(.)
     # Select values for a single protein in long format and add sample annotation
@@ -97,11 +110,27 @@ plot_single <- function(data, protein, type) {
 #' plot_heatmap(example_sign, "contrast", k = 6, col_limit = 10, labelsize = 3)
 #' @export
 plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
+  # Show error if inputs are not the required classes
   if(is.integer(k)) k <- as.numeric(k)
   if(is.integer(col_limit)) col_limit <- as.numeric(col_limit)
   if(is.integer(labelsize)) labelsize <- as.numeric(labelsize)
-  assert_that(inherits(data, "SummarizedExperiment"), is.character(type),
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.character(type),
               is.numeric(k), is.numeric(col_limit), is.numeric(labelsize))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in data (colData)", call. = FALSE)
+  }
+  if (!"sign" %in% colnames(rowData(data))) {
+    stop("'sign' column is not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
+  }
+  if (length(grep("_diff", colnames(rowData(data)))) < 1) {
+    stop("'[contrast]_diff' columns are not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
+  }
+  # Show error if an unvalid type is given
+  if (!type %in% c("centered", "contrast")) {
+    stop("Not a valid type, run plot_single() with a valid type\nValid types are: 'centered', 'contrast'", call. = FALSE)
+  }
 
   # Filter for significant proteins only
   data <- data[rowData(data)$sign == "+", ]
@@ -110,6 +139,7 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
   # the average enrichments of conditions versus the control condition ("contrast")
   if(type == "centered") {
     # Obtain protein-centered enrichment values
+    rowData(data)$mean <- rowMeans(assay(data))
     df <- assay(data) - rowData(data)$mean
 
     # Perform k-means clustering
@@ -173,9 +203,18 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
 #' plot_volcano(example_sign, "Ubi4_vs_Ctrl", add_names = FALSE)
 #' @export
 plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
+  # Show error if inputs are not the required classes
   if(is.integer(labelsize)) labelsize <- as.numeric(labelsize)
-  assert_that(inherits(data, "SummarizedExperiment"), is.character(contrast),
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.character(contrast),
               is.numeric(labelsize), is.logical(add_names))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    stop("'name' and/or 'ID' columns are not present in data", call. = FALSE)
+  }
+  if (length(grep("_p.adj|_diff|_sign", colnames(rowData(data)))) < 1) {
+    stop("'[contrast]_diff', '[contrast]_p.adj' and/or '[contrast]_sign' columns are not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
+  }
 
   row_data <- rowData(data)
 
@@ -232,7 +271,16 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
 #' plot_norm(example_filter, example_vsn)
 #' @export
 plot_norm <- function(raw, norm) {
-  assert_that(inherits(raw, "SummarizedExperiment"), inherits(norm, "SummarizedExperiment"))
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(raw, "SummarizedExperiment"), inherits(norm, "SummarizedExperiment"))
+
+  # Show error if inputs do not contain required columns
+  if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(raw)))) {
+    stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in raw;\nRun make_se() or make_se_parse() to obtain the required data", call. = FALSE)
+  }
+  if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(norm)))) {
+    stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in norm;\nRun make_se() or make_se_parse() to obtain the required data", call. = FALSE)
+  }
 
   # Get a long data.frame of the assay data (original and normalized) annotated with sample info
   df1 <- assay(raw) %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(raw)), by = "ID") %>% mutate(var = "original")
@@ -261,15 +309,16 @@ plot_norm <- function(raw, norm) {
 #' plot_missval(example_filter)
 #' @export
 plot_missval <- function(data) {
-  assert_that(inherits(data, "SummarizedExperiment"))
+  # Show error if input is not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
 
   # Make assay data binary (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame(.)
   missval <- df[apply(df, 1, function(x) any(is.na(x))),]
   missval <- ifelse(is.na(missval), 0, 1)
   # Plot binary heatmap
-  ht2 = Heatmap(missval, col = c("white","black"), row_names_side = "left", column_names_side = "top", show_row_names = F, show_column_names = T,
-                name = "Missingness Pattern", row_names_gp = gpar(fontsize = 10), column_names_gp = gpar(fontsize = 16))
+  ht2 = Heatmap(missval, col = c("white","black"), column_names_side = "top", show_row_names = F, show_column_names = T,
+                name = "Missingness Pattern", column_names_gp = gpar(fontsize = 16))
   draw(ht2, heatmap_legend_side = "top")
 }
 
@@ -292,7 +341,8 @@ plot_missval <- function(data) {
 #' plot_numbers(example_filter)
 #' @export
 plot_numbers <- function(data) {
-  assert_that(inherits(data, "SummarizedExperiment"))
+  # Show error if input is not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
 
   # Make a binary long data.frame (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
@@ -321,7 +371,8 @@ plot_numbers <- function(data) {
 #' plot_frequency(example_filter)
 #' @export
 plot_frequency <- function(data) {
-  assert_that(inherits(data, "SummarizedExperiment"))
+  # Show error if input is not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
 
   # Make a binary long data.frame (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
@@ -352,7 +403,8 @@ plot_frequency <- function(data) {
 #' plot_coverage(example_filter)
 #' @export
 plot_coverage <- function(data) {
-  assert_that(inherits(data, "SummarizedExperiment"))
+  # Show error if input is not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
 
   # Make a binary long data.frame (1 = valid value, 0 = missing value)
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))

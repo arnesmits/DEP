@@ -12,6 +12,7 @@
 #'   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
 #'   \item \code{\link{TMT}}: Tandem-mass-tags (TMT) workflow
 #'   \item \code{\link{report}}: Create a rmarkdown report
+#'   \item \code{\link{iBAQ}}: iBAQ-based stoichiometry workflow
 #' }
 #'
 #' @section proteomeR functions:
@@ -45,7 +46,6 @@
 #'   \item \code{\link{ibaq_merge}}: Merge iBAQ intensities of protein groups based on shared peptides
 #'   \item \code{\link{stoichiometry}}: Calculate relative stoichiometry of all significant proteins
 #'   \item \code{\link{plot_stoi}}: Barplot of the relative stoichiometries
-#'   \item \code{\link{results_stoi}}: Generate a results table of relative stoichiometry values
 #' }
 #'
 #' @docType package

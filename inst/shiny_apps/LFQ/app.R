@@ -24,7 +24,7 @@ ui <- shinyUI(
 		    menuItem("Files", selected = TRUE,
 		      fileInput('file1', 'ProteinGroups.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
   		    fileInput('file2', 'ExperimentalDesign.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-  		    radioButtons("anno", "Sample annotation", choices = list("Parse from columns" = "columns", "Use Experimental Design" = "expdesign"), selected = "columns")
+  		    radioButtons("anno", "Sample annotation", choices = list("Parse from columns" = "columns", "Use Experimental Design" = "expdesign"), selected = "expdesign")
   		  ),
 		    menuItemOutput("columns"),
   			menuItem("Imputation & Stats options",
