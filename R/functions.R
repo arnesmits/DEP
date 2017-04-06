@@ -160,6 +160,7 @@ filter_missval <- function(data, thr = 0) {
   # Make assay data binary (1 = valid value)
   bin_data <- assay(data)
   bin_data[!is.na(assay(data))] <- 1
+  bin_data[is.na(assay(data))] <- 0
 
   # Filter data on the maximum allowed number of missing values per condition (defined by thr)
   keep <- bin_data %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, value, 2:ncol(.)) %>%
