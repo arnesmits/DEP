@@ -487,18 +487,13 @@ server <- shinyServer(function(input, output) {
       ibaq <- reactive({
         data <- data_unique()
         peptides <- peptides()
-        ibaq_merge(data, peptides)
+        merge_ibaq(data, peptides)
       })
 
       stoi <- reactive({
         sign <- sign()
         ibaq <- ibaq()
         stoichiometry(sign, ibaq, input$stoi_cntrst, input$stoi_bait)
-      })
-
-      stoi_results <- reactive({
-        stoi <- stoi()
-        results_stoi(stoi, input$thr)
       })
 
       input_plot_stoi <- reactive({
@@ -511,7 +506,7 @@ server <- shinyServer(function(input, output) {
       ### Output functions ### ----------------------------------------------------------------------------------------------
 
       output$stoi_table <- DT::renderDataTable({
-        stoi_results()
+        stoi()
       }, options = list(pageLength = 25, scrollX = T))
 
       output$stoi <- renderPlot({
