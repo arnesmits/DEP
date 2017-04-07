@@ -7,7 +7,7 @@
 iBAQ(results, peptides, contrast, bait, level = 1)
 }
 \arguments{
-\item{results}{List of SummerizedExperiments obtained from \code{\link{LFQ}} function.}
+\item{results}{List of SummarizedExperiments obtained from \code{\link{LFQ}} function.}
 
 \item{peptides}{Data.frame, Peptide table from MaxQuant ("peptides.txt").}
 

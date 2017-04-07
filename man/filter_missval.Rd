@@ -7,15 +7,15 @@
 filter_missval(data, thr = 0)
 }
 \arguments{
-\item{data}{SummerizedExperiment, Data object which will be filtered.}
+\item{data}{SummarizedExperiment, Data object which will be filtered.}
 
 \item{thr}{Integer, sets the threshold for the allowed number of missing values per condition.}
 }
 \value{
-An filtered SummerizedExperiment object.
+An filtered SummarizedExperiment object.
 }
 \description{
-\code{filter_missval} filters an SummerizedExperiment object based on missing values.
+\code{filter_missval} filters an SummarizedExperiment object based on missing values.
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

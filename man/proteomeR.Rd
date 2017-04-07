@@ -48,6 +48,8 @@ The proteomeR package provides all functionalities to analyze label free quantif
   \item \code{\link{plot_volcano}}: Volcano plot for a specified contrast
   \item \code{\link{plot_heatmap}}: Heatmap of all significant proteins
   \item \code{\link{plot_norm}}: Boxplots to inspect normalization
+  \item \code{\link{plot_detect}}: Density and CumSum plots to inspect detection limit
+  \item \code{\link{plot_imp}}: Density plots to inspect imputation
   \item \code{\link{plot_missval}}: Heatmap to inspect missing values
   \item \code{\link{plot_numbers}}: Barplot of proteins identified
   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between conditions

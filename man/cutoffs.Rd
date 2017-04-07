@@ -7,14 +7,14 @@
 cutoffs(data, alpha = 0.05, lfc = 1)
 }
 \arguments{
-\item{data}{SummerizedExperiment, Data object which will be filtered for significant proteins.}
+\item{data}{SummarizedExperiment, Data object which will be filtered for significant proteins.}
 
 \item{alpha}{Integer, sets the threshold for the false discovery rate (FDR).}
 
 \item{lfc}{Integer, sets the threshold for the log fold change (lfc).}
 }
 \value{
-An SummerizedExperiment object containing a variable "sign" denoting the significant proteins.
+An SummarizedExperiment object containing a variable "sign" denoting the significant proteins.
 }
 \description{
 \code{cutoffs} denotes significant proteins based on defined cutoffs.

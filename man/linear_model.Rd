@@ -7,14 +7,14 @@
 linear_model(data, control, type)
 }
 \arguments{
-\item{data}{SummerizedExperiment, Data object for which the variance will be analyzed.}
+\item{data}{SummarizedExperiment, Data object for which the variance will be analyzed.}
 
 \item{control}{Character, The condition to which the contrasts are generated (the control would be most appropriate).}
 
 \item{type}{all" or "control" The type of contrasts that will be generated.}
 }
 \value{
-An SummerizedExperiment object containing FDR estimates of differential expression.
+An SummarizedExperiment object containing FDR estimates of differential expression.
 }
 \description{
 \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link[limma]{limma}}).

@@ -7,14 +7,14 @@
 anova_tukey(data, control, type)
 }
 \arguments{
-\item{data}{SummerizedExperiment, Data object for which the variance will be analyzed.}
+\item{data}{SummarizedExperiment, Data object for which the variance will be analyzed.}
 
 \item{control}{Character, The condition to which the contrasts are generated (the control would be most appropriate).}
 
 \item{type}{all" or "control" The type of contrasts that will be generated.}
 }
 \value{
-An SummerizedExperiment object containing FDR estimates of differential expression.
+An SummarizedExperiment object containing FDR estimates of differential expression.
 }
 \description{
 \code{anova_tukey} performs an Analysis of Variance fit (\code{\link[stats]{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link[stats]{TukeyHSD}}).

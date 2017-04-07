@@ -2,20 +2,20 @@
 % Please edit documentation in R/functions.R
 \name{make_se_parse}
 \alias{make_se_parse}
-\title{Data.frame to SummerizedExperiment parsing from column names}
+\title{Data.frame to SummarizedExperiment parsing from column names}
 \usage{
 make_se_parse(data, columns)
 }
 \arguments{
-\item{data}{Data.frame, Data object which will be turned into a SummerizedExperiment}
+\item{data}{Data.frame, Data object which will be turned into a SummarizedExperiment}
 
-\item{columns}{Vector of integers, Number of the columns that contain the assay data.}
+\item{columns}{Vector of integers, Column numbers that contain the assay data.}
 }
 \value{
-A SummerizedExperiment object.
+A SummarizedExperiment object.
 }
 \description{
-\code{make_se_parse} creates a SummerizedExperiment object based on a single data.frame
+\code{make_se_parse} creates a SummarizedExperiment object based on a single data.frame
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

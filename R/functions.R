@@ -30,13 +30,13 @@ unique_names <- function(data, name, ids, delim = ";") {
   return(data)
 }
 
-#' Data.frame to SummerizedExperiment parsing from column names
+#' Data.frame to SummarizedExperiment parsing from column names
 #'
-#' \code{make_se_parse} creates a SummerizedExperiment object based on a single data.frame
+#' \code{make_se_parse} creates a SummarizedExperiment object based on a single data.frame
 #'
-#' @param data Data.frame, Data object which will be turned into a SummerizedExperiment
-#' @param columns Vector of integers, Number of the columns that contain the assay data.
-#' @return A SummerizedExperiment object.
+#' @param data Data.frame, Data object which will be turned into a SummarizedExperiment
+#' @param columns Vector of integers, Column numbers that contain the assay data.
+#' @return A SummarizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -51,6 +51,9 @@ make_se_parse <- function(data, columns) {
   # Show error if inputs do not contain required columns
   if (any(!c("name", "ID") %in% colnames(data))) {
     stop("'name' and/or 'ID' columns are not present in data;\nRun data_unique() to obtain the required data", call. = FALSE)
+  }
+  if (any(!apply(data[,columns], 2, is.numeric))) {
+    stop("specified columns should be numeric;\nRun make_se_parse() with the appropriate columns as argument")
   }
 
   # Select the assay data
@@ -77,14 +80,14 @@ make_se_parse <- function(data, columns) {
   return(dataset)
 }
 
-#' Data.frame to SummerizedExperiment using an experimental design
+#' Data.frame to SummarizedExperiment using an experimental design
 #'
-#' \code{make_se} creates a SummerizedExperiment object based on two data.frames: the data and experimental design.
+#' \code{make_se} creates a SummarizedExperiment object based on two data.frames: the data and experimental design.
 #'
-#' @param data Data.frame, Data object which will be turned into a SummerizedExperiment
+#' @param data Data.frame, Data object which will be turned into a SummarizedExperiment
 #' @param columns Vector of integers, Number of the columns that contain the assay data.
 #' @param expdesign Data.frame, Experimental design object containing 'label', 'condition' and 'replicate' information
-#' @return A SummerizedExperiment object.
+#' @return A SummarizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -103,6 +106,9 @@ make_se <- function(data, columns, expdesign) {
   }
   if (any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
     stop("'label', 'condition' and/or 'replicate' columns are not present in expdesign", call. = FALSE)
+  }
+  if (any(!apply(data[,columns], 2, is.numeric))) {
+    stop("specified columns should be numeric;\nRun make_se_parse() with the appropriate columns as argument")
   }
 
   # Select the assay data
@@ -128,11 +134,11 @@ make_se <- function(data, columns, expdesign) {
 
 #' Filter on missing values
 #'
-#' \code{filter_missval} filters an SummerizedExperiment object based on missing values.
+#' \code{filter_missval} filters an SummarizedExperiment object based on missing values.
 #'
-#' @param data SummerizedExperiment, Data object which will be filtered.
+#' @param data SummarizedExperiment, Data object which will be filtered.
 #' @param thr Integer, sets the threshold for the allowed number of missing values per condition.
-#' @return An filtered SummerizedExperiment object.
+#' @return An filtered SummarizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -156,6 +162,9 @@ filter_missval <- function(data, thr = 0) {
   if (any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
     stop("'label', 'condition' and/or 'replicate' columns are not present in data (colData);\nRun make_se() or make_se_parse() to obtain the required data ", call. = FALSE)
   }
+  if (thr < 0 | thr > max(colData(data)$replicate)) {
+    stop("invalid filter threshold applied;\nRun filter_missval() with a threshold ranging from 0 to the number of replicates")
+  }
 
   # Make assay data binary (1 = valid value)
   bin_data <- assay(data)
@@ -172,10 +181,10 @@ filter_missval <- function(data, thr = 0) {
 
 #' Data normalization using vsn
 #'
-#' \code{norm_vsn} normalizes an SummerizedExperiment object using \code{\link[vsn]{vsn-package}}.
+#' \code{norm_vsn} normalizes an SummarizedExperiment object using \code{\link[vsn]{vsn-package}}.
 #'
-#' @param data SummerizedExperiment, Data object which will be normalized with log2-transformed assay data.
-#' @return An normalized SummerizedExperiment object.
+#' @param data SummarizedExperiment, Data object which will be normalized with log2-transformed assay data.
+#' @return An normalized SummarizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -198,28 +207,14 @@ norm_vsn <- function(data) {
   return(data_vsn)
 }
 
-#####
-
-# function to obtain a MSnSet object from a SummarizedExperiment object
-se2msn <- function(data) {
-  raw <- assay(data)
-  feat_data <- data.frame(rowData(data))
-  rownames(feat_data) <- feat_data$name
-  pheno_data <- data.frame(colData(data))
-  msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
-                         pData = Biobase::AnnotatedDataFrame(pheno_data),
-                         fData = Biobase::AnnotatedDataFrame(feat_data))
-  return(msn)
-}
-
-#' Impute missing values
+#' Imputation by random draws from a manually defined distribution
 #'
-#' \code{imputation} imputes missing values based on \code{\link[MSnbase]{impute}}.
+#' \code{manual_impute} missing values in a Summarized
 #'
-#' @param data SummerizedExperiment, Data object for which missing values will be imputed.
-#' @param fun "man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link[MSnbase]{impute}}.
-#' @param ... Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link[MSnbase]{impute}}.
-#' @return An imputed SummerizedExperiment object.
+#' @param data SummarizedExperiment, Data object for which missing values will be imputed.
+#' @param shift Integer
+#' @param scale Integer
+#' @return An imputed SummarizedExperiment object.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -231,13 +226,86 @@ se2msn <- function(data) {
 #' example_filter <- filter_missval(example_se, thr = 0)
 #' example_vsn <- norm_vsn(example_filter)
 #'
-#' example_impute_MinProb <- imputation(example_filter, fun = "MinProb", q = 0.05)
-#' example_impute_QRILC <- imputation(example_filter, fun = "QRILC")
+#' example_impute_manual <- imputation(example_vsn, fun = "man", shift = 1.8, scale = 0.3)
+#' @export
+manual_impute <- function(data, scale = 0.3, shift = 1.8) {
+  if (is.integer(scale)) scale <- is.numeric(scale)
+  if (is.integer(shift)) shift <- is.numeric(shift)
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"), is.numeric(scale), is.numeric(shift))
+
+  # Get descriptive parameters of the current sample distributions
+  stat <- assay(data) %>% data.frame() %>% rownames_to_column(.) %>% gather(samples, value, 2:ncol(.)) %>%
+    filter(!is.na(value))  %>% group_by(samples) %>%
+    summarise(mean = mean(value), median = median(value), sd = sd(value), n = n(), infin = nrow(assay(data))-n)
+  # Impute missing values by random draws from a distribution
+  # which is left-shifted by parameters 'shift' * sd and scaled by parameter 'scale' * sd.
+  for(a in 1:nrow(stat)) {
+    assay(data)[is.na(assay(data)[,stat$samples[a]]),stat$samples[a]] <-
+      rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
+  }
+  return(data)
+}
+
+#' Obtain a MSnSet object from a SummarizedExperiment object
 #'
-#' example_impute_knn <- imputation(example_filter, fun = "knn", k = 10, rowmax = 0.9)
-#' example_impute_MLE <- imputation(example_filter, fun = "MLE")
+#' \code{se2msn} generats a MSnSet object from a SummarizedExperiment object
 #'
-#' example_impute_manual <- imputation(example_filter, fun = "man", shift = 1.8, scale = 0.3)
+#' @param data SummarizedExperiment, Data object which will be turned into a MSnSet object.
+#' @return A MSnSet object.
+#' @examples
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' columns <- grep("LFQ.", colnames(example_unique))
+#' exp_design <- UbiLength_ExpDesign
+#' example_se <- make_se(example_unique, columns, exp_design)
+#'
+#' example_MSnSet <- se2msn(example_se)
+#' @export
+se2msn <- function(data) {
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
+
+  # Extract expression, feature and pheno data
+  raw <- assay(data)
+  feat_data <- data.frame(rowData(data))
+  rownames(feat_data) <- feat_data$name
+  pheno_data <- data.frame(colData(data))
+
+  # Generate MSnSet object
+  msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
+                         pData = Biobase::AnnotatedDataFrame(pheno_data),
+                         fData = Biobase::AnnotatedDataFrame(feat_data))
+  return(msn)
+}
+
+#' Impute missing values
+#'
+#' \code{imputation} imputes missing values based on \code{\link[MSnbase]{impute}}.
+#'
+#' @param data SummarizedExperiment, Data object for which missing values will be imputed.
+#' @param fun "man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link[MSnbase]{impute}}.
+#' @param ... Additional arguments for imputation functions as depicted in \code{\link{manual_impute}} \code{\link[MSnbase]{impute}}.
+#' @return An imputed SummarizedExperiment object.
+#' @examples
+#' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
+#' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' columns <- grep("LFQ.", colnames(example_unique))
+#' exp_design <- UbiLength_ExpDesign
+#' example_se <- make_se(example_unique, columns, exp_design)
+#'
+#' example_filter <- filter_missval(example_se, thr = 0)
+#' example_vsn <- norm_vsn(example_filter)
+#'
+#' example_impute_MinProb <- imputation(example_vsn, fun = "MinProb", q = 0.05)
+#' example_impute_QRILC <- imputation(example_vsn, fun = "QRILC")
+#'
+#' example_impute_knn <- imputation(example_vsn, fun = "knn", k = 10, rowmax = 0.9)
+#' example_impute_MLE <- imputation(example_vsn, fun = "MLE")
+#'
+#' example_impute_manual <- imputation(example_vsn, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
 imputation <- function(data, fun, ...) {
   # Show error if inputs are not the required classes
@@ -247,20 +315,8 @@ imputation <- function(data, fun, ...) {
   if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
     stop("'name' and/or 'ID' columns are not present in data (rowData);\nRun data_unique() and make_se() (or make_se_parse()) to obtain the required data", call. = FALSE)
   }
-
-  # function for imputation by random draws from a manually defined distribution
-  manual_impute <- function(data, scale = 0.3, shift = 1.8) {
-    # Get descriptive parameters of the current sample distributions
-    stat <- assay(data) %>% data.frame() %>% rownames_to_column(.) %>% gather(samples, value, 2:ncol(.)) %>%
-      filter(!is.na(value))  %>% group_by(samples) %>%
-      summarise(mean = mean(value), median = median(value), sd = sd(value), n = n(), infin = nrow(assay(data))-n)
-    # Impute missing values by random draws from a distribution
-    # which is left-shifted by parameters 'shift' * sd and scaled by parameter 'scale' * sd.
-    for(a in 1:nrow(stat)) {
-      assay(data)[is.na(assay(data)[,stat$samples[a]]),stat$samples[a]] <-
-        rnorm(stat$infin[a] , mean = stat$median[a] - shift * stat$sd[a], sd = stat$sd[a] * scale)
-    }
-    return(data)
+  if (!fun %in% c("man", MSnbase::imputeMethods())) {
+    stop(paste("run imputation() with a valid function;\nValid functionns are ", paste(c("man", MSnbase::imputeMethods()), collapse = "', '"), "", sep = "'"))
   }
 
   # if the "man" function is selected, use the manual impution method
@@ -280,10 +336,10 @@ imputation <- function(data, fun, ...) {
 #'
 #' \code{linear_model} performs a differential expression test based on linear models and empherical Bayes statistics (\code{\link[limma]{limma}}).
 #'
-#' @param data SummerizedExperiment, Data object for which the variance will be analyzed.
+#' @param data SummarizedExperiment, Data object for which the variance will be analyzed.
 #' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
 #' @param type all" or "control" The type of contrasts that will be generated.
-#' @return An SummerizedExperiment object containing FDR estimates of differential expression.
+#' @return An SummarizedExperiment object containing FDR estimates of differential expression.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -374,10 +430,10 @@ linear_model <- function(data, control, type) {
 #'
 #' \code{anova_tukey} performs an Analysis of Variance fit (\code{\link[stats]{aov}}) and subsequent Tukey Honest Significant Differences analysis (\code{\link[stats]{TukeyHSD}}).
 #'
-#' @param data SummerizedExperiment, Data object for which the variance will be analyzed.
+#' @param data SummarizedExperiment, Data object for which the variance will be analyzed.
 #' @param control Character, The condition to which the contrasts are generated (the control would be most appropriate).
 #' @param type all" or "control" The type of contrasts that will be generated.
-#' @return An SummerizedExperiment object containing FDR estimates of differential expression.
+#' @return An SummarizedExperiment object containing FDR estimates of differential expression.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -457,10 +513,10 @@ anova_tukey <- function(data, control, type) {
 #'
 #' \code{cutoffs} denotes significant proteins based on defined cutoffs.
 #'
-#' @param data SummerizedExperiment, Data object which will be filtered for significant proteins.
+#' @param data SummarizedExperiment, Data object which will be filtered for significant proteins.
 #' @param alpha Integer, sets the threshold for the false discovery rate (FDR).
 #' @param lfc Integer, sets the threshold for the log fold change (lfc).
-#' @return An SummerizedExperiment object containing a variable "sign" denoting the significant proteins.
+#' @return An SummarizedExperiment object containing a variable "sign" denoting the significant proteins.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")
 #' example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
@@ -515,9 +571,9 @@ cutoffs <- function(data, alpha = 0.05, lfc = 1) {
 
 #' Generate a results table
 #'
-#' \code{results} generates a results table (data.frame) from a SummerizedExperiment object which has been generated by \code{\link{linear_model}} followed by \code{\link{cutoffs}}.
+#' \code{results} generates a results table (data.frame) from a SummarizedExperiment object which has been generated by \code{\link{linear_model}} followed by \code{\link{cutoffs}}.
 #'
-#' @param data SummerizedExperiment, Data object which has been generated by \code{\link{linear_model}} and \code{\link{cutoffs}}.
+#' @param data SummarizedExperiment, Data object which has been generated by \code{\link{linear_model}} and \code{\link{cutoffs}}.
 #' @return An data.frame object containing all results variables from the performed analysis.
 #' @examples
 #' example <- UbiLength %>% filter(Reverse != "+", Potential.contaminant != "+")

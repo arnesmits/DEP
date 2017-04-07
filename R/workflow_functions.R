@@ -147,7 +147,7 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
 #'
 #' \code{report} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 #'
-#' @param results List of SummerizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.
+#' @param results List of SummarizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.
 #' @return A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 #' @examples
 #' \dontrun{
@@ -191,7 +191,7 @@ report <- function(results) {
 #'
 #' \code{iBAQ} is a wrapper function running the entire analysis workflow for stoichiometry analysis using intensity-based absolute quantification (iBAQ)-based proteomics data.
 #'
-#' @param results List of SummerizedExperiments obtained from \code{\link{LFQ}} function.
+#' @param results List of SummarizedExperiments obtained from \code{\link{LFQ}} function.
 #' @param peptides Data.frame, Peptide table from MaxQuant ("peptides.txt").
 #' @param contrast Character, The specific contrast to calculate the stroichiometry for.
 #' @param bait Character, The name of the protein to which all other proteins will be scaled for the relative stoichiometry

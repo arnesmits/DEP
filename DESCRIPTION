@@ -24,7 +24,8 @@ Imports: magrittr,
     DT,
     rmarkdown,
     SummarizedExperiment,
-    assertthat
+    assertthat,
+    gridExtra
 RoxygenNote: 6.0.1
 Suggests: knitr,
     BiocStyle,

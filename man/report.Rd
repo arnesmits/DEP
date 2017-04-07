@@ -7,7 +7,7 @@
 report(results)
 }
 \arguments{
-\item{results}{List of SummerizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.}
+\item{results}{List of SummarizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.}
 }
 \value{
 A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.

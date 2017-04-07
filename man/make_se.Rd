@@ -2,22 +2,22 @@
 % Please edit documentation in R/functions.R
 \name{make_se}
 \alias{make_se}
-\title{Data.frame to SummerizedExperiment using an experimental design}
+\title{Data.frame to SummarizedExperiment using an experimental design}
 \usage{
 make_se(data, columns, expdesign)
 }
 \arguments{
-\item{data}{Data.frame, Data object which will be turned into a SummerizedExperiment}
+\item{data}{Data.frame, Data object which will be turned into a SummarizedExperiment}
 
 \item{columns}{Vector of integers, Number of the columns that contain the assay data.}
 
 \item{expdesign}{Data.frame, Experimental design object containing 'label', 'condition' and 'replicate' information}
 }
 \value{
-A SummerizedExperiment object.
+A SummarizedExperiment object.
 }
 \description{
-\code{make_se} creates a SummerizedExperiment object based on two data.frames: the data and experimental design.
+\code{make_se} creates a SummarizedExperiment object based on two data.frames: the data and experimental design.
 }
 \examples{
 example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")

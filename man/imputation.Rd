@@ -7,14 +7,14 @@
 imputation(data, fun, ...)
 }
 \arguments{
-\item{data}{SummerizedExperiment, Data object for which missing values will be imputed.}
+\item{data}{SummarizedExperiment, Data object for which missing values will be imputed.}
 
 \item{fun}{"man", "QRILC", "MinDet", "MinProb", "min", "zero", "MLE", "bpca" or "knn", Function used for data imputation based on \code{\link[MSnbase]{impute}}.}
 
-\item{...}{Additional arguments for "man" (scale and shift) or for other functions as depicted in \code{\link[MSnbase]{impute}}.}
+\item{...}{Additional arguments for imputation functions as depicted in \code{\link{manual_impute}} \code{\link[MSnbase]{impute}}.}
 }
 \value{
-An imputed SummerizedExperiment object.
+An imputed SummarizedExperiment object.
 }
 \description{
 \code{imputation} imputes missing values based on \code{\link[MSnbase]{impute}}.
@@ -30,11 +30,11 @@ example_se <- make_se(example_unique, columns, exp_design)
 example_filter <- filter_missval(example_se, thr = 0)
 example_vsn <- norm_vsn(example_filter)
 
-example_impute_MinProb <- imputation(example_filter, fun = "MinProb", q = 0.05)
-example_impute_QRILC <- imputation(example_filter, fun = "QRILC")
+example_impute_MinProb <- imputation(example_vsn, fun = "MinProb", q = 0.05)
+example_impute_QRILC <- imputation(example_vsn, fun = "QRILC")
 
-example_impute_knn <- imputation(example_filter, fun = "knn", k = 10, rowmax = 0.9)
-example_impute_MLE <- imputation(example_filter, fun = "MLE")
+example_impute_knn <- imputation(example_vsn, fun = "knn", k = 10, rowmax = 0.9)
+example_impute_MLE <- imputation(example_vsn, fun = "MLE")
 
-example_impute_manual <- imputation(example_filter, fun = "man", shift = 1.8, scale = 0.3)
+example_impute_manual <- imputation(example_vsn, fun = "man", shift = 1.8, scale = 0.3)
 }
