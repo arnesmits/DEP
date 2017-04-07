@@ -1,8 +1,10 @@
-context("2 - Missing values filtering, data normalization and missing values imputation")
+context("2 - Missing values filtering and data normalization")
 
 test_that("filter_missval throws error without valid input", {
   expect_error(filter_missval("test_se", 0))
   expect_error(filter_missval(test_se, "0"))
+  expect_error(filter_missval(test_se, 4))
+  expect_error(filter_missval(test_se, -1))
 })
 
 test_that("filter_missval returns a SummarizedExperiment", {
@@ -12,5 +14,13 @@ test_that("filter_missval returns a SummarizedExperiment", {
 test_that("filter_missval returns correct number of rows", {
   expect_equal(filter_missval(test_se, 0) %>% nrow(), 203)
   expect_equal(filter_missval(test_se, 1) %>% nrow(), 243)
-  expect_equal(filter_missval(test_se, 2) %>% nrow(), 293)
+  expect_equal(filter_missval(test_se, 2) %>% nrow(), 393)
+})
+
+test_that("norm_vsn throws error without valid input", {
+  expect_error(norm_vsn("test_filter"))
+})
+
+test_that("norm_vsn returns a SummarizedExperiment", {
+  expect_is(norm_vsn(test_filter), "SummarizedExperiment")
 })
