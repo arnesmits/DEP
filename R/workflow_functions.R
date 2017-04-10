@@ -185,6 +185,8 @@ report <- function(results) {
 
   # Save the results table in a tab-delimited txt file
   write.table(table, paste(wd, "results.txt", sep = "/"), row.names = FALSE, sep = "\t")
+
+  cat(paste0("Report and results.txt file saved in: '", wd, "'"))
 }
 
 #' iBAQ workflow

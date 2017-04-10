@@ -150,8 +150,8 @@ stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
   if (any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in data", call. = FALSE)
   }
-  if (length(grep("_sign|_diff", colnames(row_data))) < 1) {
-    stop("'[contrast]_sign' and/or '[contrast]_diff' columns are not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
+  if (length(grep("_sign|_diff|_sign", colnames(row_data))) < 1) {
+    stop("'[contrast]_sign', '[contrast]_diff' and/or '[contrast]_sign' columns are not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
   }
   if (length(grep("iBAQ.", colnames(ibaq))) < 1) {
     stop("'iBAQ' columns are not present in ibaq", call. = FALSE)
@@ -247,6 +247,10 @@ plot_stoi <- function(data, thr = 0.01, max_y = NULL) {
   # Show error if inputs are not the required classes
   if(is.integer(thr)) thr <- as.numeric(thr)
   assertthat::assert_that(is.data.frame(data), is.numeric(thr))
+  if(!is.null(max_y)) {
+    if(is.integer(max_y)) max_y <- as.numeric(max_y)
+    assertthat::assert_that(is.numeric(max_y))
+  }
 
   if (any(!c("name", "condition", "stoichiometry", "sd") %in% colnames(data))) {
     stop("'name', 'condition', 'stoichiometry' and/or 'sd' columns are not present in data;\nRun stoichiometry() to obtain required data", call. = FALSE)

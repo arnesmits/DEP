@@ -35,6 +35,9 @@ plot_single <- function(data, protein, type) {
   if (length(grep("_p.adj|_diff", colnames(rowData(data)))) < 1) {
     stop("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in data;\nRun linear_model() followed by cutoffs() to obtain the required data", call. = FALSE)
   }
+  if (!"name" %in% colnames(rowData(data))) {
+    stop("'name' column not present in data", call. = FALSE)
+  }
   # Show error if an unvalid type is given
   if (!type %in% c("centered", "contrast")) {
     stop("Not a valid type, run plot_single() with a valid type\nValid types are: 'centered', 'contrast'", call. = FALSE)
@@ -378,10 +381,10 @@ plot_detect <- function(data) {
   # Plot the densities and cumalitive fractions for proteins with and without missing values
   p1 <- ggplot(stat, aes(mean, col = missval)) + geom_density(na.rm = TRUE) + theme_bw() + labs(x = "Log2 Intensity", y = "Density") +
     theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="Proteins with missing values"))
+          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="missing values"))
   p2 <- ggplot(cumsum, aes(mean, cs_frac, col = missval)) + geom_line() + theme_bw() + labs(x = "Log2 Intensity", y = "Cumulative fraction") +
     theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="Proteins with missing values"))
+          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="Pmissing values"))
   gridExtra::grid.arrange(p1, p2, ncol = 1)
 }
 

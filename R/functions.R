@@ -316,7 +316,7 @@ imputation <- function(data, fun, ...) {
     stop("'name' and/or 'ID' columns are not present in data (rowData);\nRun data_unique() and make_se() (or make_se_parse()) to obtain the required data", call. = FALSE)
   }
   if (!fun %in% c("man", MSnbase::imputeMethods())) {
-    stop(paste("run imputation() with a valid function;\nValid functionns are ", paste(c("man", MSnbase::imputeMethods()), collapse = "', '"), "", sep = "'"))
+    stop(paste("run imputation() with a valid function;\nValid functions are ", paste(c("man", MSnbase::imputeMethods()), collapse = "', '"), "", sep = "'"))
   }
 
   # if the "man" function is selected, use the manual impution method
