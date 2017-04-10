@@ -27,10 +27,15 @@ test_that("imputation throws error without valid input", {
   expect_error(imputation("test_vsn", "MinProb"))
   expect_error(imputation(test_vsn, MinProb))
   expect_error(imputation(test_vsn, "FOO"))
+
+  test_vsn_error <- test_vsn
+  SummarizedExperiment::rowData(test_vsn_error) <- SummarizedExperiment::rowData(test_vsn_error)[,-(24:25)]
+  expect_error(imputation(test_vsn_error, "MinProb"))
 })
 
 test_that("imputation returns a MSnSet object", {
   expect_is(imputation(test_vsn, "MinProb"), "SummarizedExperiment")
+  expect_is(imputation(test_vsn, "man"), "SummarizedExperiment")
 })
 
 test_that("linear_model returns an object without missing values", {

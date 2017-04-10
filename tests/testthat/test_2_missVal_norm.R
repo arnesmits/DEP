@@ -5,6 +5,14 @@ test_that("filter_missval throws error without valid input", {
   expect_error(filter_missval(test_se, "0"))
   expect_error(filter_missval(test_se, 4))
   expect_error(filter_missval(test_se, -1))
+
+  test_se_error <- test_se
+  SummarizedExperiment::rowData(test_se_error) <- SummarizedExperiment::rowData(test_se_error)[,-(24:25)]
+  expect_error(filter_missval(test_se_error, 0))
+
+  test_se_error2 <- test_se
+  SummarizedExperiment::colData(test_se_error2) <- SummarizedExperiment::colData(test_se_error2)[,-(3)]
+  expect_error(filter_missval(test_se_error2, 0))
 })
 
 test_that("filter_missval returns a SummarizedExperiment", {

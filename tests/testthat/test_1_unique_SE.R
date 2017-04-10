@@ -18,6 +18,7 @@ test_that("make_se_parse trows error without valid input", {
   expect_error(make_se_parse("test_unique", 21:32))
   expect_error(make_se_parse(test_unique, "21:32"))
   expect_error(make_se_parse(test_unique, 1:10))
+  expect_error(make_se_parse(test_unique[,-(36:37)], 21:32))
 })
 
 test_that("make_se_parse returns a SummarizedExperiment", {
@@ -25,10 +26,13 @@ test_that("make_se_parse returns a SummarizedExperiment", {
 })
 
 test_that("make_se trows error without valid input", {
-  expect_error(make_se_parse("test_unique", 21:32, UbiLength_ExpDesign))
-  expect_error(make_se_parse(test_unique, "21:32", UbiLength_ExpDesign))
-  expect_error(make_se_parse("test_unique", 21:32, "UbiLength_ExpDesign"))
-  expect_error(make_se_parse(test_unique, 1:10, UbiLength_ExpDesign))
+  expect_error(make_se("test_unique", 21:32, UbiLength_ExpDesign))
+  expect_error(make_se(test_unique, "21:32", UbiLength_ExpDesign))
+  expect_error(make_se("test_unique", 21:32, "UbiLength_ExpDesign"))
+
+  expect_error(make_se(test_unique, 1:10, UbiLength_ExpDesign))
+  expect_error(make_se(test_unique[,-(36:37)], 21:32, UbiLength_ExpDesign))
+  expect_error(make_se(test_unique, 21:32, UbiLength_ExpDesign[,-(2)]))
 })
 
 test_that("make_se returns a SummarizedExperiment", {
