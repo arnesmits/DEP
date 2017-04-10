@@ -1,10 +1,10 @@
 ---
-title: "Introduction to the proteomeR package"
+title: "proteomeR package"
 author: "Arne Smits"
 date: "`r doc_date()`"
 package: "`r pkg_ver('proteomeR')`"
 vignette: >
-  %\VignetteIndexEntry{Introduction to the proteomeR package}
+  %\VignetteIndexEntry{proteomeR package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output:
@@ -39,7 +39,7 @@ library("proteomeR")
 
 The package contains two `r CRANpkg("shiny") ` apps, which allow for interactive analysis entailing the entire workflow described below.
 These are especially relevant for users with limited or no experience in R.
-Currently, there are two different apps The first for label-free quantification (LFQ)-based analysis (output from MaxQuant) and the second for tandem-mass-tags (TMT)-based analysis (output from IsobarQuant).
+Currently, there are three different apps. One for label-free quantification (LFQ)-based analysis (output from MaxQuant) and the second for tandem-mass-tags (TMT)-based analysis (output from IsobarQuant). The third app, is a extention of the LFQ-based analysis for iBAQ-based stoichiometry analysis.
 To run the apps, simply run this single command:
 
 ``` {r run_app, eval = FALSE}
@@ -203,24 +203,31 @@ plot_missval(data_filt)
 
 The example dataset is an affinity enrichment dataset of ubiquitin interactors, which is likely to have proteins which are below the detection limit in specific samples.
 These can be proteins that are specifically enriched in the ubiquitin purifications, but are not enriched in the controls samples, or vice versa.
-This expectation is also reflected in the missingness heatmap; missing values are highly biased to specific samples.  
+This expectation is also reflected in the missingness heatmap; missing values are highly biased to specific samples.
+To check whether missing values are biased to lower intense proteins, we visualize the densities and cumulative sums of proteins with and without missing values.   
+
+``` {r plot_detect, fig.height = 6, fig.width = 6}
+# Plot intensity distributions and cumulative fraction 
+# of proteins with and without missing values
+plot_detect(data_filt)
+```
 
 The imputation method to be used depends on the missingness pattern of the data (see the `r Biocpkg("MSnbase") ` vignette and more specifically the _impute_ function description for more information).
 Values which are missing not at random (MNAR) should be imputed by left-censored imputation method, such as the quantile regression-based left-consored function ("QRILC") or random draws from a left-shifted distribution "(MinProb"). In contrast, data missing at random (MAR) should be imputed with methods such as k-nearest neighbour ("knn") or maximum likelihood ("MLE") functions.  
 
-As the example data has values missing not at random, QRILC imputation is the method of choice.
+As the example data has left-censored missing values (missing not at random), 'MinProb' or 'QRILC' imputation are appropriate imputation methods.
 
 ``` {r impute, results = "hide", message = FALSE, warning = FALSE}
-# Impute missing data using random draws from a Gaussian distribution centered around a minimal value
-# (for data not missing at random)
+# Impute missing data using random draws from a Gaussian distribution centered around 
+# a minimal value (for data not missing at random)
 data_imp <- imputation(data_norm, fun = "MinProb", q = 0.01)
 
-# Impute missing data using a quantile regression-based left-censored imputation method (QRILC)
-# (for data not missing at random)
+# Impute missing data using the quantile regression-based left-censored 
+# imputation method (QRILC) (for data not missing at random)
 data_imp_QRILC <- imputation(data_norm, fun = "QRILC")
 
-# Impute missing data using radom drwas from a manually defined left-shifted Gaussian distribution
-# (for data not missing at random)
+# Impute missing data using radom drwas from a manually defined 
+# left-shifted Gaussian distribution (for data not missing at random)
 data_imp_man <- imputation(data_norm, fun = "man", shift = 1.8, scale = 0.3)
 
 # Impute missing data using the k-nearest neighbour approach
@@ -230,6 +237,13 @@ data_imp_knn <- imputation(data_norm, fun = "knn")
 # Impute missing data using the k-nearest neighbour approach
 #(for data missing at random)
 data_imp_MLE <- imputation(data_norm, fun = "MLE")
+```
+   
+The effect of the imputation on the distributions can be visualized.
+
+``` {r plot_imp, fig.width = 4, fig.height = 4}
+# Plot intensity distributions before and after imputation
+plot_imp(data_norm, data_imp)
 ```
 
 ## Differential enrichment analysis
@@ -499,7 +513,8 @@ expdesign <- GFPip_ExpDesign
 
 # The LFQ wrapper function performs the full differential analysis
 data_results <- LFQ(data, expdesign, fun = "MinProb", 
-      control = "WT", type = "control", alpha = 0.05, lfc = 4.5)
+      control = "WT", type = "control", 
+      filter = c("Reverse", "Contaminant"), alpha = 0.05, lfc = 4.5)
 
 # Plot volcano from LFQ results
 plot_volcano(data_results$sign, "GFP_vs_WT")

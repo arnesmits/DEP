@@ -384,7 +384,7 @@ plot_detect <- function(data) {
           legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="missing values"))
   p2 <- ggplot(cumsum, aes(mean, cs_frac, col = missval)) + geom_line() + theme_bw() + labs(x = "Log2 Intensity", y = "Cumulative fraction") +
     theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="Pmissing values"))
+          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="missing values"))
   gridExtra::grid.arrange(p1, p2, ncol = 1)
 }
 
