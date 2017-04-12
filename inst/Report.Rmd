@@ -6,6 +6,8 @@ output:
     toc: true
     toc_float: true
     theme: united
+  pdf_document:
+    toc: true
 ---
 
 ```{r setup, include=FALSE}
@@ -16,29 +18,44 @@ This report presents an overview of the proteomeR analysis.
 
 ## Summary
 
+Original file contains _`r nrow(data)`_ proteins groups, of which _`r nrow(sign)`_ proteins were reproducibly quantified.    
+
+In total _`r ncol(data)`_ samples were detected.
+
+<span style="color:blue">`r colnames(data)`</span>   
+   
+
+
 #### `r nrow(sign[rowData(sign)$sign == "+"])` proteins differ significantly between samples.
 
 Parameters used:  
 
-* adjusted p <= `r param$alpha`  
-* |logFC| >= `r param$lfc`
+* tested contrasts = <span style="color:blue">`r gsub("_p.adj", "", colnames(rowData(sign))[grep("p.adj", colnames(rowData(sign)))])`</span>  
+* adjusted p <= <span style="color:blue">`r param$alpha`</span>  
+* |logFC| >= <span style="color:blue">`r param$lfc`</span>  
 
+\pagebreak
 
-Original file contains _`r nrow(data)`_ proteins groups, of which _`r nrow(sign)`_ proteins were reproducibly quantified.  
-In total _`r ncol(data)`_ samples were detected.
+## Protein numbers
+
+Protein identifications per sample.
 
 ```{r,echo=FALSE}
 pg_width = ncol(filt) / 3
 if (pg_width > 10) { pg_width = 10 }
 ```
 
-```{r numbers, echo=FALSE, warning=FALSE, fig.width = pg_width}
+```{r numbers, echo=FALSE, warning=FALSE, fig.height = 4, fig.width = pg_width}
 plot_numbers(filt)
 ```
 
-```{r coverage, echo=FALSE, warning=FALSE, fig.width = 3}
+Proteins coverage in all samples.
+
+```{r coverage, echo=FALSE, warning=FALSE, fig.height = 4, fig.width = 3}
 plot_coverage(filt)
 ```
+
+\pagebreak
 
 ## Normalization
 
@@ -52,14 +69,27 @@ norm_height = ncol(filt) / 2
 plot_norm(filt, norm)
 ```
 
+\pagebreak
+
 ## Missing values
 
 A heatmap of missing values to asses the type of missing data (random or not).
-If data is randomly missing, use the "knn" option for imputation. If the missing data is biased to certain samples (e.g. controls) which are expected to be devoid of certain proteins, use the "QRILC", "MinProb" or "Perseus" options for imputation.
+If data is randomly missing, use the "knn" option for imputation. If the missing data is biased to certain samples (e.g. controls) which are expected to be devoid of certain proteins, use the "QRILC", "MinProb" or "man" options for imputation.
 
-```{r missval, echo=FALSE}
+
+```{r missval, echo=FALSE, fig.width = 5, fig.height = 5}
 plot_missval(norm)
 ```
+
+\pagebreak
+
+Quantitative information of proteins with and without missing values
+
+```{r missval2, echo=FALSE, fig.width = 5, fig.height = 5}
+plot_detect(norm)
+```
+
+\pagebreak
 
 ## Output plots of the data
 
@@ -69,17 +99,24 @@ len = nrow(sign[rowData(sign)$sign == "+"]) / 7
 if (len < 2) { len = 2 }
 ```
 
+```{r,echo=FALSE}
+df <- assay(sign[rowData(sign)$sign == "+"]) - rowMeans(assay(sign[rowData(sign)$sign == "+"]))
+col_lim <- quantile(df, probs= 0.95) - quantile(df, probs= 0.05)
+if (len < col_lim) { col_lim = 2 }
+```
+
 ```{r heatmap_1, echo=FALSE, fig.width = 5, fig.height = len}
-plot_heatmap(sign, "contrast", k = 6, col_limit = 8)
+plot_heatmap(sign, "contrast", k = 6, col_limit = (2 * col_lim))
 ```
 
 ```{r,echo=FALSE}
 width = ncol(filt) / 3
+if (width < 5) { width = 5 }
 if (width > 10) { width = 10 }
 ```
 
 ```{r heatmap_2, echo=FALSE, fig.width = width, fig.height = len}
-plot_heatmap(sign, "centered", k = 6, col_limit = 4)
+plot_heatmap(sign, "centered", k = 6, col_limit = col_lim)
 ```
 
 

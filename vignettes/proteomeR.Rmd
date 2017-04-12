@@ -18,6 +18,7 @@ library(magrittr)
 library(proteomeR)
 })
 ```
+\pagebreak
 
 # Overview of the analysis
 
@@ -55,7 +56,7 @@ run_app("iBAQ")
 
 # Differential analysis
 
-## Example dataset for differential enrichment analysis: Ubiquitin interactors
+## Example dataset: Ubiquitin interactors
 
 We analyze a proteomics dataset in which Ubiquitin-protein interactors were characterized ([Zhang et al. Mol Cell 2017](http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7)).
 The raw mass spectrometry data were first analyzed using MaxQuant ([Cox and Mann, Nat Biotech 2007](http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html)).
@@ -116,7 +117,7 @@ data_unique <- unique_names(data, "Gene.names", "Protein.IDs", delim = ";")
 data$name %>% duplicated(.) %>% any(.)
 ```
 
-## Generate an SummarizedExperiment object
+## Generate a SummarizedExperiment object
 
 Many [Bioconductor](http://www.bioconductor.org/) packages use SummarizedExperiment objects as input and/or output.
 This class of objects contains and coordinates the actual (assay) data, information on the samples as well as feature annotation.
@@ -130,7 +131,7 @@ knitr::kable(UbiLength_ExpDesign)
 ```
 
 ``` {r to_exprset}
-# Generate an SummarizedExperiment object with an experimental design
+# Generate an SummarizedExperiment object using an experimental design
 LFQ_columns <- grep("LFQ.", colnames(data_unique)) # get LFQ column numbers
 experimental_design <- UbiLength_ExpDesign
 data_se <- make_se(data_unique, LFQ_columns, experimental_design)
@@ -144,11 +145,11 @@ data_se
 
 ```
 
-## Filter for missing values
+## Filter on missing values
 
 The dataset contains proteins which are not quantified in all replicates. Some proteins are even only deteced in a single replicate.
 This leaves our dataset with missing values, which need to be imputed. However, this should not be done for proteins that contain too many missing values.
-Therefore, we first filter out proteins that contain to many missing values. This is done by setting the threshold for the allowed number of missing values per condition in the _filter_missval_ function.
+Therefore, we first filter out proteins that contain too many missing values. This is done by setting the threshold for the allowed number of missing values per condition in the _filter_missval_ function.
 
 ``` {r filter_missval}
 # Filter for proteins that are identified in all replicates of at least one condition
@@ -186,7 +187,7 @@ The normalization can be inspected by checking the distributions of the samples 
 plot_norm(data_filt, data_norm)
 ```
 
-## Imputate data for missing values
+## Impute data for missing values
 
 The remaining missing values in the dataset need to be imputed.
 The data can be missing at random (MAR), for example if proteins are quantified in some replicates but not in others,
@@ -217,16 +218,15 @@ Values which are missing not at random (MNAR) should be imputed by left-censored
 
 As the example data has left-censored missing values (missing not at random), 'MinProb' or 'QRILC' imputation are appropriate imputation methods.
 
-``` {r impute, results = "hide", message = FALSE, warning = FALSE}
+``` {r impute, results = "hide", message = FALSE, warning = FALSE, error = TRUE}
+# All possible imputation methods are printed in an erro, if an invalid function name is given.
+imputation(data_norm, fun = "")
+
 # Impute missing data using random draws from a Gaussian distribution centered around 
 # a minimal value (for data not missing at random)
 data_imp <- imputation(data_norm, fun = "MinProb", q = 0.01)
 
-# Impute missing data using the quantile regression-based left-censored 
-# imputation method (QRILC) (for data not missing at random)
-data_imp_QRILC <- imputation(data_norm, fun = "QRILC")
-
-# Impute missing data using radom drwas from a manually defined 
+# Impute missing data using random draws from a manually defined 
 # left-shifted Gaussian distribution (for data not missing at random)
 data_imp_man <- imputation(data_norm, fun = "man", shift = 1.8, scale = 0.3)
 
@@ -234,21 +234,18 @@ data_imp_man <- imputation(data_norm, fun = "man", shift = 1.8, scale = 0.3)
 # (for data missing at random)
 data_imp_knn <- imputation(data_norm, fun = "knn")
 
-# Impute missing data using the k-nearest neighbour approach
-#(for data missing at random)
-data_imp_MLE <- imputation(data_norm, fun = "MLE")
 ```
    
 The effect of the imputation on the distributions can be visualized.
 
-``` {r plot_imp, fig.width = 4, fig.height = 4}
+``` {r plot_imp, fig.width = 5, fig.height = 5}
 # Plot intensity distributions before and after imputation
 plot_imp(data_norm, data_imp)
 ```
 
 ## Differential enrichment analysis
 
-Linear models combined with empherical Bayes statistics is used for the analysis of differential enrichment (or differential expression for analysis on expression levels).
+Protein-wise linear models combined with empherical Bayes statistics are used for the differential enrichment analysis (or differential expression for analysis on expression levels).
 The _linear_model_ wrapper function introduced here uses `r Biocpkg("limma") ` and automatically generates the contrasts to be tested.
 For the contrasts generation, the control sample has to be specified.
 Additionally, the types of contrasts to be produced need to be indicated, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control ("control").
@@ -259,7 +256,7 @@ Additionally, the types of contrasts to be produced need to be indicated, allowi
 data_lm <- linear_model(data_imp, control = "Ctrl", type = "control")
 
 # Test all possible comparisons of samples
-data_lm_all_contrasts <- linear_model(data_imp_QRILC, control = "Ctrl", type = "all")
+data_lm_all_contrasts <- linear_model(data_imp, control = "Ctrl", type = "all")
 ```
 
 An ANOVA and post-hoc Tukey Honest Significant Differences analysis is also implemented, although the use of _linear_models_ based on `r Biocpkg("limma") ` is recommended.
