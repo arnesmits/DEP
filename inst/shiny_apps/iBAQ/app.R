@@ -12,7 +12,7 @@ library(SummarizedExperiment)
 library(limma)
 library(vsn)
 library(fdrtool)
-library(proteomeR)
+library(DEP)
 library(shiny)
 library(shinydashboard)
 

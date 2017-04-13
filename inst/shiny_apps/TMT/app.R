@@ -12,13 +12,13 @@ library(SummarizedExperiment)
 library(limma)
 library(vsn)
 library(fdrtool)
-library(proteomeR)
+library(DEP)
 library(shiny)
 library(shinydashboard)
 
 ui <- shinyUI(
   dashboardPage(
-    dashboardHeader(title = "DEP - LFQ"),
+    dashboardHeader(title = "DEP - TMT"),
     dashboardSidebar(
       sidebarMenu(
         menuItem("Files", selected = TRUE,
