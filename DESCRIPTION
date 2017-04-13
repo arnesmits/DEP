@@ -29,5 +29,6 @@ Imports: magrittr,
 RoxygenNote: 6.0.1
 Suggests: knitr,
     BiocStyle,
-    testthat
+    testthat,
+    rmarkdown
 VignetteBuilder: knitr
