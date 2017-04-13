@@ -1,5 +1,5 @@
 ---
-title: "proteomeR report"
+title: "DEP report"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
   html_document:
@@ -14,7 +14,7 @@ output:
 knitr::opts_chunk$set(dev = 'pdf')
 ```
 
-This report presents an overview of the proteomeR analysis.
+This report presents an overview of the DEP analysis.
 
 ## Summary
 

@@ -18,7 +18,7 @@ library(shinydashboard)
 
 ui <- shinyUI(
   dashboardPage(
-    dashboardHeader(title = "proteomeR - LFQ"),
+    dashboardHeader(title = "DEP - LFQ"),
     dashboardSidebar(
       sidebarMenu(
         menuItem("Files", selected = TRUE,

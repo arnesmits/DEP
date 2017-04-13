@@ -1,13 +1,13 @@
-#' proteomeR: A package for integrative analysis of proteomics data.
+#' DEP: A package for Differential Enrichment analysis of Proteomics data.
 #'
-#' The proteomeR package provides all functionalities to analyze label free quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
+#' The DEP package provides all functionalities to analyze label free protein quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
 #'
-#' @section proteomeR shiny apps:
+#' @section DEP shiny apps:
 #' \itemize{
 #'   \item \code{\link{run_app}}: Shiny apps for interactive analysis
 #' }
 #'
-#' @section proteomeR workflows:
+#' @section DEP workflows:
 #' \itemize{
 #'   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
 #'   \item \code{\link{TMT}}: Tandem-mass-tags (TMT) workflow
@@ -15,7 +15,7 @@
 #'   \item \code{\link{iBAQ}}: iBAQ-based stoichiometry workflow
 #' }
 #'
-#' @section proteomeR functions:
+#' @section DEP functions:
 #' \itemize{
 #'   \item \code{\link{unique_names}}: Generate unique names
 #'   \item \code{\link{make_se_parse}}: Turn data.frame into SummarizedExperiment by parsing column names
@@ -29,7 +29,7 @@
 #'   \item \code{\link{results}}: Generate a results table
 #' }
 #'
-#' @section proteomeR visualization functions:
+#' @section DEP visualization functions:
 #' \itemize{
 #'   \item \code{\link{plot_single}}: Barplot for a protein of interest
 #'   \item \code{\link{plot_volcano}}: Volcano plot for a specified contrast
@@ -43,7 +43,7 @@
 #'   \item \code{\link{plot_coverage}}: Barplot of the protein coverage in conditions
 #' }
 #'
-#' @section proteomeR iBAQ functions:
+#' @section DEP iBAQ functions:
 #' \itemize{
 #'   \item \code{\link{ibaq_merge}}: Merge iBAQ intensities of protein groups based on shared peptides
 #'   \item \code{\link{stoichiometry}}: Calculate relative stoichiometry of all significant proteins
@@ -51,7 +51,7 @@
 #' }
 #'
 #' @docType package
-#' @name proteomeR
+#' @name DEP
 #'
 #'
 #' @import ComplexHeatmap limma magrittr tidyverse grid SummarizedExperiment assertthat

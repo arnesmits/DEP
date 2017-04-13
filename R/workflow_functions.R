@@ -180,7 +180,7 @@ report <- function(results) {
   # Render the Rmarkdown report
   wd <- paste(getwd(), "/Report", sep = "")
   dir.create(wd)
-  file <- paste(system.file(package = "proteomeR"), "/Report.Rmd", sep = "")
+  file <- paste(system.file(package = "DEP"), "/Report.Rmd", sep = "")
   rmarkdown::render(file, output_format = "all", output_dir = wd, quiet = T)
 
   # Save the results table in a tab-delimited txt file

@@ -1,6 +1,6 @@
-Package: proteomeR
-Title: Integrative analysis of proteomics data
-Version: 1.1.2
+Package: DEP
+Title: Differential Enrichment analysis of Proteomics data
+Version: 1.0.0
 Authors@R: person("Arne", "Smits", email = "arne.smits@embl.de", role = c("aut", "cre"))
 Description: This analysis workflow provides an integrated solution for robust and reproducible analysis of proteomics data.
 License: Artistic-2.0

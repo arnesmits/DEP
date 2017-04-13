@@ -1,4 +1,4 @@
-#' proteomeR shiny apps
+#' DEP shiny apps
 #'
 #' \code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
 #'
@@ -16,7 +16,7 @@
 #' @export
 run_app <- function(app) {
   # Locate all the shiny apps that exist
-  valid_apps <- list.files(system.file("shiny_apps", package = "proteomeR"))
+  valid_apps <- list.files(system.file("shiny_apps", package = "DEP"))
 
   valid_apps_msg <-
     paste0(
@@ -33,6 +33,6 @@ run_app <- function(app) {
   }
 
   # Launch the app
-  appDir <- system.file("shiny_apps", app, package = "proteomeR")
+  appDir <- system.file("shiny_apps", app, package = "DEP")
   suppressWarnings(shiny::runApp(appDir, display.mode = "normal"))
 }
