@@ -8,14 +8,14 @@
 \description{
 The DEP package provides all functionalities to analyze label free protein quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
 }
-\section{DEP shiny apps}{
+\section{Shiny apps}{
 
 \itemize{
   \item \code{\link{run_app}}: Shiny apps for interactive analysis
 }
 }
 
-\section{DEP workflows}{
+\section{Workflows}{
 
 \itemize{
   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
@@ -25,7 +25,7 @@ The DEP package provides all functionalities to analyze label free protein quant
 }
 }
 
-\section{DEP functions}{
+\section{Functions}{
 
 \itemize{
   \item \code{\link{unique_names}}: Generate unique names
@@ -41,7 +41,7 @@ The DEP package provides all functionalities to analyze label free protein quant
 }
 }
 
-\section{DEP visualization functions}{
+\section{Visualization functions}{
 
 \itemize{
   \item \code{\link{plot_single}}: Barplot for a protein of interest
@@ -57,7 +57,7 @@ The DEP package provides all functionalities to analyze label free protein quant
 }
 }
 
-\section{DEP iBAQ functions}{
+\section{iBAQ functions}{
 
 \itemize{
   \item \code{\link{ibaq_merge}}: Merge iBAQ intensities of protein groups based on shared peptides

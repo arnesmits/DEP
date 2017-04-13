@@ -2,12 +2,12 @@
 #'
 #' The DEP package provides all functionalities to analyze label free protein quantification (LFQ) and tandem-mass-tags (TMT) labeled proteomics data
 #'
-#' @section DEP shiny apps:
+#' @section Shiny apps:
 #' \itemize{
 #'   \item \code{\link{run_app}}: Shiny apps for interactive analysis
 #' }
 #'
-#' @section DEP workflows:
+#' @section Workflows:
 #' \itemize{
 #'   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
 #'   \item \code{\link{TMT}}: Tandem-mass-tags (TMT) workflow
@@ -15,7 +15,7 @@
 #'   \item \code{\link{iBAQ}}: iBAQ-based stoichiometry workflow
 #' }
 #'
-#' @section DEP functions:
+#' @section Functions:
 #' \itemize{
 #'   \item \code{\link{unique_names}}: Generate unique names
 #'   \item \code{\link{make_se_parse}}: Turn data.frame into SummarizedExperiment by parsing column names
@@ -29,7 +29,7 @@
 #'   \item \code{\link{results}}: Generate a results table
 #' }
 #'
-#' @section DEP visualization functions:
+#' @section Visualization functions:
 #' \itemize{
 #'   \item \code{\link{plot_single}}: Barplot for a protein of interest
 #'   \item \code{\link{plot_volcano}}: Volcano plot for a specified contrast
@@ -43,7 +43,7 @@
 #'   \item \code{\link{plot_coverage}}: Barplot of the protein coverage in conditions
 #' }
 #'
-#' @section DEP iBAQ functions:
+#' @section iBAQ functions:
 #' \itemize{
 #'   \item \code{\link{ibaq_merge}}: Merge iBAQ intensities of protein groups based on shared peptides
 #'   \item \code{\link{stoichiometry}}: Calculate relative stoichiometry of all significant proteins

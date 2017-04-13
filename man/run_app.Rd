@@ -2,7 +2,7 @@
 % Please edit documentation in R/run_app_function.R
 \name{run_app}
 \alias{run_app}
-\title{proteomeR shiny apps}
+\title{DEP shiny apps}
 \usage{
 run_app(app)
 }
