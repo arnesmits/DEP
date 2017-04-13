@@ -2,7 +2,6 @@
 
 export(LFQ)
 export(TMT)
-export(anova_tukey)
 export(cutoffs)
 export(filter_missval)
 export(iBAQ)

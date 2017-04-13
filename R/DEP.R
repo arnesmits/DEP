@@ -23,8 +23,7 @@
 #'   \item \code{\link{filter_missval}}: Filter on missing values
 #'   \item \code{\link{norm_vsn}}: Normalize data using vsn
 #'   \item \code{\link{imputation}}: Impute missing values
-#'   \item \code{\link{linear_model}}: Differential expression analysis (limma)
-#'   \item \code{\link{anova_tukey}}: Differential expression analysis (anova - tukey)
+#'   \item \code{\link{linear_model}}: Differential expression analysis
 #'   \item \code{\link{cutoffs}}: Denote significant proteins
 #'   \item \code{\link{results}}: Generate a results table
 #' }

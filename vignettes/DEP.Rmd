@@ -15,6 +15,7 @@ suppressPackageStartupMessages({library(BiocStyle)
 library(DEP)
 })
 ```
+
 \pagebreak
 
 # Overview of the analysis
@@ -28,7 +29,7 @@ For scientists with limited experience in R, the package also entails wrapper fu
 Install and load the package
 ```{r install, eval = FALSE}
 
-devtools::install_github("arnesmits/DEP")
+devtools::install_github("arnesmits/DEP", build_vignettes = TRUE)
 library("DEP")
 
 ```
@@ -254,15 +255,7 @@ data_lm <- linear_model(data_imp, control = "Ctrl", type = "control")
 # Test all possible comparisons of samples
 data_lm_all_contrasts <- linear_model(data_imp, control = "Ctrl", type = "all")
 ```
-
-An ANOVA and post-hoc Tukey Honest Significant Differences analysis is also implemented, although the use of _linear_models_ based on `r Biocpkg("limma") ` is recommended.
-
-``` {r statistics2, , results = "hide", message = FALSE}
-# Differential enrichment analysis  based on ANOVA and Tukey
-data_anova <- anova_tukey(data_imp, control = "Ctrl", type = "control")
-
-```
-
+   
 Finally, significant proteins are defined by user-defined cutoffs.
 
 ``` {r results}

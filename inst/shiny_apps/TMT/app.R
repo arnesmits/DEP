@@ -26,9 +26,8 @@ ui <- shinyUI(
                  fileInput('file2', 'ExperimentalDesign.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv'))
         ),
         menuItemOutput("columns"),
-        menuItem("Imputation & Stats options",
-                 radioButtons("imputation", "Imputation type", choices = list("QRILC" = "QRILC", "Minimal probability" = "MinProb", "Manual" = "man", "k-nearest neighbors" = "knn"), selected = "MinProb"),
-                 radioButtons("stat", "Statistical method", c("Linear model", "ANOVA"), selected = "Linear model")
+        menuItem("Imputation options",
+                 radioButtons("imputation", "Imputation type", choices = list("QRILC" = "QRILC", "Minimal probability" = "MinProb", "Manual" = "man", "k-nearest neighbors" = "knn"), selected = "MinProb")
         ),
         actionButton("analyze", "Analyze"),
         tags$hr(),
@@ -143,15 +142,7 @@ server <- shinyServer(function(input, output) {
 
   df <- reactive({
     imp <- imp()
-    if(input$stat == "ANOVA") {
-      withProgress(message = 'Analysis', value = 0.1, {
-        df <- anova_tukey(imp, input$control, input$contrasts)
-      })
-    }
-    if(input$stat == "Linear model") {
-      df <- linear_model(imp, input$control, input$contrasts)
-    }
-    df
+    linear_model(imp, input$control, input$contrasts)
   })
 
   sign <- reactive({
