@@ -25,10 +25,9 @@ Imports: magrittr,
     rmarkdown,
     SummarizedExperiment,
     assertthat,
-    gridExtra
+    gridExtra,
+    rmarkdown,
+    BiocStyle
 RoxygenNote: 6.0.1
-Suggests: knitr,
-    BiocStyle,
-    testthat,
-    rmarkdown
+Suggests: testthat
 VignetteBuilder: knitr
