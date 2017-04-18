@@ -87,9 +87,17 @@ ui <- shinyUI(
   				    plotOutput("norm", height = 600),
   				    downloadButton('downloadNorm', 'Download')
   				  ),
-  				  tabPanel(title = "Missing values",
-  				    plotOutput("missval", height = 600),
-  				    downloadButton('downloadMissval', 'Download')
+  				  tabPanel(title = "Missing values - Quant",
+  				           plotOutput("detect", height = 600),
+  				           downloadButton('downloadDetect', 'Download')
+  				  ),
+  				  tabPanel(title = "Missing values - Heatmap",
+  				           plotOutput("missval", height = 600),
+  				           downloadButton('downloadMissval', 'Download')
+  				  ),
+  				  tabPanel(title = "Imputation",
+  				           plotOutput("imputation", height = 600),
+  				           downloadButton('downloadImputation', 'Download')
   				  )
   				)
 			  )
@@ -299,6 +307,14 @@ server <- shinyServer(function(input, output) {
       plot_missval(norm())
     })
 
+    detect_input <- reactive({
+      plot_detect(norm())
+    })
+
+    imputation_input <- reactive({
+      plot_imp(norm(), df())
+    })
+
     numbers_input <- reactive({
       plot_numbers(norm())
     })
@@ -330,6 +346,14 @@ server <- shinyServer(function(input, output) {
 
     output$missval <- renderPlot({
       missval_input()
+    })
+
+    output$detect <- renderPlot({
+      detect_input()
+    })
+
+    output$imputation <- renderPlot({
+      imputation_input()
     })
 
     output$numbers <- renderPlot({
@@ -401,6 +425,24 @@ server <- shinyServer(function(input, output) {
       content = function(file) {
         pdf(file)
         print(missval_input())
+        dev.off()
+      }
+    )
+
+    output$downloadDetect <- downloadHandler(
+      filename = "missing_values_quant.pdf",
+      content = function(file) {
+        pdf(file)
+        gridExtra::grid.arrange(detect_input())
+        dev.off()
+      }
+    )
+
+    output$downloadImputation <- downloadHandler(
+      filename = "imputation.pdf",
+      content = function(file) {
+        pdf(file)
+        print(imputation_input())
         dev.off()
       }
     )
