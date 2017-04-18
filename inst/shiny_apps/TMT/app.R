@@ -27,7 +27,8 @@ ui <- shinyUI(
         ),
         menuItemOutput("columns"),
         menuItem("Imputation options",
-                 radioButtons("imputation", "Imputation type", choices = list("QRILC" = "QRILC", "Minimal probability" = "MinProb", "Manual" = "man", "k-nearest neighbors" = "knn"), selected = "MinProb")
+                 radioButtons("imputation", "Imputation type", choices = c("man", MSnbase::imputeMethods())[1:9], selected = "MinProb"),
+                 p(a("Detailed information link", href = "https://www.rdocumentation.org/packages/MSnbase/versions/1.20.7/topics/impute-methods", target="_blank"))
         ),
         actionButton("analyze", "Analyze"),
         tags$hr(),
@@ -353,7 +354,7 @@ server <- shinyServer(function(input, output) {
              "results" = results(sign()),
              "significant_proteins" = results(sign()) %>% filter(sign == "+") %>% select(-sign),
              "displayed_subset" = res() %>% filter(sign == "+") %>% select(-sign),
-             "full_dataset" = left_join(rownames_to_column(exprs(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
+             "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
 
     output$downloadData <- downloadHandler(

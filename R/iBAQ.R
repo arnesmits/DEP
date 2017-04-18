@@ -339,9 +339,10 @@ plot_ibaq <- function(data, contrast, labelsize = 3) {
   ip <- gsub("_vs_.*", "", contrast)
   control <- gsub(".*_vs_", "", contrast)
   ibaq_anno <- colData(data) %>% data.frame() %>% mutate(sample = paste("iBAQ.", label, sep = ""))
-  long <- row_data %>% gather(sample, iBAQ, starts_with("iBAQ.")) %>% left_join(., ibaq_anno, by = "sample")
+  long <- row_data %>% gather(sample, iBAQ_value, starts_with("iBAQ.")) %>% select(name, sample, Peptides, iBAQ_value) %>% left_join(., ibaq_anno, by = "sample")
 
-  stoi <- long %>% group_by(name, condition) %>% summarise(mean = mean(iBAQ)) %>% spread(condition, mean) %>% mutate(ibaq = GFP - WT)
+  stoi <- long %>% group_by(name, condition) %>% summarise(mean = mean(iBAQ_value)) %>% spread(condition, mean)
+  stoi$ibaq <- stoi[[ip]] - stoi[[control]]
 
   col_diff <- grep(paste(contrast, "_diff", sep = ""), colnames(row_data))
   col_sign <- grep(paste(contrast, "_sign", sep = ""), colnames(row_data))

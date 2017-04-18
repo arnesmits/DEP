@@ -27,9 +27,10 @@ ui <- shinyUI(
   		    radioButtons("anno", "Sample annotation", choices = list("Parse from columns" = "columns", "Use Experimental Design" = "expdesign"), selected = "expdesign")
   		  ),
 		    menuItemOutput("columns"),
-  			menuItem("Imputation options",
-  			  radioButtons("imputation", "Imputation type", choices = list("QRILC" = "QRILC", "Minimal probability" = "MinProb", "Manual" = "man", "k-nearest neighbors" = "knn"), selected = "MinProb")
-  			),
+		    menuItem("Imputation options",
+		             radioButtons("imputation", "Imputation type", choices = c("man", MSnbase::imputeMethods())[1:9], selected = "MinProb"),
+		             p(a("Detailed information link", href = "https://www.rdocumentation.org/packages/MSnbase/versions/1.20.7/topics/impute-methods", target="_blank"))
+		    ),
   			actionButton("analyze", "Analyze"),
   			tags$hr(),
         uiOutput("downloadTable"),
@@ -72,6 +73,16 @@ ui <- shinyUI(
   				      plotOutput("volcano", height = 600),
   				      downloadButton('downloadVolcano', 'Download volcano')
   				    )
+  				  ),
+  				  tabPanel(title = "iBAQ vs LFC plot",
+  				           fluidRow(
+  				             box(uiOutput("ibaq_cntrst"), width = 6),
+  				             box(numericInput("ibaq_fontsize", "Font size", min = 0, max = 8, value = 2), width = 6)
+  				           ),
+  				           fluidRow(
+  				             plotOutput("ibaq_plot", height = 600),
+  				             downloadButton('downloadIBAQ', 'Download')
+  				           )
   				  )
 				  ),
   				tabBox(title = "QC Plots", width = 12,
@@ -222,6 +233,14 @@ server <- shinyServer(function(input, output) {
       }
     })
 
+    output$ibaq_cntrst <- renderUI({
+      if (!is.null(selected())) {
+        df <- rowData(selected())
+        cols <- grep("_sign$",colnames(df))
+        selectizeInput("ibaq_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
+      }
+    })
+
     ### Reactive functions ### ----------------------------------------------------------------------------------------------
     excluded <- reactive({
       if(is.null(input$exclude)) {
@@ -299,6 +318,12 @@ server <- shinyServer(function(input, output) {
       }
     })
 
+    ibaq_input <- reactive({
+      if(!is.null(input$ibaq_cntrst) & length(grep("^iBAQ.", colnames(rowData(selected())))) > 1) {
+        plot_ibaq(selected(), input$ibaq_cntrst, input$ibaq_fontsize)
+      }
+    })
+
     norm_input <- reactive({
       plot_norm(filt(), norm())
     })
@@ -340,6 +365,10 @@ server <- shinyServer(function(input, output) {
       volcano_input()
     })
 
+    output$ibaq_plot <- renderPlot({
+      ibaq_input()
+    })
+
     output$norm <- renderPlot({
       norm_input()
     })
@@ -376,7 +405,7 @@ server <- shinyServer(function(input, output) {
              "results" = results(sign()),
              "significant_proteins" = results(sign()) %>% filter(sign == "+") %>% select(-sign),
              "displayed_subset" = res() %>% filter(sign == "+") %>% select(-sign),
-             "full_dataset" = left_join(rownames_to_column(exprs(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
+             "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
 
     output$downloadData <- downloadHandler(
@@ -407,6 +436,15 @@ server <- shinyServer(function(input, output) {
       content = function(file) {
         pdf(file)
         print(volcano_input())
+        dev.off()
+      }
+    )
+
+    output$downloadIBAQ <- downloadHandler(
+      filename = function() { paste("iBAQ_vs_LFC_", input$contrast, ".pdf", sep = "") },
+      content = function(file) {
+        pdf(file)
+        print(ibaq_input())
         dev.off()
       }
     )
