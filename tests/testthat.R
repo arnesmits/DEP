@@ -1,4 +1,4 @@
 library(testthat)
-library(proteomeR)
+library(DEP)
 
-test_check("proteomeR")
+test_check("DEP")
