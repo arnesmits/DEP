@@ -46,6 +46,7 @@ The DEP package provides all functionalities to analyze label free protein quant
   \item \code{\link{plot_single}}: Barplot for a protein of interest
   \item \code{\link{plot_volcano}}: Volcano plot for a specified contrast
   \item \code{\link{plot_heatmap}}: Heatmap of all significant proteins
+  \item \code{\link{plot_ibaq}}: Scatter plot of iBAQ intensities versus log fold changes for a specified contrast
   \item \code{\link{plot_norm}}: Boxplots to inspect normalization
   \item \code{\link{plot_detect}}: Density and CumSum plots to inspect detection limit
   \item \code{\link{plot_imp}}: Density plots to inspect imputation
