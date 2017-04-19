@@ -60,7 +60,7 @@ The DEP package provides all functionalities to analyze label free protein quant
 \section{iBAQ functions}{
 
 \itemize{
-  \item \code{\link{ibaq_merge}}: Merge iBAQ intensities of protein groups based on shared peptides
+  \item \code{\link{merge_ibaq}}: Merge iBAQ intensities of protein groups based on shared peptides
   \item \code{\link{stoichiometry}}: Calculate relative stoichiometry of all significant proteins
   \item \code{\link{plot_stoi}}: Barplot of the relative stoichiometries
 }
