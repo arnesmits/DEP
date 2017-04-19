@@ -28,7 +28,8 @@ A data.frame with the relative stoichiometry data
 # load data and test for differentially enriched proteins
 data <- GFPip
 expdesign <- GFPip_ExpDesign
-results <- LFQ(data, expdesign, "MinProb", "WT", "control", filter = c("Reverse", "Contaminant"), alpha = 0.05, lfc = 4.5)
+results <- LFQ(data, expdesign, "MinProb", "WT", "control",
+   filter = c("Reverse", "Contaminant"), alpha = 0.05, lfc = 4.5)
 
 # load peptide data and perform iBAQ-based stoichiometry analysis
 peptides <- GFPip_pep
