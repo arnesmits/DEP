@@ -1,17 +1,17 @@
 context("1 - Make unique names and generate a SummarizedExperiment")
 
-test_that("unique_names throws error without valid input", {
-  expect_error(unique_names("test_data", "Gene.names", "Protein.IDs"))
-  expect_error(unique_names(test_data, "Gene.name", "Protein.IDs"))
-  expect_error(unique_names(test_data, "Gene.names", "Protein.ID"))
+test_that("make_unique throws error without valid input", {
+  expect_error(make_unique("test_data", "Gene.names", "Protein.IDs"))
+  expect_error(make_unique(test_data, "Gene.name", "Protein.IDs"))
+  expect_error(make_unique(test_data, "Gene.names", "Protein.ID"))
 })
 
-test_that("unique_names returns a data.frame", {
-  expect_is(unique_names(test_data, "Gene.names", "Protein.IDs"), "data.frame")
+test_that("make_unique returns a data.frame", {
+  expect_is(make_unique(test_data, "Gene.names", "Protein.IDs"), "data.frame")
 })
 
-test_that("unique_names returns unique names", {
-  expect_false(any(duplicated(unique_names(test_data, "Gene.names", "Protein.IDs")$name)))
+test_that("make_unique returns unique names", {
+  expect_false(any(duplicated(make_unique(test_data, "Gene.names", "Protein.IDs")$name)))
 })
 
 test_that("make_se_parse trows error without valid input", {

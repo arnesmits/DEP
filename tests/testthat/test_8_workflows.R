@@ -49,7 +49,7 @@ test_that("LFQ returns a list object", {
 
 test_that("LFQ returns a list object with all expected objects", {
   expect_equal(names(LFQ(test_data, UbiLength_ExpDesign, "MinProb", "Ctrl", "control", filter = c("Reverse", "Potential.contaminant"),
-                name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1)), c("data","se","filt","norm","imputed","lm","sign","results","param"))
+                name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1)), c("data","se","filt","norm","imputed","diff","signif","results","param"))
 })
 
 test_that("report throws error without valid input", {
