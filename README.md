@@ -16,8 +16,8 @@ Even easier to use are the interactive Shiny apps that are provided by the packa
 Install and load the package
 
 ``` r
-devtools::install_github("arnesmits/DEP", build_vignettes = TRUE))
-library("DEP")
+source("https://bioconductor.org/biocLite.R")
+biocLite("arnesmits/DEP")
 ```
 
 More information can be found in the vignette

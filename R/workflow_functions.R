@@ -28,39 +28,39 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name", ids = "
 
   # Show error if inputs do not contain required columns
   if (length(grep(paste("^", name, "$", sep = ""), colnames(data))) < 1) {
-    stop("name input is not present in data", call. = FALSE)
+    stop(paste0("'", name, "' is not a column in '", deparse(substitute(data)), "'."), call. = FALSE)
   }
   if (length(grep(paste("^", ids, "$", sep = ""), colnames(data))) < 1) {
-    stop("ids input is not present in data", call. = FALSE)
+    stop(paste0("'", ids, "' is not a column in '", deparse(substitute(data)), "'."), call. = FALSE)
   }
   if (any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
-    stop("'label', 'condition' and/or 'replicate' columns are not present in expdesign", call. = FALSE)
+    stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.", call. = FALSE)
   }
   # Show error if inputs are not valid
   if (!type %in% c("all", "control")) {
-    stop("Not a valid type, run TMT() with a valid type\nValid types are: 'all', 'control'", call. = FALSE)
+    stop("run TMT() with a valid type.\nValid types are: 'all', 'control'.", call. = FALSE)
   }
 
   # Filter the data for Reverse hits (indicated by "###" in the gene_name)
   data <- data[-grep("###", data$gene_name),]
   # Make unique names and turn the data into a SummarizedExperiment
   cols <- grep("signal_sum", colnames(data)) # The reporter signal columns
-  data %<>% unique_names(., name, ids, delim = "[|]") %>% make_se(., cols, expdesign)
+  data %<>% make_unique(., name, ids, delim = "[|]") %>% make_se(., cols, expdesign)
   # Filter on missing values
   filt <- filter_missval(data)
   # Variance stabilization
-  norm <- norm_vsn(filt)
+  norm <- normalize(filt)
   # Impute missing values
-  imp <- imputation(norm, fun)
+  imputed <- impute(norm, fun)
   # Test for differential expression by empirical Bayes moderation of a linear model and defined contrasts
-  lm <- linear_model(imp, control, type)
+  diff <- test_diff(imputed, control, type)
   # Denote differential expressed proteins
-  sign <- cutoffs(lm, alpha, lfc)
+  signif <- add_rejections(diff, alpha, lfc)
   # Generate a results table
-  res <- results(sign)
+  results <- get_results(signif)
 
   param <- data.frame(alpha, lfc)
-  return(list(se = data, filt = filt, norm = norm, imputed = imp, lm = lm, sign = sign, results = res, param = param))
+  return(list(se = data, filt = filt, norm = norm, imputed = imputed, diff = diff, signif = signif, results = results, param = param))
 }
 
 #' LFQ workflow
@@ -96,20 +96,20 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
 
   # Show error if inputs do not contain required columns
   if (length(grep(paste("^", name, "$", sep = ""), colnames(data))) < 1) {
-    stop("name input is not present in data", call. = FALSE)
+    stop(paste0("'", name, "' is not a column in '", deparse(substitute(data)), "'."), call. = FALSE)
   }
   if (length(grep(paste("^", ids, "$", sep = ""), colnames(data))) < 1) {
-    stop("ids input is not present in data", call. = FALSE)
+    stop(paste0("'", ids, "' is not a column in '", deparse(substitute(data)), "'."), call. = FALSE)
   }
   if (length(grep(paste("^", filter, "$", sep = "", collapse = "|"), colnames(data))) < 1) {
-    stop("filter input is not present in data", call. = FALSE)
+    stop(paste0("Not all filter columns are present in '", deparse(substitute(data)), "'."), call. = FALSE)
   }
   if (any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
-    stop("'label', 'condition' and/or 'replicate' columns are not present in expdesign", call. = FALSE)
+    stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.", call. = FALSE)
   }
   # Show error if inputs are not valid
   if (!type %in% c("all", "control")) {
-    stop("Not a valid type, run LFQ() with a valid type\nValid types are: 'all', 'control'", call. = FALSE)
+    stop("run LFQ() with a valid type.\nValid types are: 'all', 'control'.", call. = FALSE)
   }
 
   # Filter out the positive proteins (indicated by "+") in the pre-defined columns
@@ -124,23 +124,23 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
 
   # Make unique names and turn the data into a SummarizedExperiment
   cols <- grep("^LFQ", colnames(data)) # The LFQ intensity columns
-  data_unique <- unique_names(data, name, ids, delim = ";")
+  data_unique <- make_unique(data, name, ids, delim = ";")
   se <- make_se(data_unique, cols, expdesign)
   # Filter on missing values
   filt <- filter_missval(se)
   # Variance stabilization
-  norm <- norm_vsn(filt)
+  norm <- normalize(filt)
   # Impute missing values
-  imp <- imputation(norm, fun)
+  imputed <- impute(norm, fun)
   # Test for differential expression by empirical Bayes moderation of a linear model and defined contrasts
-  lm <- linear_model(imp, control, type)
+  diff <- test_diff(imputed, control, type)
   # Denote differential expressed proteins
-  sign <- cutoffs(lm, alpha, lfc)
+  signif <- add_rejections(diff, alpha, lfc)
   # Generate a results table
-  res <- results(sign)
+  results <- get_results(signif)
 
   param <- data.frame(alpha, lfc)
-  return(list(data = data_unique, se = se, filt = filt, norm = norm, imputed = imp, lm = lm, sign = sign, results = res, param = param))
+  return(list(data = data_unique, se = se, filt = filt, norm = norm, imputed = imputed, diff = diff, signif = signif, results = results, param = param))
 }
 
 #' Generate a markdown report
@@ -165,15 +165,15 @@ report <- function(results) {
   assertthat::assert_that(is.list(results))
 
   # Show error in case that the required objects are not present in the list object 'results'
-  if(any(!c("data", "se", "filt", "norm", "imputed", "lm", "sign", "results", "param") %in% names(results))) {
-    stop("No valid input; Run report() with appropriate input generated by LFQ() or TMT()", call. = FALSE)
+  if(any(!c("data", "se", "filt", "norm", "imputed", "diff", "signif", "results", "param") %in% names(results))) {
+    stop("run report() with appropriate input generated by LFQ() or TMT()", call. = FALSE)
   }
 
   # Extract the objects used in the Rmarkdown report from the results object
   data <- results$se
   filt <- results$filt
   norm <- results$norm
-  sign <- results$sign
+  signif <- results$signif
   param <- results$param
   table <- results$results
 
@@ -219,30 +219,30 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
   assertthat::assert_that(is.list(results), is.data.frame(peptides), is.character(contrast), is.character(bait), is.numeric(level))
 
   # Show error in case that the required objects are not present in the list object 'results'
-  if(any(!c("data", "se", "filt", "norm", "imputed", "lm", "sign", "results", "param") %in% names(results))) {
-    stop("No valid input; Run iBAQ() with appropriate input generated by LFQ()", call. = FALSE)
+  if(any(!c("data", "se", "filt", "norm", "imputed", "diff", "signif", "results", "param") %in% names(results))) {
+    stop("run iBAQ() with appropriate input generated by LFQ()", call. = FALSE)
   }
   if (length(grep("iBAQ.", colnames(results$data))) < 1) {
-    stop("'iBAQ' columns are not present in results", call. = FALSE)
+    stop(paste0("'iBAQ' columns are not present in '", deparse(substitute(results)), "'."), call. = FALSE)
   }
   if (any(!c("Protein.group.IDs", "Unique..Groups.") %in% colnames(peptides))) {
-    stop("'Protein.group.IDs' and/or 'Unique..Groups.' columns are not present in peptides", call. = FALSE)
+    stop(paste0("'Protein.group.IDs' and/or 'Unique..Groups.' columns are not present in '", deparse(substitute(peptides)), "'."), call. = FALSE)
   }
   if (any(!c("name", "ID") %in% colnames(rowData(results$sign)))) {
-    stop("'name' and/or 'ID' columns are not present in results$sign", call. = FALSE)
+    stop(paste0("'name' and/or 'ID' columns are not present in '", deparse(substitute(results)), "'."), call. = FALSE)
   }
   if (length(grep("_sign|_diff", colnames(rowData(results$sign)))) < 1) {
-    stop("'[contrast]_sign' and/or '[contrast]_diff' columns are not present in results$sign", call. = FALSE)
+    stop(paste0("'[contrast]_sign' and/or '[contrast]_diff' columns are not present in '", deparse(substitute(results)), "'."), call. = FALSE)
   }
 
   # Merge iBAQ values for peptides with shared peptides
   ibaq <- merge_ibaq(results$data, peptides)
 
   # Calculate relative stoichiometry compared to the bait
-  stoi <- stoichiometry(results$sign, ibaq, contrast, bait, level)
+  stoi <- get_stoichiometry(results$sign, ibaq, contrast, bait, level)
 
   # Plot stoichiometry
-  p1 <- plot_stoi(stoi)
+  p1 <- plot_stoichiometry(stoi)
   print(p1)
 
   return(stoi)

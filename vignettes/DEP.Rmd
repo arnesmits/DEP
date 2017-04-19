@@ -29,8 +29,10 @@ For scientists with limited experience in R, the package also entails wrapper fu
 Install and load the package
 ```{r install, eval = FALSE}
 
-devtools::install_github("arnesmits/DEP", build_vignettes = TRUE)
-library("DEP")
+source("https://bioconductor.org/biocLite.R")
+biocLite("arnesmits/DEP")
+
+library(DEP)
 
 ```
 
@@ -108,7 +110,7 @@ Additionally, some proteins do not have an annotated gene name and for those we 
 ``` {r unique_names}
 # Make unique names using the annotation in the "Gene.names" column as primary names
 # and the annotation in "Protein.IDs" as name for those that do not have an gene name.
-data_unique <- unique_names(data, "Gene.names", "Protein.IDs", delim = ";")
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 # Are there any duplicated names?
 data$name %>% duplicated(.) %>% any(.)
@@ -174,14 +176,14 @@ The data is background corrected and normalized by variance stabilization transf
 
 ``` {r normalize}
 # Normalize the data
-data_norm <- norm_vsn(data_filt)
+data_norm <- normalize(data_filt)
 ```
 
 The normalization can be inspected by checking the distributions of the samples before and after normalization.
 
 ``` {r plot_norm, fig.height = 6}
 # Visualize normalization by boxplots for all samples before and after normalization
-plot_norm(data_filt, data_norm)
+plot_normalization(data_filt, data_norm)
 ```
 
 ## Impute data for missing values
@@ -217,19 +219,19 @@ As the example data has left-censored missing values (missing not at random), 'M
 
 ``` {r impute, results = "hide", message = FALSE, warning = FALSE, error = TRUE}
 # All possible imputation methods are printed in an erro, if an invalid function name is given.
-imputation(data_norm, fun = "")
+impute(data_norm, fun = "")
 
 # Impute missing data using random draws from a Gaussian distribution centered around 
 # a minimal value (for data not missing at random)
-data_imp <- imputation(data_norm, fun = "MinProb", q = 0.01)
+data_imp <- impute(data_norm, fun = "MinProb", q = 0.01)
 
 # Impute missing data using random draws from a manually defined 
 # left-shifted Gaussian distribution (for data not missing at random)
-data_imp_man <- imputation(data_norm, fun = "man", shift = 1.8, scale = 0.3)
+data_imp_man <- impute(data_norm, fun = "man", shift = 1.8, scale = 0.3)
 
 # Impute missing data using the k-nearest neighbour approach
 # (for data missing at random)
-data_imp_knn <- imputation(data_norm, fun = "knn")
+data_imp_knn <- impute(data_norm, fun = "knn")
 
 ```
    
@@ -237,7 +239,7 @@ The effect of the imputation on the distributions can be visualized.
 
 ``` {r plot_imp, fig.width = 5, fig.height = 5}
 # Plot intensity distributions before and after imputation
-plot_imp(data_norm, data_imp)
+plot_imputation(data_norm, data_imp)
 ```
 
 ## Differential enrichment analysis
@@ -250,20 +252,20 @@ Additionally, the types of contrasts to be produced need to be indicated, allowi
 ``` {r statistics}
 # Differential enrichment analysis  based on linear models and empherical Bayes statistics
 # Test every sample versus control
-data_lm <- linear_model(data_imp, control = "Ctrl", type = "control")
+data_diff <- test_diff(data_imp, control = "Ctrl", type = "control")
 
 # Test all possible comparisons of samples
-data_lm_all_contrasts <- linear_model(data_imp, control = "Ctrl", type = "all")
+data_diff_all_contrasts <- test_diff(data_imp, control = "Ctrl", type = "all")
 ```
    
 Finally, significant proteins are defined by user-defined cutoffs.
 
 ``` {r results}
 # Denote significant proteins based on user defined cutoffs
-data_sign <- cutoffs(data_lm, alpha = 0.05, lfc = log2(1.5))
+data_signif <- add_rejections(data_diff, alpha = 0.05, lfc = log2(1.5))
 
 # Number of significant proteins
-results(data_sign) %>% filter(sign == "+") %>% nrow()
+get_results(data_signif) %>% filter(significant) %>% nrow()
 
 ```
 
@@ -280,7 +282,7 @@ Additionally, the clustering of samples (columns) can indicate closer related sa
 
 ``` {r heatmap, fig.height = 8, fig.width = 4}
 # Plot a heatmap of all significant proteins with the data centered per protein
-plot_heatmap(data_sign, type = "centered", k = 6, col_limit = 4, labelsize = 3)
+plot_heatmap(data_signif, type = "centered", k = 6, col_limit = 4, labelsize = 3)
 ```
 
 The heatmap shows a really nice clustering of the replicates and indicates that 4Ubi and 6Ubi enrich a similar repetoire of proteins. The k-means clustering of proteins (general clusters of rows) nicely separates protein classes with different binding behaviours.  
@@ -291,7 +293,7 @@ Alternatively, a heatmap can be plotted with the direct sample comparisons (colu
 
 ``` {r heatmap2, fig.height = 8, fig.width = 4}
 # Plot a heatmap of all significant proteins (rows) and the tested contrasts (columns)
-plot_heatmap(data_sign, type = "contrast", k = 6, col_limit = 10, labelsize = 3)
+plot_heatmap(data_signif, type = "contrast", k = 6, col_limit = 10, labelsize = 3)
 ```
 
 ### Volcano plots of specific contrasts
@@ -300,9 +302,9 @@ Volcano plots can be used to visualize a specific contrast (comparison between t
 
 ``` {r volcano, fig.height = 5, fig.width = 6}
 # Plot a volcano plot for the contrast "Ubi6 vs Ctrl""
-plot_volcano(data_sign, contrast = "Ubi6_vs_Ctrl", labelsize = 2)
+plot_volcano(data_signif, contrast = "Ubi6_vs_Ctrl", labelsize = 2)
 # Plot a volcano plot for the contrast "Ubi6 vs Ctrl"" without labels
-plot_volcano(data_sign, contrast = "Ubi6_vs_Ctrl", add_names = FALSE)
+plot_volcano(data_signif, contrast = "Ubi6_vs_Ctrl", add_names = FALSE)
 ```
 
 ### Barplots of a protein of interest
@@ -311,10 +313,10 @@ It can also be useful to plot the data of a single protein, for example if this 
 
 ``` {r bar, fig.height = 3.5, fig.width = 3.5}
 # Plot a barplot for the protein USP15 with the data centered
-plot_single(data_sign, protein = "USP15", type = "centered")
+plot_single(data_signif, protein = "USP15", type = "centered")
 
 # Plot a barplot for the protein USP15
-plot_single(data_sign, protein = "USP15", type = "contrast")
+plot_single(data_signif, protein = "USP15", type = "contrast")
 ```
 
 ## Results table
@@ -323,7 +325,7 @@ To extract a table containing the essential results, the _results_ function can 
 
 ``` {r results_table}
 # Generate a results table
-data_results <- results(data_sign)
+data_results <- get_results(data_signif)
 ```
 
 The resulting table contains the following columns:
@@ -333,7 +335,7 @@ The resulting table contains the following columns:
 colnames(data_results)
 ```
 
-Of these columns, the __p.adj__ columns contain the adjusted p values for the contrast as depicted in the column name. The __ratio__ columns contain the average log2 fold changes. The __sign__ columns indicate whether the protein is differentially enriched/expressed, as defined by the chosen cutoffs. The __centered__ columns contain the average log2 enrichment values scaled by protein-wise centering.
+Of these columns, the __p.adj__ columns contain the adjusted p values for the contrast as depicted in the column name. The __ratio__ columns contain the average log2 fold changes. The __significant__ columns indicate whether the protein is differentially enriched/expressed, as defined by the chosen cutoffs. The __centered__ columns contain the average log2 enrichment values scaled by protein-wise centering.
 
 # Stoichiometry analysis
 
@@ -353,7 +355,7 @@ expdesign <- GFPip_ExpDesign
 
 # We filter for contaminant proteins and decoy database hits and generate unique names
 data <-  filter(data, Reverse != "+", Contaminant != "+")
-data_unique <- unique_names(data, "Gene.names", "Protein.IDs")
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs")
 
 # The SummarizedExperiment object is generated
 cols <- grep("LFQ.", colnames(data_unique))
@@ -376,16 +378,16 @@ plot_numbers(data_filt)
 plot_coverage(data_filt)
 
 # Normalize
-data_norm <- norm_vsn(data_filt)
+data_norm <- normalize(data_filt)
 
 # Visualize normalization
-plot_norm(data_filt, data_norm)
+plot_normalization(data_filt, data_norm)
 
 # Plot missingness pattern
 plot_missval(data_filt)
 
 # Impute left-censored values, as the missingness pattern is not at random
-data_imp <- imputation(data_norm, fun = "MinProb", q = 0.01)
+data_imp <- impute(data_norm, fun = "MinProb", q = 0.01)
 
 ```
 
@@ -394,13 +396,13 @@ data_imp <- imputation(data_norm, fun = "MinProb", q = 0.01)
 ``` {r GFPip_DE}
 
 # Differential enrichment analysis
-data_lm <- linear_model(data_imp, control = "WT", type = "control")
+data_diff <- test_diff(data_imp, control = "WT", type = "control")
 
 # Call significant proteins based on user defined cutoffs
-data_sign <- cutoffs(data_lm, alpha = 0.05, lfc = 4.5)
+data_signif <- cutoffs(data_diff, alpha = 0.05, lfc = 4.5)
 
 # Visualize the results
-plot_volcano(data_sign, contrast = "GFP_vs_WT")
+plot_volcano(data_signif, contrast = "GFP_vs_WT")
 
 ```
 
@@ -415,13 +417,13 @@ peptides <- GFPip_pep
 ibaq <- merge_ibaq(data_unique, peptides)
 
 # Calculate stoichiometry
-stoi <- stoichiometry(data_sign, ibaq, "GFP_vs_WT", "Suz12")
+stoi <- get_stoichiometry(data_sign, ibaq, "GFP_vs_WT", "Suz12")
 
 # Check the stoichiometry values for the ten most abundant proteins
 head(stoi)
 
 # Plot stoichiometry
-plot_stoi(stoi, thr = 0.01)
+plot_stoichiometry(stoi, thr = 0.01)
 
 ```
 
@@ -460,7 +462,7 @@ The _results_ object contains the essential results and the _sign_ object contai
 colnames(data_results$results)
 
 # the sign object
-data_results$sign
+data_results$signif
 ```
 
 The results table can be explored by selecting the _$results_ object
@@ -470,14 +472,14 @@ The results table can be explored by selecting the _$results_ object
 results_table <- data_results$results
 
 # Number of significant proteins
-results_table %>% filter(sign == "+") %>% nrow()
+results_table %>% filter(sign) %>% nrow()
 ```
 
 The full data (_sign_ object) can be used for the plotting functions as desribed in the chapter ["Visualization of the results"](#visualization-of-the-results).
 
 ``` {r LFQ_results4, fig.height = 5, fig.width = 6}
 # Extract the sign object
-full_data <- data_results$sign
+full_data <- data_results$signif
 
 # Use the full data to generate a volcano plot
 plot_volcano(full_data, contrast = "Ubi4_vs_Ctrl", labelsize = 2)
@@ -503,7 +505,7 @@ data_results <- LFQ(data, expdesign, fun = "MinProb",
       filter = c("Reverse", "Contaminant"), alpha = 0.05, lfc = 4.5)
 
 # Plot volcano from LFQ results
-plot_volcano(data_results$sign, "GFP_vs_WT")
+plot_volcano(data_results$signif, "GFP_vs_WT")
 
 # The iBAQ wrapper function performs the stoichiometry analysis
 stoi <- iBAQ(data_results, peptides, "GFP_vs_WT", "Suz12")
