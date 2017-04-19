@@ -1,6 +1,6 @@
 #' UbiLength - Ubiquitin interactors of different linear ubiquitin lengths
 #'
-#' This dataset contains label free quantification (LFQ) data (MaxQuant output \url{http://www.maxquant.org})
+#' This dataset contains label free quantification (LFQ) data (MaxQuant output \url{http://www.maxquant.org}).
 #'
 #' @format A data.frame with 3006 observations and 35 variables:
 #' \describe{
@@ -40,7 +40,7 @@
 
 #' GFPip - GFP affinity purification of PRC2 in ESCs followed by mass spectrometry
 #'
-#' This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org})
+#' This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).
 #'
 #' @format A data.frame with 1914 observations and 30 variables:
 #' \describe{
@@ -67,7 +67,7 @@
 
 #' GFPip_pep - Peptides table of GFP affinity purification of PRC2 in ESCs followed by mass spectrometry
 #'
-#' This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org})
+#' This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org}).
 #'
 #' @format A data.frame with 12750 observations and 29 variables:
 #' \describe{
@@ -108,7 +108,7 @@
 
 #' DiUbi - Ubiquitin interactors for different diubiquitin-linkages
 #'
-#' This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org})
+#' This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).
 #'
 #' @format A data.frame with 4071 observations and 102 variables:
 #' \describe{
