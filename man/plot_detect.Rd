@@ -16,14 +16,15 @@ Density and CumSum plots of intensities of protein with missing values (generate
 \code{plot_detect} generates density and CumSum plots of protein intensities with and without missing values
 }
 \examples{
-example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
-example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+data <- UbiLength
+data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
-columns <- grep("LFQ.", colnames(example_unique))
+columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
-example_se <- make_se(example_unique, columns, exp_design)
+se <- make_se(data_unique, columns, exp_design)
 
-example_filter <- filter_missval(example_se, thr = 0)
+filt <- filter_missval(se, thr = 0)
 
-plot_detect(example_filter)
+plot_detect(filt)
 }

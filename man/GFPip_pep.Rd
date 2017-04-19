@@ -29,6 +29,6 @@ Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb comp
 GFPip_pep
 }
 \description{
-This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org})
+This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org}).
 }
 \keyword{datasets}

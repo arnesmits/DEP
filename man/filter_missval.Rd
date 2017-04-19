@@ -7,24 +7,25 @@
 filter_missval(data, thr = 0)
 }
 \arguments{
-\item{data}{SummarizedExperiment, Data object which will be filtered.}
+\item{data}{SummarizedExperiment, Proteomics data which will be filtered (generated using \code{\link{make_se}} or \code{\link{make_se_parse}}).}
 
 \item{thr}{Integer, sets the threshold for the allowed number of missing values per condition.}
 }
 \value{
-An filtered SummarizedExperiment object.
+A filtered SummarizedExperiment object.
 }
 \description{
-\code{filter_missval} filters an SummarizedExperiment object based on missing values.
+\code{filter_missval} filters a SummarizedExperiment object based on missing values.
 }
 \examples{
-example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
-example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+data <- UbiLength
+data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
-columns <- grep("LFQ.", colnames(example_unique))
+columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
-example_se <- make_se(example_unique, columns, exp_design)
+se <- make_se(data_unique, columns, exp_design)
 
-example_stringent_filter <- filter_missval(example_se, thr = 0)
-example_less_stringent_filter <- filter_missval(example_se, thr = 1)
+stringent_filter <- filter_missval(se, thr = 0)
+less_stringent_filter <- filter_missval(se, thr = 1)
 }

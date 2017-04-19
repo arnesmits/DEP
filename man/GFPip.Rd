@@ -30,6 +30,6 @@ Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb comp
 GFPip
 }
 \description{
-This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org})
+This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).
 }
 \keyword{datasets}

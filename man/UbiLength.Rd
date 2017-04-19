@@ -28,6 +28,6 @@ Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin s
 UbiLength
 }
 \description{
-This dataset contains label free quantification (LFQ) data (MaxQuant output \url{http://www.maxquant.org})
+This dataset contains label free quantification (LFQ) data (MaxQuant output \url{http://www.maxquant.org}).
 }
 \keyword{datasets}

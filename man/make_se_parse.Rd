@@ -2,25 +2,26 @@
 % Please edit documentation in R/functions.R
 \name{make_se_parse}
 \alias{make_se_parse}
-\title{Data.frame to SummarizedExperiment parsing from column names}
+\title{Data.frame to SummarizedExperiment object conversion using parsing from column names}
 \usage{
 make_se_parse(data, columns)
 }
 \arguments{
-\item{data}{Data.frame, Data object which will be turned into a SummarizedExperiment}
+\item{data}{Data.frame, Protein table with unique names (in column 'name') which will be turned into a SummarizedExperiment.}
 
-\item{columns}{Vector of integers, Column numbers that contain the assay data.}
+\item{columns}{Vector of integers, Column numbers indicating the columns containing assay data.}
 }
 \value{
-A SummarizedExperiment object.
+A SummarizedExperiment object with log2-transformed values.
 }
 \description{
-\code{make_se_parse} creates a SummarizedExperiment object based on a single data.frame
+\code{make_se_parse} creates a SummarizedExperiment object based on a single data.frame.
 }
 \examples{
-example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
-example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+data <- UbiLength
+data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
-columns <- grep("LFQ.", colnames(example_unique))
-example_se <- make_se_parse(example_unique, columns)
+columns <- grep("LFQ.", colnames(data_unique))
+se <- make_se_parse(data_unique, columns)
 }

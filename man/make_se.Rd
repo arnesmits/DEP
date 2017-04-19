@@ -2,28 +2,29 @@
 % Please edit documentation in R/functions.R
 \name{make_se}
 \alias{make_se}
-\title{Data.frame to SummarizedExperiment using an experimental design}
+\title{Data.frame to SummarizedExperiment object conversion using an experimental design}
 \usage{
 make_se(data, columns, expdesign)
 }
 \arguments{
-\item{data}{Data.frame, Data object which will be turned into a SummarizedExperiment}
+\item{data}{Data.frame, Protein table with unique names (in column 'name') which will be turned into a SummarizedExperiment.}
 
-\item{columns}{Vector of integers, Number of the columns that contain the assay data.}
+\item{columns}{Vector of integers, Column numbers indicating the columns containing assay data.}
 
-\item{expdesign}{Data.frame, Experimental design object containing 'label', 'condition' and 'replicate' information}
+\item{expdesign}{Data.frame, Experimental design containing 'label', 'condition' and 'replicate' information.}
 }
 \value{
-A SummarizedExperiment object.
+A SummarizedExperiment object with log2-transformed values.
 }
 \description{
-\code{make_se} creates a SummarizedExperiment object based on two data.frames: the data and experimental design.
+\code{make_se} creates a SummarizedExperiment object based on two data.frames: the protein table and experimental design.
 }
 \examples{
-example <- UbiLength \%>\% filter(Reverse != "+", Potential.contaminant != "+")
-example_unique <- unique_names(example, "Gene.names", "Protein.IDs", delim = ";")
+data <- UbiLength
+data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
-columns <- grep("LFQ.", colnames(example_unique))
+columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
-example_se <- make_se(example_unique, columns, exp_design)
+se <- make_se(data_unique, columns, exp_design)
 }

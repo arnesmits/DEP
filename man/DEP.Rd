@@ -28,15 +28,15 @@ The DEP package provides all functionalities to analyze label free protein quant
 \section{Functions}{
 
 \itemize{
-  \item \code{\link{unique_names}}: Generate unique names
+  \item \code{\link{make_unique}}: Generate unique names
   \item \code{\link{make_se_parse}}: Turn data.frame into SummarizedExperiment by parsing column names
   \item \code{\link{make_se}}: Turn data.frame into SummarizedExperiment using an experimental design
   \item \code{\link{filter_missval}}: Filter on missing values
-  \item \code{\link{norm_vsn}}: Normalize data using vsn
-  \item \code{\link{imputation}}: Impute missing values
-  \item \code{\link{linear_model}}: Differential expression analysis
-  \item \code{\link{cutoffs}}: Denote significant proteins
-  \item \code{\link{results}}: Generate a results table
+  \item \code{\link{normalize}}: Normalize data using vsn
+  \item \code{\link{impute}}: Impute missing values
+  \item \code{\link{test_diff}}: Differential enrichment analysis
+  \item \code{\link{add_rejections}}: Mark significant proteins
+  \item \code{\link{get_results}}: Generate a results table
 }
 }
 
@@ -47,9 +47,9 @@ The DEP package provides all functionalities to analyze label free protein quant
   \item \code{\link{plot_volcano}}: Volcano plot for a specified contrast
   \item \code{\link{plot_heatmap}}: Heatmap of all significant proteins
   \item \code{\link{plot_ibaq}}: Scatter plot of iBAQ intensities versus log fold changes for a specified contrast
-  \item \code{\link{plot_norm}}: Boxplots to inspect normalization
+  \item \code{\link{plot_normalization}}: Boxplots to inspect normalization
   \item \code{\link{plot_detect}}: Density and CumSum plots to inspect detection limit
-  \item \code{\link{plot_imp}}: Density plots to inspect imputation
+  \item \code{\link{plot_imputation}}: Density plots to inspect imputation
   \item \code{\link{plot_missval}}: Heatmap to inspect missing values
   \item \code{\link{plot_numbers}}: Barplot of proteins identified
   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between conditions
@@ -61,8 +61,8 @@ The DEP package provides all functionalities to analyze label free protein quant
 
 \itemize{
   \item \code{\link{merge_ibaq}}: Merge iBAQ intensities of protein groups based on shared peptides
-  \item \code{\link{stoichiometry}}: Calculate relative stoichiometry of all significant proteins
-  \item \code{\link{plot_stoi}}: Barplot of the relative stoichiometries
+  \item \code{\link{get_stoichiometry}}: Calculate relative stoichiometry of all significant proteins
+  \item \code{\link{plot_stoichiometry}}: Barplot of the relative stoichiometries
 }
 }
 
