@@ -136,27 +136,27 @@ server <- shinyServer(function(input, output) {
     data <- data()
     rows <- grep("###", data[,grep(input$name, colnames(data))])
     cols <- grep("^signal_sum", colnames(data))
-    data[-rows,] %>% unique_names(., input$name, input$id, delim = "[|]") %>% make_se(., cols, expdesign()) %>% filter_missval(., 0)
+    data[-rows,] %>% make_unique(., input$name, input$id, delim = "[|]") %>% make_se(., cols, expdesign()) %>% filter_missval(., 0)
   })
 
   norm <- reactive({
     data <- filt()
-    norm_vsn(data)
+    normalize_vsn(data)
   })
 
   imp <- reactive({
     norm <- norm()
-    imputation(norm, input$imputation)
+    DEP::impute(norm, input$imputation)
   })
 
   df <- reactive({
     imp <- imp()
-    linear_model(imp, input$control, input$contrasts)
+    test_diff(imp, input$control, input$contrasts)
   })
 
   sign <- reactive({
     df <- df()
-    cutoffs(df, input$p, input$lfc)
+    add_rejections(df, input$p, input$lfc)
   })
 
   ### All object and functions upon 'Analyze' input  ### ---------------------------------------------------------------------------
@@ -173,30 +173,30 @@ server <- shinyServer(function(input, output) {
     })
 
     output$signBox <- renderInfoBox({
-      infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$sign == "+"] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
+      infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$significant, ] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
     })
 
     output$select <- renderUI({
       row_data <- rowData(sign())
-      cols <- grep("_sign",colnames(row_data))
+      cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
-      names %<>% gsub("_sign","",.)
+      names %<>% gsub("_significant","",.)
       selectizeInput("select", "Select direct comparisons", choices=names, multiple = TRUE)
     })
 
     output$exclude <- renderUI({
       row_data <- rowData(sign())
-      cols <- grep("_sign",colnames(row_data))
+      cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
-      names %<>% gsub("_sign","",.)
+      names %<>% gsub("_significant","",.)
       selectizeInput("exclude", "Exclude direct comparisons", choices=names, multiple = TRUE)
     })
 
     output$volcano_cntrst <- renderUI({
       if (!is.null(selected())) {
         df <- rowData(selected())
-        cols <- grep("_sign$",colnames(df))
-        selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
+        cols <- grep("_significant$",colnames(df))
+        selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_significant", "", colnames(df)[cols]))
       }
     })
 
@@ -207,12 +207,12 @@ server <- shinyServer(function(input, output) {
       } else {
         if(length(input$exclude) == 1) {
           df <- rowData(sign())
-          col <- grep(paste(input$exclude, "_sign", sep = ""), colnames(df))
-          excluded <- sign()[df[,col] != "+",]
+          col <- grep(paste(input$exclude, "_significant", sep = ""), colnames(df))
+          excluded <- sign()[!df[,col],]
         } else {
           df <- rowData(sign())
-          cols <- grep(paste(input$exclude, "_sign", sep = "", collapse = "|"), colnames(df))
-          excluded <- sign()[apply(df[,cols] != "+", 1, all)]
+          cols <- grep(paste(input$exclude, "_significant", sep = "", collapse = "|"), colnames(df))
+          excluded <- sign()[apply(!df[,cols], 1, all)]
         }
       }
       excluded
@@ -224,35 +224,35 @@ server <- shinyServer(function(input, output) {
       } else {
         if(length(input$select) == 1) {
           df <- rowData(excluded())
-          col <- grep(paste(input$select, "_sign", sep = ""), colnames(df))
-          selected <- sign()[df[,col] == "+",]
+          col <- grep(paste(input$select, "_significant", sep = ""), colnames(df))
+          selected <- excluded()[df[,col],]
         } else {
           df <- rowData(excluded())
-          cols <- grep(paste(input$select, "_sign", sep = "", collapse = "|"), colnames(df))
-          selected <- sign()[apply(df[,cols] == "+", 1, all)]
+          cols <- grep(paste(input$select, "_significant", sep = "", collapse = "|"), colnames(df))
+          selected <- excluded()[apply(df[,cols], 1, all)]
         }
       }
       selected
     })
 
     res <- reactive({
-      results(selected())
+      get_results(selected())
     })
 
     table <- reactive({
-      res <- res() %>% filter(sign == "+") %>% select(-sign)
+      res <- res() %>% filter(significant) %>% select(-significant)
       if(input$pres == "centered") {
         cols <- grep("_ratio", colnames(res))
         table <- res[,-cols]
         colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("sign", colnames(table))] %<>% gsub("[.]", " - ", .)
+        colnames(table)[grep("significant", colnames(table))] %<>% gsub("[.]", " - ", .)
         colnames(table) %<>% gsub("_centered", "", .) %>% gsub("[_]", " ", .)
       }
       if(input$pres == "contrast") {
         cols <- grep("_centered", colnames(res))
         table <- res[,-cols]
         colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("sign", colnames(table))] %<>% gsub("[.]", " - ", .)
+        colnames(table)[grep("significant", colnames(table))] %<>% gsub("[.]", " - ", .)
         colnames(table) %<>% gsub("_ratio", "", .) %>% gsub("[_]", " ", .)
       }
       table
@@ -278,7 +278,7 @@ server <- shinyServer(function(input, output) {
     })
 
     norm_input <- reactive({
-      plot_norm(filt(), norm())
+      plot_normalization(filt(), norm())
     })
 
     missval_input <- reactive({
@@ -290,7 +290,7 @@ server <- shinyServer(function(input, output) {
     })
 
     imputation_input <- reactive({
-      plot_imp(norm(), df())
+      plot_imputation(norm(), df())
     })
 
     numbers_input <- reactive({
@@ -351,9 +351,9 @@ server <- shinyServer(function(input, output) {
     ### Download objects and functions ### ---------------------------------------------------------------------------------
     datasetInput <- reactive({
       switch(input$dataset,
-             "results" = results(sign()),
-             "significant_proteins" = results(sign()) %>% filter(sign == "+") %>% select(-sign),
-             "displayed_subset" = res() %>% filter(sign == "+") %>% select(-sign),
+             "results" = get_results(sign()),
+             "significant_proteins" = get_results(sign()) %>% filter(significant) %>% select(-significant),
+             "displayed_subset" = res() %>% filter(significant) %>% select(-significant),
              "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
 

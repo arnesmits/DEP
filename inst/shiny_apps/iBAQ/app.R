@@ -36,7 +36,9 @@ ui <- shinyUI(
   			div(style="display:inline-block",uiOutput("button_stoi")),
   			tags$hr(),
         uiOutput("downloadTable"),
-  			uiOutput("downloadButton")
+  			uiOutput("downloadButton1"),
+  			tags$hr(),
+  			uiOutput("downloadButton2")
   		  )
 			),
 		dashboardBody(
@@ -174,7 +176,7 @@ server <- shinyServer(function(input, output) {
 
   data_unique <- reactive({
     data <- data()
-    unique_names(data, input$name, input$id)
+    make_unique(data, input$name, input$id)
   })
 
   filt <- reactive({
@@ -201,22 +203,22 @@ server <- shinyServer(function(input, output) {
 
   norm <- reactive({
     data <- filt()
-    norm_vsn(data)
+    normalize_vsn(data)
   })
 
   imp <- reactive({
     norm <- norm()
-    imputation(norm, input$imputation)
+    DEP::impute(norm, input$imputation)
   })
 
   df <- reactive({
     imp <- imp()
-    linear_model(imp, input$control, input$contrasts)
+    test_diff(imp, input$control, input$contrasts)
   })
 
   sign <- reactive({
     df <- df()
-    cutoffs(df, input$p, input$lfc)
+    add_rejections(df, input$p, input$lfc)
   })
 
   ### All object and functions upon 'Analyze' input  ### ---------------------------------------------------------------------------
@@ -228,46 +230,46 @@ server <- shinyServer(function(input, output) {
     output$button_stoi <- renderUI ({ if (!is.null(peptides())) { actionButton("stoichiometry", "Stoichiometry") } })
 
     output$downloadTable <- renderUI({
-      selectizeInput("dataset", "Choose a dataset to download" , c("results","significant_proteins","displayed_subset","full_dataset", "stoichiometry"))
+      selectizeInput("dataset", "Choose a dataset to download" , c("results","significant_proteins","displayed_subset","full_dataset"))
     })
 
-    output$downloadButton <- renderUI({
+    output$downloadButton1 <- renderUI({
       downloadButton('downloadData', 'Download')
     })
 
     output$signBox <- renderInfoBox({
-      infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$sign == "+"] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
+      infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$significant, ] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
     })
 
     output$select <- renderUI({
       row_data <- rowData(sign())
-      cols <- grep("_sign",colnames(row_data))
+      cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
-      names %<>% gsub("_sign","",.)
+      names %<>% gsub("_significant","",.)
       selectizeInput("select", "Select direct comparisons", choices=names, multiple = TRUE)
     })
 
     output$exclude <- renderUI({
       row_data <- rowData(sign())
-      cols <- grep("_sign",colnames(row_data))
+      cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
-      names %<>% gsub("_sign","",.)
+      names %<>% gsub("_significant","",.)
       selectizeInput("exclude", "Exclude direct comparisons", choices=names, multiple = TRUE)
     })
 
     output$volcano_cntrst <- renderUI({
       if (!is.null(selected())) {
         df <- rowData(selected())
-        cols <- grep("_sign$",colnames(df))
-        selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
+        cols <- grep("_significant$",colnames(df))
+        selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_significant", "", colnames(df)[cols]))
       }
     })
 
     output$ibaq_cntrst <- renderUI({
       if (!is.null(selected())) {
         df <- rowData(selected())
-        cols <- grep("_sign$",colnames(df))
-        selectizeInput("ibaq_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
+        cols <- grep("_significant$",colnames(df))
+        selectizeInput("ibaq_cntrst", "Contrast", choices = gsub("_significant", "", colnames(df)[cols]))
       }
     })
 
@@ -278,12 +280,12 @@ server <- shinyServer(function(input, output) {
       } else {
         if(length(input$exclude) == 1) {
           df <- rowData(sign())
-          col <- grep(paste(input$exclude, "_sign", sep = ""), colnames(df))
-          excluded <- sign()[df[,col] != "+",]
+          col <- grep(paste(input$exclude, "_significant", sep = ""), colnames(df))
+          excluded <- sign()[!df[,col],]
         } else {
           df <- rowData(sign())
-          cols <- grep(paste(input$exclude, "_sign", sep = "", collapse = "|"), colnames(df))
-          excluded <- sign()[apply(df[,cols] != "+", 1, all)]
+          cols <- grep(paste(input$exclude, "_significant", sep = "", collapse = "|"), colnames(df))
+          excluded <- sign()[apply(!df[,cols], 1, all)]
         }
       }
       excluded
@@ -295,35 +297,35 @@ server <- shinyServer(function(input, output) {
       } else {
         if(length(input$select) == 1) {
           df <- rowData(excluded())
-          col <- grep(paste(input$select, "_sign", sep = ""), colnames(df))
-          selected <- sign()[df[,col] == "+",]
+          col <- grep(paste(input$select, "_significant", sep = ""), colnames(df))
+          selected <- excluded()[df[,col],]
         } else {
           df <- rowData(excluded())
-          cols <- grep(paste(input$select, "_sign", sep = "", collapse = "|"), colnames(df))
-          selected <- sign()[apply(df[,cols] == "+", 1, all)]
+          cols <- grep(paste(input$select, "_significant", sep = "", collapse = "|"), colnames(df))
+          selected <- excluded()[apply(df[,cols], 1, all)]
         }
       }
       selected
     })
 
     res <- reactive({
-      results(selected())
+      get_results(selected())
     })
 
     table <- reactive({
-      res <- res() %>% filter(sign == "+") %>% select(-sign)
+      res <- res() %>% filter(significant) %>% select(-significant)
       if(input$pres == "centered") {
         cols <- grep("_ratio", colnames(res))
         table <- res[,-cols]
         colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("sign", colnames(table))] %<>% gsub("[.]", " - ", .)
+        colnames(table)[grep("significant", colnames(table))] %<>% gsub("[.]", " - ", .)
         colnames(table) %<>% gsub("_centered", "", .) %>% gsub("[_]", " ", .)
       }
       if(input$pres == "contrast") {
         cols <- grep("_centered", colnames(res))
         table <- res[,-cols]
         colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("sign", colnames(table))] %<>% gsub("[.]", " - ", .)
+        colnames(table)[grep("significant", colnames(table))] %<>% gsub("[.]", " - ", .)
         colnames(table) %<>% gsub("_ratio", "", .) %>% gsub("[_]", " ", .)
       }
       table
@@ -355,7 +357,7 @@ server <- shinyServer(function(input, output) {
     })
 
     norm_input <- reactive({
-      plot_norm(filt(), norm())
+      plot_normalization(filt(), norm())
     })
 
     missval_input <- reactive({
@@ -367,7 +369,7 @@ server <- shinyServer(function(input, output) {
     })
 
     imputation_input <- reactive({
-      plot_imp(norm(), df())
+      plot_imputation(norm(), df())
     })
 
     numbers_input <- reactive({
@@ -432,11 +434,10 @@ server <- shinyServer(function(input, output) {
     ### Download objects and functions ### ---------------------------------------------------------------------------------
     datasetInput <- reactive({
       switch(input$dataset,
-             "results" = results(sign()),
-             "significant_proteins" = results(sign()) %>% filter(sign == "+") %>% select(-sign),
-             "displayed_subset" = res() %>% filter(sign == "+") %>% select(-sign),
-             "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")),
-             "stoichiometry" = stoi_results())
+             "results" = get_results(sign()),
+             "significant_proteins" = get_results(sign()) %>% filter(significant) %>% select(-significant),
+             "displayed_subset" = res() %>% filter(significant) %>% select(-significant),
+             "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
 
     output$downloadData <- downloadHandler(
@@ -540,11 +541,15 @@ server <- shinyServer(function(input, output) {
 
       ### Interactive UI functions ### ----------------------------------------------------------------------------------------------
 
+      output$downloadButton2 <- renderUI({
+        downloadButton('downloadStoiTable', 'Download Stoichiometry')
+      })
+
       output$stoi_cntrst <- renderUI({
         if (!is.null(sign())) {
           df <- rowData(sign())
-          cols <- grep("_sign$",colnames(df))
-          selectizeInput("stoi_cntrst", "Contrast", choices = gsub("_sign", "", colnames(df)[cols]))
+          cols <- grep("_significant$",colnames(df))
+          selectizeInput("stoi_cntrst", "Contrast", choices = gsub("_significant", "", colnames(df)[cols]))
         }
       })
 
@@ -553,8 +558,8 @@ server <- shinyServer(function(input, output) {
           row_data <- rowData(sign())
           ibaq <- ibaq()
           contrast <- input$stoi_cntrst
-          col_sign <- grep(paste(contrast, "_sign", sep = ""), colnames(row_data)) # All significance columns
-          row_data <- row_data[row_data[,col_sign] == "+", ]
+          col_sign <- grep(paste(contrast, "_significant", sep = ""), colnames(row_data)) # All significance columns
+          row_data <- row_data[row_data[,col_sign], ]
           names <- row_data$name
           rows <- ibaq %>% select(starts_with("name_")) %>% apply(., 2, function(x) grep(paste("^", names, "$", sep = "", collapse = "|"), x)) %>% unlist() %>% unique()
           sub <- ibaq[rows,] %>% select(name, starts_with("iBAQ.")) %>% gather(sample, iBAQ, 2:ncol(.)) %>% group_by(name) %>% summarize(mean = mean(iBAQ)) %>% arrange(desc(mean))
@@ -573,13 +578,13 @@ server <- shinyServer(function(input, output) {
       stoi <- reactive({
         sign <- sign()
         ibaq <- ibaq()
-        stoichiometry(sign, ibaq, input$stoi_cntrst, input$stoi_bait)
+        get_stoichiometry(sign, ibaq, input$stoi_cntrst, input$stoi_bait)
       })
 
       input_plot_stoi <- reactive({
         if(!is.null(stoi())) {
           stoi <- stoi()
-          plot_stoi(stoi, thr = input$thr)
+          plot_stoichiometry(stoi, thr = input$thr)
         }
       })
 
@@ -594,6 +599,11 @@ server <- shinyServer(function(input, output) {
       })
 
       ### Download objects and functions ### ---------------------------------------------------------------------------------
+
+      output$downloadStoiTable <- downloadHandler(
+        filename = function() { "stoichiometry.txt" },
+        content = function(file) { write.table(stoi(), file, col.names = T, row.names = F, sep ="\t") }
+      )
 
       output$downloadStoi <- downloadHandler(
         filename = "stoichiometry.pdf",
