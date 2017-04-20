@@ -17,6 +17,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: magrittr,
     Biobase,
+    SummarizedExperiment,
     MSnbase,
     limma,
     vsn,
@@ -30,7 +31,6 @@ Imports: magrittr,
     shinydashboard,
     DT,
     rmarkdown,
-    SummarizedExperiment,
     assertthat,
     gridExtra,
     BiocStyle
