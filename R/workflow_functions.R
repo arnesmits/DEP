@@ -49,7 +49,7 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name", ids = "
   # Filter on missing values
   filt <- filter_missval(data)
   # Variance stabilization
-  norm <- normalize(filt)
+  norm <- normalize_vsn(filt)
   # Impute missing values
   imputed <- impute(norm, fun)
   # Test for differential expression by empirical Bayes moderation of a linear model and defined contrasts
@@ -129,7 +129,7 @@ LFQ <- function(data, expdesign, fun, control, type, filter = c("Reverse", "Pote
   # Filter on missing values
   filt <- filter_missval(se)
   # Variance stabilization
-  norm <- normalize(filt)
+  norm <- normalize_vsn(filt)
   # Impute missing values
   imputed <- impute(norm, fun)
   # Test for differential expression by empirical Bayes moderation of a linear model and defined contrasts

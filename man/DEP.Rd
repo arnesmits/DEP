@@ -32,7 +32,7 @@ The DEP package provides all functionalities to analyze label free protein quant
   \item \code{\link{make_se_parse}}: Turn data.frame into SummarizedExperiment by parsing column names
   \item \code{\link{make_se}}: Turn data.frame into SummarizedExperiment using an experimental design
   \item \code{\link{filter_missval}}: Filter on missing values
-  \item \code{\link{normalize}}: Normalize data using vsn
+  \item \code{\link{normalize_vsn}}: Normalize data using vsn
   \item \code{\link{impute}}: Impute missing values
   \item \code{\link{test_diff}}: Differential enrichment analysis
   \item \code{\link{add_rejections}}: Mark significant proteins
@@ -60,9 +60,22 @@ The DEP package provides all functionalities to analyze label free protein quant
 \section{iBAQ functions}{
 
 \itemize{
-  \item \code{\link{merge_ibaq}}: Merge iBAQ intensities of protein groups based on shared peptides
+  \item \code{\link{merge_ibaq}}: Merge iBAQ intensities of protein groups with shared peptides
   \item \code{\link{get_stoichiometry}}: Calculate relative stoichiometry of all significant proteins
-  \item \code{\link{plot_stoichiometry}}: Barplot of the relative stoichiometries
+  \item \code{\link{plot_stoichiometry}}: Barplot of relative stoichiometries
+}
+}
+
+\section{Example data}{
+
+\itemize{
+  \item \code{\link{UbiLength}}: Ubiquitin interactors of different linear ubiquitin lengths (UbIA-MS dataset) (Zhang, Smits, van Tilburg et al. Mol. Cell 2017)
+  \item \code{\link{UbiLength_ExpDesign}}: Experimental design of the UbiLength dataset
+  \item \code{\link{DiUbi}}: Ubiquitin interactors for different diubiquitin-linkages (UbIA-MS dataset) (Zhang, Smits, van Tilburg et al. Mol. Cell 2017)
+  \item \code{\link{DiUbi_ExpDesign}}: Experimental design of the DiUbi dataset
+  \item \code{\link{GFPip}}: EED interactors in ESCs (GFP IP - MS dataset) (Kloet et al. Nat. Struct. Mol. Biol. 2016)
+  \item \code{\link{GFPip_ExpDesign}}: Experimental design of the GFPip dataset
+  \item \code{\link{GFPip_pep}}: Peptides table of the GFPip dataset
 }
 }
 

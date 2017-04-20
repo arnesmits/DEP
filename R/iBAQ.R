@@ -128,7 +128,7 @@ merge_ibaq <- function(data, peptides) {
 #' cols <- grep("LFQ", colnames(data_filt))
 #' se <- make_se(data_filt, cols, exp_design)
 #' filt <- filter_missval(se)
-#' norm <- normalize(filt)
+#' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, "MinProb")
 #'
 #' # Test for differential enriched proteins
@@ -230,18 +230,18 @@ get_stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
 #' cols <- grep("LFQ", colnames(data_filt))
 #' se <- make_se(data_filt, cols, exp_design)
 #' filt <- filter_missval(se)
-#' norm <- normalize(filt)
+#' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, "MinProb")
 #'
 #' # Test for differential enriched proteins
 #' diff <- test_diff(imputed, "WT", "control")
-#' final <- get_rejections(diff, alpha = 0.05, lfc = 4.5)
+#' final <- add_rejections(diff, alpha = 0.05, lfc = 4.5)
 #'
 #' # Merge iBAQ intensities of proteins that have shared peptides
 #' ibaq <- merge_ibaq(data_unique, peptides)
 #'
 #' # Calculate relative stoichiometry versus "Suz12" in the "GFP_vs_WT" contrast
-#' stoi <- stoichiometry(final, ibaq, contrast = "GFP_vs_WT", bait = "Suz12")
+#' stoi <- get_stoichiometry(final, ibaq, contrast = "GFP_vs_WT", bait = "Suz12")
 #' plot_stoichiometry(stoi)
 #'
 #' @export
@@ -289,12 +289,12 @@ plot_stoichiometry <- function(data, thr = 0.01, max_y = NULL) {
 #' cols <- grep("LFQ", colnames(data_filt))
 #' se <- make_se(data_filt, cols, exp_design)
 #' filt <- filter_missval(se)
-#' norm <- normalize(filt)
+#' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, "MinProb")
 #'
 #' # Test for differential enriched proteins
 #' diff <- test_diff(imputed, "WT", "control")
-#' final <- get_rejections(diff, alpha = 0.05, lfc = 4.5)
+#' final <- add_rejections(diff, alpha = 0.05, lfc = 4.5)
 #'
 #' # Plot iBAQ vs LFQ plot
 #' plot_ibaq(final, "GFP_vs_WT", labelsize = 3)
