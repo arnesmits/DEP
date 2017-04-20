@@ -20,8 +20,4 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("arnesmits/DEP")
 ```
 
-More information can be found in the vignette
-
-``` r
-browseVignettes("DEP")
-```
+More information can be found in the [vignette](http://www.huber.embl.de/users/smits/DEP.html).
