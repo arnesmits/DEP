@@ -3,7 +3,7 @@
 \docType{data}
 \name{UbiLength}
 \alias{UbiLength}
-\title{UbiLength - Ubiquitin interactors of different linear ubiquitin lengths}
+\title{UbiLength - Ubiquitin interactors of different linear ubiquitin lengths (UbIA-MS dataset)}
 \format{A data.frame with 3006 observations and 35 variables:
 \describe{
   \item{Protein.IDs}{Uniprot IDs}

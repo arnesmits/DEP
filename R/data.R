@@ -1,4 +1,4 @@
-#' UbiLength - Ubiquitin interactors of different linear ubiquitin lengths
+#' UbiLength - Ubiquitin interactors of different linear ubiquitin lengths (UbIA-MS dataset)
 #'
 #' This dataset contains label free quantification (LFQ) data (MaxQuant output \url{http://www.maxquant.org}).
 #'
@@ -38,7 +38,7 @@
 #'
 "UbiLength_ExpDesign"
 
-#' GFPip - GFP affinity purification of PRC2 in ESCs followed by mass spectrometry
+#' GFPip - EED interactors in ESCs (GFP IP - MS dataset)
 #'
 #' This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).
 #'
@@ -65,7 +65,7 @@
 #'
 "GFPip"
 
-#' GFPip_pep - Peptides table of GFP affinity purification of PRC2 in ESCs followed by mass spectrometry
+#' GFPip_pep - Peptides table of EED interactors in ESCs (GFP IP - MS dataset)
 #'
 #' This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org}).
 #'
@@ -106,7 +106,7 @@
 #'
 "GFPip_ExpDesign"
 
-#' DiUbi - Ubiquitin interactors for different diubiquitin-linkages
+#' DiUbi - Ubiquitin interactors for different diubiquitin-linkages (UbIA-MS dataset)
 #'
 #' This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).
 #'

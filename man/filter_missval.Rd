@@ -15,7 +15,7 @@ filter_missval(data, thr = 0)
 A filtered SummarizedExperiment object.
 }
 \description{
-\code{filter_missval} filters a SummarizedExperiment object based on missing values.
+\code{filter_missval} filters a proteomics dataset based on missing values.
 }
 \examples{
 data <- UbiLength

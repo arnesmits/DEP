@@ -3,7 +3,7 @@
 \docType{data}
 \name{GFPip_pep}
 \alias{GFPip_pep}
-\title{GFPip_pep - Peptides table of GFP affinity purification of PRC2 in ESCs followed by mass spectrometry}
+\title{GFPip_pep - Peptides table of EED interactors in ESCs (GFP IP - MS dataset)}
 \format{A data.frame with 12750 observations and 29 variables:
 \describe{
   \item{Sequence}{Peptide sequence}

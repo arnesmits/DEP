@@ -17,7 +17,7 @@ impute(data, fun, ...)
 An imputed SummarizedExperiment object.
 }
 \description{
-\code{impute} imputes missing values in a SummarizedExperiment object.
+\code{impute} imputes missing values in a proteomics dataset.
 }
 \examples{
 data <- UbiLength
@@ -29,7 +29,7 @@ exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
 filt <- filter_missval(se, thr = 0)
-norm <- normalize(filt)
+norm <- normalize_vsn(filt)
 
 imputed_MinProb <- impute(norm, fun = "MinProb", q = 0.05)
 imputed_QRILC <- impute(norm, fun = "QRILC")

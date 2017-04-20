@@ -17,7 +17,7 @@ manual_impute(data, scale = 0.3, shift = 1.8)
 An imputed SummarizedExperiment object.
 }
 \description{
-\code{manual_impute} imputes missing values in a SummarizedExperiment object.
+\code{manual_impute} imputes missing values in a proteomics dataset by random draws from a manually defined distribution.
 }
 \examples{
 data <- UbiLength
@@ -29,7 +29,7 @@ exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
 filt <- filter_missval(se, thr = 0)
-norm <- normalize(filt)
+norm <- normalize_vsn(filt)
 
 imputed_manual <- impute(norm, fun = "man", shift = 1.8, scale = 0.3)
 }

@@ -19,7 +19,7 @@ make_unique(data, name, ids, delim = ";")
 A data.frame containing addiontal variables "name" and "ID" containing unique names and identifiers, respectively.
 }
 \description{
-\code{make_unique} generates unique identifiers for a dataset based on a "name" and "id" column.
+\code{make_unique} generates unique identifiers for a proteomics dataset based on a "name" and "id" columns.
 }
 \examples{
 data <- UbiLength

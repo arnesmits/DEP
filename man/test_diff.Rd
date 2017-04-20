@@ -29,7 +29,7 @@ exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
 filt <- filter_missval(se, thr = 0)
-norm <- normalize(filt)
+norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 diff <- test_diff(imputed, "Ctrl", "control")

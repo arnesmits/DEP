@@ -38,7 +38,7 @@ data_filt <- data_unique \%>\% filter(Reverse != "+", Contaminant != "+")
 cols <- grep("LFQ", colnames(data_filt))
 se <- make_se(data_filt, cols, exp_design)
 filt <- filter_missval(se)
-norm <- normalize(filt)
+norm <- normalize_vsn(filt)
 imputed <- impute(norm, "MinProb")
 
 # Test for differential enriched proteins

@@ -3,7 +3,7 @@
 \docType{data}
 \name{DiUbi}
 \alias{DiUbi}
-\title{DiUbi - Ubiquitin interactors for different diubiquitin-linkages}
+\title{DiUbi - Ubiquitin interactors for different diubiquitin-linkages (UbIA-MS dataset)}
 \format{A data.frame with 4071 observations and 102 variables:
 \describe{
   \item{Protein.IDs}{Uniprot IDs}

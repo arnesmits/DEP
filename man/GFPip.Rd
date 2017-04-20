@@ -3,7 +3,7 @@
 \docType{data}
 \name{GFPip}
 \alias{GFPip}
-\title{GFPip - GFP affinity purification of PRC2 in ESCs followed by mass spectrometry}
+\title{GFPip - EED interactors in ESCs (GFP IP - MS dataset)}
 \format{A data.frame with 1914 observations and 30 variables:
 \describe{
   \item{Protein.IDs}{Uniprot IDs}
