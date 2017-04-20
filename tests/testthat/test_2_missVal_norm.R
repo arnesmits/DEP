@@ -25,10 +25,10 @@ test_that("filter_missval returns correct number of rows", {
   expect_equal(filter_missval(test_se, 2) %>% nrow(), 393)
 })
 
-test_that("normalize throws error without valid input", {
-  expect_error(normalize("test_filter"))
+test_that("normalize_vsn throws error without valid input", {
+  expect_error(normalize_vsn("test_filter"))
 })
 
-test_that("normalize returns a SummarizedExperiment", {
-  expect_is(normalize(test_filter), "SummarizedExperiment")
+test_that("normalize_vsn returns a SummarizedExperiment", {
+  expect_is(normalize_vsn(test_filter), "SummarizedExperiment")
 })
