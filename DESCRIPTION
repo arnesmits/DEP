@@ -11,11 +11,15 @@ Description: This package provides an integrated analysis workflow for robust an
     For scientists with limited experience in R, the package also entails wrapper functions that entail the complete analysis workflow and generate a report (see the chapter on [Wrapper functions](#wrapper-functions-for-the-entire-workflow)).
     Even easier to use are the interactive Shiny apps that are provided by the package (see the chapter on [Shiny apps](#interactive-analysis-using-the-proteomer-shiny-apps)).
 License: Artistic-2.0
-Depends: R (>= 3.1.0),
-    tidyverse
+Depends: R (>= 3.3)
 Encoding: UTF-8
 LazyData: true
-Imports: magrittr,
+Imports: ggplot2,
+    dplyr,
+    purrr,
+    readr,
+    tibble,
+    tidyr,
     Biobase,
     SummarizedExperiment,
     MSnbase,
@@ -33,8 +37,12 @@ Imports: magrittr,
     rmarkdown,
     assertthat,
     gridExtra,
-    BiocStyle
+    BiocStyle,
+    grid,
+    stats,
+    utils
 RoxygenNote: 6.0.1
 Suggests: testthat,
     knitr
+biocViews: Proteomics, MassSpectrometry, DifferentialExpression
 VignetteBuilder: knitr
