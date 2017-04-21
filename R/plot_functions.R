@@ -66,10 +66,9 @@ plot_single <- function(data, protein, type) {
     df %<>% filter(rowname == protein) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(data)), by = "ID")
     df$replicate <- as.factor(df$replicate)
     # Plot the centered enrichment values for the replicates as well as the mean
-    p1 <- ggplot(df, aes(condition, val, col = replicate)) + geom_hline(yintercept = 0) + theme_bw() +
-      stat_summary(fun.y = "mean", colour = "black", size = 0, geom = "bar", fill = "black") +
-      geom_point(shape = 17, size = 4) + labs(title = unique(df$rowname), x = "Baits", y = "Enrichment (log2)") +
-      theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1), axis.title=element_text(size=14,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=14,face="bold"), legend.position="top")
+    p1 <- ggplot(df, aes(condition, val, col = replicate)) + geom_hline(yintercept = 0) +
+      stat_summary(fun.y = "mean", colour = "black", size = 0, geom = "bar", fill = "black") + geom_point(shape = 17, size = 4) +
+      labs(title = unique(df$rowname), x = "Baits", y = "Enrichment (log2)") + theme_DEP2()
   }
   if(type == "contrast") {
     # Obtain average enrichments of conditions versus the control condition
@@ -78,9 +77,8 @@ plot_single <- function(data, protein, type) {
     # Select values for a single protein in long format
     df %<>% filter(rowname == protein) %>% gather(condition, LFC, 2:ncol(.))
     # Plot the average enrichments of conditions versus the control condition
-    p1 <- ggplot(df, aes(condition, LFC)) + geom_hline(yintercept = 0) + theme_bw() +
-      geom_bar(stat = "unique", size = 0, col = "black", fill = "black") + labs(title = unique(df$rowname), x = "", y = "Enrichment (log2)") +
-      theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1), axis.title=element_text(size=14,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=14,face="bold"), legend.position="top")
+    p1 <- ggplot(df, aes(condition, LFC)) + geom_hline(yintercept = 0) + geom_bar(stat = "unique", size = 0, col = "black", fill = "black") +
+      labs(title = unique(df$rowname), x = "", y = "Enrichment (log2)") + theme_DEP2()
   }
   p1
 }
@@ -152,7 +150,9 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
     set.seed(1)
     kmeans <- kmeans(df,k)
     # Order the k-means clusters according to the maximum enrichment in all samples averaged over the proteins in the cluster
-    order <- df %>% data.frame() %>% cbind(., cluster = kmeans$cluster) %>% mutate(row = apply(.[,1:(ncol(.)-1)], 1, function(x) max(x))) %>% group_by(cluster) %>% summarize(index=sum(row)/n()) %>% arrange(desc(index)) %>% collect %>% .[[1]] %>% match(seq(1:k),.)
+    order <- df %>% data.frame() %>% cbind(., cluster = kmeans$cluster) %>%
+      mutate(row = apply(.[,1:(ncol(.)-1)], 1, function(x) max(x))) %>% group_by(cluster) %>%
+      summarize(index=sum(row)/n()) %>% arrange(desc(index)) %>% collect %>% .[[1]] %>% match(seq(1:k),.)
     kmeans$cluster <- order[kmeans$cluster]
   }
   if(type == "contrast") {
@@ -164,7 +164,8 @@ plot_heatmap <- function(data, type, k = 6, col_limit = 6, labelsize = 10) {
     set.seed(1)
     kmeans <- kmeans(df,k)
     # Order the k-means clusters according to their average enrichment
-    order <- cbind(df, cluster = kmeans$cluster) %>% gather(condition, diff, 1:(ncol(.)-1)) %>% group_by(cluster) %>% summarize(row = mean(diff)) %>% arrange(desc(row)) %>% collect %>% .[[1]] %>% match(seq(1:k),.)
+    order <- cbind(df, cluster = kmeans$cluster) %>% gather(condition, diff, 1:(ncol(.)-1)) %>% group_by(cluster) %>%
+      summarize(row = mean(diff)) %>% arrange(desc(row)) %>% collect %>% .[[1]] %>% match(seq(1:k),.)
     kmeans$cluster <- order[kmeans$cluster]
   }
 
@@ -249,13 +250,14 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
 
   # Plot volcano with or without labels
   if(add_names) {
-    p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = signif_prots, col = "black") + ggrepel::geom_text_repel(data = signif_prots, aes(label = name), size = labelsize, point.padding = unit(0.3, "lines")) + theme_bw() +
-      theme(legend.position="none", axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold")) + labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") +
-      geom_text(data = data.frame(), aes(x = c(Inf, -Inf), y = c(-Inf, -Inf), hjust = c(1, 0), vjust = c(-1, -1), label = c(name1, name2), size = 5, fontface = "bold"))
+    p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = signif_prots, col = "black") +
+      ggrepel::geom_text_repel(data = signif_prots, aes(label = name), size = labelsize, point.padding = unit(0.3, "lines")) +
+      geom_text(data = data.frame(), aes(x = c(Inf, -Inf), y = c(-Inf, -Inf), hjust = c(1, 0), vjust = c(-1, -1), label = c(name1, name2), size = 5, fontface = "bold")) +
+      labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") + theme_DEP1()
   } else {
-    p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = signif_prots, col = "black") + theme_bw() +
-      theme(legend.position="none", axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold")) + labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") +
-      geom_text(data = data.frame(), aes(x = c(Inf, -Inf), y = c(-Inf, -Inf), hjust = c(1, 0), vjust = c(-1, -1), label = c(name1, name2), size = 5, fontface = "bold"))
+    p1 <- ggplot(df, aes(x, y)) + geom_vline(xintercept = 0) + geom_point(col = "grey") + geom_point(data = signif_prots, col = "black") +
+      geom_text(data = data.frame(), aes(x = c(Inf, -Inf), y = c(-Inf, -Inf), hjust = c(1, 0), vjust = c(-1, -1), label = c(name1, name2), size = 5, fontface = "bold")) +
+      labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") + theme_DEP1()
   }
   p1
 }
@@ -298,8 +300,8 @@ plot_normalization <- function(raw, norm) {
   df2 <- assay(norm) %>% data.frame() %>% rownames_to_column(.) %>% gather(ID, val, 2:ncol(.)) %>% left_join(., data.frame(colData(norm)), by = "ID") %>% mutate(var = "normalized")
   df <- rbind(df1, df2)
   # Boxplots for conditions with facet_wrap for the original and normalized values
-  ggplot(df, aes(x = ID, y = val, fill = condition)) + geom_boxplot(notch = T, na.rm=TRUE) + coord_flip() + facet_wrap(~var, ncol = 1) + theme_bw() + labs(x = "", y = "Log2 Intensity") +
-    theme(axis.text=element_text(size=12), axis.title=element_text(size=14,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=14,face="bold"), legend.position="right")
+  ggplot(df, aes(x = ID, y = val, fill = condition)) + geom_boxplot(notch = T, na.rm=TRUE) + coord_flip() + facet_wrap(~var, ncol = 1) +
+    labs(x = "", y = "Log2 Intensity") + theme_DEP1()
 }
 
 #' Visualize imputation
@@ -346,8 +348,8 @@ plot_imputation <- function (raw, imp)
   df <- rbind(df1, df2)
 
   # Density plots for different conditions with facet_wrap for original and imputed samles
-  ggplot(df, aes(val, col = condition)) + geom_density(na.rm = TRUE) + facet_wrap(~var, ncol = 1) + theme_bw() + labs(x = "Log2 Intensity", y = "Density") +
-    theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), legend.text = element_text(size = 12), legend.title = element_text(size = 14, face = "bold"), legend.position = "right")
+  ggplot(df, aes(val, col = condition)) + geom_density(na.rm = TRUE) + facet_wrap(~var, ncol = 1) +
+    labs(x = "Log2 Intensity", y = "Density") + theme_DEP1()
 }
 
 #' Visualize intensities of proteins with missing values
@@ -389,12 +391,10 @@ plot_detect <- function(data) {
   cumsum <- stat %>% group_by(missval) %>% arrange(mean) %>% mutate(num = 1, cs = cumsum(num), cs_frac = cs / n())
 
   # Plot the densities and cumalitive fractions for proteins with and without missing values
-  p1 <- ggplot(stat, aes(mean, col = missval)) + geom_density(na.rm = TRUE) + theme_bw() + labs(x = "Log2 Intensity", y = "Density") +
-    theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="missing values"))
-  p2 <- ggplot(cumsum, aes(mean, cs_frac, col = missval)) + geom_line() + theme_bw() + labs(x = "Log2 Intensity", y = "Cumulative fraction") +
-    theme(axis.text = element_text(size = 12), axis.title = element_text(size = 14, face = "bold"), legend.text = element_text(size = 12),
-          legend.title = element_text(size = 14, face = "bold"), legend.position = "right") + guides(col=guide_legend(title="missing values"))
+  p1 <- ggplot(stat, aes(mean, col = missval)) + geom_density(na.rm = TRUE) +
+    labs(x = "Log2 Intensity", y = "Density") + guides(col=guide_legend(title="missing values")) + theme_DEP1()
+  p2 <- ggplot(cumsum, aes(mean, cs_frac, col = missval)) + geom_line() +
+    labs(x = "Log2 Intensity", y = "Cumulative fraction") + guides(col=guide_legend(title="missing values")) + theme_DEP1()
   gridExtra::grid.arrange(p1, p2, ncol = 1)
 }
 
@@ -456,10 +456,8 @@ plot_numbers <- function(data) {
   df <- assay(data) %>% data.frame() %>% rownames_to_column() %>% gather(ID, bin, 2:ncol(.)) %>% mutate(bin = ifelse(is.na(bin), 0, 1))
   # Summarize the number of proteins identified per sample and generate a barplot
   stat <- df %>% group_by(ID) %>% summarize(n = n(), sum = sum(bin)) %>% left_join(., data.frame(colData(data)), by = "ID")
-  ggplot(stat, aes(x = ID, y = sum, fill = condition)) + geom_bar(stat = "identity") + theme_bw() +
-    labs(title = "Proteins per sample", x = "", y = "Number of ProteinGroups") + geom_hline(yintercept = unique(stat$n)) +
-    theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1, size=10), axis.title=element_text(size=12,face="bold"),
-          legend.text=element_text(size=10), legend.title = element_text(size=12,face="bold"), legend.position="right")
+  ggplot(stat, aes(x = ID, y = sum, fill = condition)) + geom_bar(stat = "identity") + geom_hline(yintercept = unique(stat$n)) +
+    labs(title = "Proteins per sample", x = "", y = "Number of ProteinGroups") + theme_DEP2()
 }
 
 #' Plot protein overlap between samples
@@ -490,10 +488,8 @@ plot_frequency <- function(data) {
   stat <- df %>% group_by(rowname) %>% summarize(sum = sum(bin))
   # Get the frequency of the number of experiments proteins were observerd and plot these numbers
   table <- table(stat$sum) %>% data.frame()
-  ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) + geom_bar(stat = "identity") + theme_bw() + scale_fill_grey(start = 0.8, end = 0.2) +
-    labs(title = "Protein identifications overlap", x = "Identified in number of samples", y = "Number of ProteinGroups") +
-    theme(axis.text=element_text(size=12), axis.text.x = element_text(angle = 90, hjust = 1, size=12), axis.title=element_text(size=12,face="bold"),
-          legend.text=element_text(size=12), legend.title = element_text(size=12,face="bold"), legend.position="none")
+  ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) + geom_bar(stat = "identity") + scale_fill_grey(start = 0.8, end = 0.2) +
+    labs(title = "Protein identifications overlap", x = "Identified in number of samples", y = "Number of ProteinGroups") + theme_DEP1()
 }
 
 #' Plot protein coverage in conditions
@@ -524,7 +520,7 @@ plot_coverage <- function(data) {
   stat <- df %>% group_by(rowname) %>% summarize(sum = sum(bin))
   # Get the frequency of the number of experiments proteins were observerd and plot the cumulative sum of these numbers
   table <- table(stat$sum) %>% data.frame() %>% mutate(sum = rev(cumsum(rev(Freq))), pos = sum - (Freq / 2))
-  ggplot(table, aes(x = "all", y = Freq, fill = Var1)) + geom_col(col = "white") + theme_bw() + labs(title = "Protein coverage in samples", x = "", y = "Number of ProteinGroups") + scale_fill_grey(start = 0.8, end = 0.2) +
-    theme(axis.text=element_text(size=12), axis.text.x = element_blank(), axis.title=element_text(size=12,face="bold"), legend.text=element_text(size=12), legend.title = element_text(size=12,face="bold"), legend.position="right") +
-    guides(fill=guide_legend(title="samples"))
+  ggplot(table, aes(x = "all", y = Freq, fill = Var1)) + geom_col(col = "white") + scale_fill_grey(start = 0.8, end = 0.2) +
+    labs(title = "Protein coverage in samples", x = "", y = "Number of ProteinGroups") + guides(fill=guide_legend(title="samples")) +
+    theme_DEP1()
 }
