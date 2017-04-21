@@ -16,8 +16,8 @@
   \item{Charges}{Peptide charge}
   \item{PEP}{Posterior Error Probability of the identification}
   \item{Score}{Andromeda score}
-  \item{Reverse}{The peptide is identified in the decoy database if marked ("+")}
-  \item{Contaminant}{The peptide is a known contaminant if marked ("+")}
+  \item{Reverse}{The peptide is identified in the decoy database if marked ('+')}
+  \item{Contaminant}{The peptide is a known contaminant if marked ('+')}
   \item{id}{The peptide ID}
   \item{Protein.group.IDs}{The protein group ID of the protein to which the peptide is matched}
 }}
@@ -27,6 +27,9 @@ Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb comp
 }
 \usage{
 GFPip_pep
+}
+\value{
+A data.frame with the GFPip peptides table
 }
 \description{
 This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org}).

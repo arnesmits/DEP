@@ -17,9 +17,9 @@
   \item{Intensity columns (30)}{Raw mass spectrometry intensity, A.U.}
   \item{iBAQ columns (30)}{iBAQ normalized mass spectrometry intensity, A.U.}
   \item{LFQ.intensity columns (30)}{LFQ normalized mass spectrometry intensity, A.U.}
-  \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ("+")}
-  \item{Reverse}{The protein is identified in the decoy database if marked ("+")}
-  \item{Potential.contaminant}{The protein is a known contaminant if marked ("+")}
+  \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ('+')}
+  \item{Reverse}{The protein is identified in the decoy database if marked ('+')}
+  \item{Potential.contaminant}{The protein is a known contaminant if marked ('+')}
   \item{id}{The protein group ID}
 }}
 \source{
@@ -28,6 +28,11 @@ Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin s
 }
 \usage{
 DiUbi
+}
+\value{
+A data.frame with the DiUbi dataset
+
+A data.frame with the GFP Experimental design
 }
 \description{
 This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).

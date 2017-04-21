@@ -17,6 +17,9 @@ Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb comp
 \usage{
 GFPip_ExpDesign
 }
+\value{
+A data.frame with the GFPip experimental design
+}
 \description{
 This dataset annotates 6 different samples in 2 conditions and 3 replicates.
 }

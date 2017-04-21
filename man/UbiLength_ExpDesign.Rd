@@ -17,6 +17,9 @@ Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin s
 \usage{
 UbiLength_ExpDesign
 }
+\value{
+A data.frame with the UbiLength Experimental design
+}
 \description{
 This dataset annotates 12 different samples in 4 conditions and 3 replicates.
 }

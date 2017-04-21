@@ -16,9 +16,9 @@
   \item{Unique.peptides}{Number of peptides identified which are unique for this protein group}
   \item{Intensity columns (12)}{Raw mass spectrometry intensity, A.U.}
   \item{LFQ.intensity columns (12)}{LFQ normalized mass spectrometry intensity, A.U.}
-  \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ("+")}
-  \item{Reverse}{The protein is identified in the decoy database if marked ("+")}
-  \item{Potential.contaminant}{The protein is a known contaminant if marked ("+")}
+  \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ('+')}
+  \item{Reverse}{The protein is identified in the decoy database if marked ('+')}
+  \item{Potential.contaminant}{The protein is a known contaminant if marked ('+')}
 }}
 \source{
 Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin signaling. Molecular Cell:
@@ -26,6 +26,9 @@ Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin s
 }
 \usage{
 UbiLength
+}
+\value{
+A data.frame with the UbiLength dataset
 }
 \description{
 This dataset contains label free quantification (LFQ) data (MaxQuant output \url{http://www.maxquant.org}).

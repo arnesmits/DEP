@@ -17,9 +17,9 @@
   \item{Intensity columns (6)}{Raw mass spectrometry intensity, A.U.}
   \item{iBAQ columns (6)}{iBAQ normalized mass spectrometry intensity, A.U.}
   \item{LFQ.intensity columns (6)}{LFQ normalized mass spectrometry intensity, A.U.}
-  \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ("+")}
-  \item{Reverse}{The protein is identified in the decoy database if marked ("+")}
-  \item{Contaminant}{The protein is a known contaminant if marked ("+")}
+  \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ('+')}
+  \item{Reverse}{The protein is identified in the decoy database if marked ('+')}
+  \item{Contaminant}{The protein is a known contaminant if marked ('+')}
   \item{id}{The protein group ID}
 }}
 \source{
@@ -28,6 +28,9 @@ Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb comp
 }
 \usage{
 GFPip
+}
+\value{
+A data.frame with the GFPip dataset
 }
 \description{
 This dataset contains label free quantification (LFQ) and intensity-based absolute quantification (iBAQ) data (MaxQuant output \url{http://www.maxquant.org}).

@@ -17,6 +17,9 @@ Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin s
 \usage{
 DiUbi_ExpDesign
 }
+\value{
+A data.frame with the DiUbi experimental design
+}
 \description{
 This dataset annotates 30 different samples in 10 conditions and 3 replicates.
 }
