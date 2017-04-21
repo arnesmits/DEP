@@ -65,7 +65,16 @@
 #' @name DEP
 #'
 #'
-#' @import ComplexHeatmap limma magrittr grid SummarizedExperiment tidyverse assertthat
-#' @import shinydashboard shiny
+#' @import ggplot2 dplyr SummarizedExperiment limma
+#' @import ComplexHeatmap grid assertthat
+#' @import shinydashboard shiny BiocStyle
+#' @importFrom tidyr unite gather spread separate
+#' @importFrom tibble rownames_to_column column_to_rownames
+#' @importFrom purrr map_df
+#' @importFrom readr parse_factor
+#' @importFrom stats median model.matrix rnorm sd
+#' @importFrom utils combn write.table
+#' @importFrom DT dataTableOutput renderDataTable
+#'
 #'
 NULL
