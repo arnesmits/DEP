@@ -21,7 +21,7 @@ An SummarizedExperiment object containing FDR estimates of differential expressi
 }
 \examples{
 data <- UbiLength
-data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(data_unique))

@@ -9,7 +9,7 @@ merge_ibaq(data, peptides)
 \arguments{
 \item{data}{Data.frame, Protein table with unique names (in column 'name').}
 
-\item{peptides}{Data.frame, Peptide table from MaxQuant ("peptides.txt").}
+\item{peptides}{Data.frame, Peptide table from MaxQuant ('peptides.txt').}
 }
 \value{
 A data.frame with iBAQ intensities per protein group. All protein groups contain peptides unique to this group.
@@ -19,7 +19,7 @@ A data.frame with iBAQ intensities per protein group. All protein groups contain
 }
 \examples{
 data <- GFPip
-data_unique <- make_unique(data, "Gene.names", "Protein.IDs")
+data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs')
 peptides <- GFPip_pep
 
 ibaq <- merge_ibaq(data_unique, peptides)

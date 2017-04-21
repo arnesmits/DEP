@@ -21,7 +21,7 @@ A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 data <- UbiLength
 expdesign <- UbiLength_ExpDesign
 
-results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
+results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
 report(results)
 
 }

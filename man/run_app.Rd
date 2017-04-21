@@ -7,7 +7,10 @@
 run_app(app)
 }
 \arguments{
-\item{app}{"LFQ", "TMT" or "iBAQ", The name of the app.}
+\item{app}{'LFQ', 'TMT' or 'iBAQ', The name of the app.}
+}
+\value{
+Launches a browser with the shiny app
 }
 \description{
 \code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
@@ -15,11 +18,11 @@ run_app(app)
 \examples{
 \dontrun{
 # Run the app
-run_app("LFQ")
+run_app('LFQ')
 
-run_app("TMT")
+run_app('TMT')
 
-run_app("iBAQ")
+run_app('iBAQ')
 
 }
 }

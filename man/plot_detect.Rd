@@ -17,10 +17,10 @@ Density and CumSum plots of intensities of protein with missing values (generate
 }
 \examples{
 data <- UbiLength
-data <- filter(data, Reverse != "+", Potential.contaminant != "+")
-data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
+data <- data[data$Reverse != '+' & data$Potential.contaminant != '+',]
+data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs', delim = ';')
 
-columns <- grep("LFQ.", colnames(data_unique))
+columns <- grep('LFQ.', colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 

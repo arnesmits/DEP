@@ -26,22 +26,22 @@ exp_design <- GFPip_ExpDesign
 peptides <- GFPip_pep
 
 # Make unique names and filter for reverse and contaminant hits
-data_unique <- data \%>\% make_unique(., "Gene.names", "Protein.IDs")
-data_filt <- data_unique \%>\% filter(Reverse != "+", Contaminant != "+")
+data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs')
+data_filt <- data_unique[data_unique$Reverse != '+' & data_unique$Contaminant != '+',]
 
 # Make a SummarizedExperiment and perform filtering on missing values,
 # variance stabilization and imputation on this object
-cols <- grep("LFQ", colnames(data_filt))
+cols <- grep('LFQ', colnames(data_filt))
 se <- make_se(data_filt, cols, exp_design)
 filt <- filter_missval(se)
 norm <- normalize_vsn(filt)
-imputed <- impute(norm, "MinProb")
+imputed <- impute(norm, 'MinProb')
 
 # Test for differential enriched proteins
-diff <- test_diff(imputed, "WT", "control")
+diff <- test_diff(imputed, 'WT', 'control')
 final <- add_rejections(diff, alpha = 0.05, lfc = 4.5)
 
 # Plot iBAQ vs LFQ plot
-plot_ibaq(final, "GFP_vs_WT", labelsize = 3)
+plot_ibaq(final, 'GFP_vs_WT', labelsize = 3)
 
 }

@@ -21,7 +21,7 @@ A SummarizedExperiment object annotated with logical columns indicating signific
 }
 \examples{
 data <- UbiLength
-data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(data_unique))
@@ -34,6 +34,4 @@ imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 diff <- test_diff(imputed, "Ctrl", "control")
 signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
-significant_proteins <- signif[SummarizedExperiment::rowData(signif)$significant, ]
-nrow(significant_proteins)
 }

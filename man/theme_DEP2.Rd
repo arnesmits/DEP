@@ -6,6 +6,22 @@
 \usage{
 theme_DEP2()
 }
+\value{
+ggplot theme
+}
 \description{
 \code{theme_DEP2} is the ggplot theme's used for plotting in \code{\link{DEP}} with vertical x-axis labels.
+}
+\examples{
+data <- UbiLength
+data <- data[data$Reverse != '+' & data$Potential.contaminant != '+',]
+data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs', delim = ';')
+
+columns <- grep('LFQ.', colnames(data_unique))
+exp_design <- UbiLength_ExpDesign
+se <- make_se(data_unique, columns, exp_design)
+
+filt <- filter_missval(se, thr = 0)
+plot_numbers(filt) # uses theme_DEP2() style
+
 }

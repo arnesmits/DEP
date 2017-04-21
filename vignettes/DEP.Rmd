@@ -13,6 +13,7 @@ vignette: >
 ```{r required packages, echo = FALSE, warning=FALSE, results="hide"}
 suppressPackageStartupMessages({library(BiocStyle)
 library(DEP)
+library(dplyr)
 })
 ```
 
@@ -69,8 +70,8 @@ The raw mass spectrometry data were first analyzed using MaxQuant ([Cox and Mann
 ## Loading of the data
 
 ```{r load data}
-# Loading two packages required for data handling
-library(magrittr)
+# Loading a package required for data handling
+library(dplyr)
 
 # The data is provided with the package
 data <- UbiLength
@@ -296,7 +297,7 @@ The heatmap shows a really nice clustering of the replicates and indicates that 
 
 Alternatively, a heatmap can be plotted with the direct sample comparisons (columns) for all significant proteins (rows). In this example this emphasises the enrichment of ubiquitin interactors over the control sample.
 
-``` {r heatmap2, fig.height = 6, fig.width = 3}
+``` {r heatmap2, fig.height = 6, fig.width = 4}
 # Plot a heatmap of all significant proteins (rows) and the tested contrasts (columns)
 plot_heatmap(data_signif, type = "contrast", k = 6, col_limit = 10, labelsize = 2)
 ```
@@ -510,4 +511,10 @@ Exp_Design <- example_Exp_Design
 # The wrapper function performs the full analysis
 TMTdata_results <- TMT(data, expdesign = Exp_Design, fun = "QRILC",
     control = "Con_", type = "control", alpha = 0.05, lfc = 1)
+```
+
+# Session information
+
+``` {r session_info, echo = FALSE}
+sessionInfo()
 ```

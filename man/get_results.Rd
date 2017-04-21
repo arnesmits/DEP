@@ -17,7 +17,7 @@ An data.frame object containing all results variables from the performed analysi
 }
 \examples{
 data <- UbiLength
-data <- filter(data, Reverse != "+", Potential.contaminant != "+")
+data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(data_unique))
@@ -30,6 +30,11 @@ imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 diff <- test_diff(imputed, "Ctrl", "control")
 signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+
 results <- get_results(signif)
-glimpse(results)
+colnames(results)
+
+significant_proteins <- results[results$significant,]
+nrow(significant_proteins)
+head(significant_proteins)
 }

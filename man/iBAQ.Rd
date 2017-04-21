@@ -9,7 +9,7 @@ iBAQ(results, peptides, contrast, bait, level = 1)
 \arguments{
 \item{results}{List of SummarizedExperiments obtained from \code{\link{LFQ}} function.}
 
-\item{peptides}{Data.frame, Peptide table from MaxQuant ("peptides.txt").}
+\item{peptides}{Data.frame, Peptide table from MaxQuant ('peptides.txt').}
 
 \item{contrast}{Character, The specific contrast to calculate the stroichiometry for.}
 
@@ -24,16 +24,13 @@ A data.frame with the relative stoichiometry data
 \code{iBAQ} is a wrapper function running the entire analysis workflow for stoichiometry analysis using intensity-based absolute quantification (iBAQ)-based proteomics data.
 }
 \examples{
-\dontrun{
 # load data and test for differentially enriched proteins
 data <- GFPip
 expdesign <- GFPip_ExpDesign
-results <- LFQ(data, expdesign, "MinProb", "WT", "control",
-   filter = c("Reverse", "Contaminant"), alpha = 0.05, lfc = 4.5)
+results <- LFQ(data, expdesign, 'MinProb', 'WT', 'control',
+   filter = c('Reverse', 'Contaminant'), alpha = 0.05, lfc = 4.5)
 
 # load peptide data and perform iBAQ-based stoichiometry analysis
 peptides <- GFPip_pep
-iBAQ(results, peptides, contrast = "GFP_vs_WT", bait = "Suz12")
-
-}
+iBAQ(results, peptides, contrast = 'GFP_vs_WT', bait = 'Suz12')
 }
