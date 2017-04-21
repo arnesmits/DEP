@@ -17,13 +17,13 @@ LFQ(data, expdesign, fun, control, type, filter = c("Reverse",
 
 \item{control}{Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).}
 
-\item{type}{"all" or "control" The type of contrasts that will be generated.}
+\item{type}{'all' or 'control' The type of contrasts that will be generated.}
 
 \item{filter}{Character, Name(s) of the column(s) to be filtered on.}
 
 \item{name}{Character, Name of the column representing gene names.}
 
-\item{ids}{"Character, Name of the column representing protein IDs.}
+\item{ids}{'Character, Name of the column representing protein IDs.}
 
 \item{alpha}{Numeric, sets the false discovery rate threshold.}
 
@@ -36,11 +36,9 @@ A list of two data.frames: 1) \code{results} object containing the significant p
 \code{LFQ} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
 }
 \examples{
-\dontrun{
 
 data <- UbiLength
 expdesign <- UbiLength_ExpDesign
-results <- LFQ(data, expdesign, "MinProb", "Ctrl", "control")
+results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
 
-}
 }

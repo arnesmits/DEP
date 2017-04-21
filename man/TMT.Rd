@@ -16,11 +16,11 @@ TMT(data, expdesign, fun, control, type, name = "gene_name",
 
 \item{control}{Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).}
 
-\item{type}{"all" or "control" The type of contrasts that will be generated.}
+\item{type}{'all' or 'control' The type of contrasts that will be generated.}
 
 \item{name}{Character, Name of the column representing gene names.}
 
-\item{ids}{"Character, Name of the column representing protein IDs.}
+\item{ids}{'Character, Name of the column representing protein IDs.}
 
 \item{alpha}{Numeric, sets the false discovery rate threshold.}
 
