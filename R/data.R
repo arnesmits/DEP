@@ -14,10 +14,11 @@
 #'   \item{Unique.peptides}{Number of peptides identified which are unique for this protein group}
 #'   \item{Intensity columns (12)}{Raw mass spectrometry intensity, A.U.}
 #'   \item{LFQ.intensity columns (12)}{LFQ normalized mass spectrometry intensity, A.U.}
-#'   \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ("+")}
-#'   \item{Reverse}{The protein is identified in the decoy database if marked ("+")}
-#'   \item{Potential.contaminant}{The protein is a known contaminant if marked ("+")}
+#'   \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ('+')}
+#'   \item{Reverse}{The protein is identified in the decoy database if marked ('+')}
+#'   \item{Potential.contaminant}{The protein is a known contaminant if marked ('+')}
 #' }
+#' @return A data.frame with the UbiLength dataset
 #' @source Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin signaling. Molecular Cell:
 #'   \url{http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7}
 #'
@@ -33,6 +34,7 @@
 #'   \item{condition}{Experimental conditions}
 #'   \item{replicate}{Replicate number}
 #' }
+#' @return A data.frame with the UbiLength Experimental design
 #' @source Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin signaling. Molecular Cell:
 #'   \url{http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7}
 #'
@@ -55,11 +57,12 @@
 #'   \item{Intensity columns (6)}{Raw mass spectrometry intensity, A.U.}
 #'   \item{iBAQ columns (6)}{iBAQ normalized mass spectrometry intensity, A.U.}
 #'   \item{LFQ.intensity columns (6)}{LFQ normalized mass spectrometry intensity, A.U.}
-#'   \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ("+")}
-#'   \item{Reverse}{The protein is identified in the decoy database if marked ("+")}
-#'   \item{Contaminant}{The protein is a known contaminant if marked ("+")}
+#'   \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ('+')}
+#'   \item{Reverse}{The protein is identified in the decoy database if marked ('+')}
+#'   \item{Contaminant}{The protein is a known contaminant if marked ('+')}
 #'   \item{id}{The protein group ID}
 #' }
+#' @return A data.frame with the GFPip dataset
 #' @source Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb complexes during stem-cell differentiation. Nature Structural & Molecular Biology:
 #'   \url{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}
 #'
@@ -81,11 +84,12 @@
 #'   \item{Charges}{Peptide charge}
 #'   \item{PEP}{Posterior Error Probability of the identification}
 #'   \item{Score}{Andromeda score}
-#'   \item{Reverse}{The peptide is identified in the decoy database if marked ("+")}
-#'   \item{Contaminant}{The peptide is a known contaminant if marked ("+")}
+#'   \item{Reverse}{The peptide is identified in the decoy database if marked ('+')}
+#'   \item{Contaminant}{The peptide is a known contaminant if marked ('+')}
 #'   \item{id}{The peptide ID}
 #'   \item{Protein.group.IDs}{The protein group ID of the protein to which the peptide is matched}
 #' }
+#' @return A data.frame with the GFPip peptides table
 #' @source Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb complexes during stem-cell differentiation. Nature Structural & Molecular Biology:
 #'   \url{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}
 #'
@@ -101,6 +105,7 @@
 #'   \item{condition}{Experimental conditions}
 #'   \item{replicate}{Replicate number}
 #' }
+#' @return A data.frame with the GFPip experimental design
 #' @source Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb complexes during stem-cell differentiation. Nature Structural & Molecular Biology:
 #'   \url{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}
 #'
@@ -123,11 +128,13 @@
 #'   \item{Intensity columns (30)}{Raw mass spectrometry intensity, A.U.}
 #'   \item{iBAQ columns (30)}{iBAQ normalized mass spectrometry intensity, A.U.}
 #'   \item{LFQ.intensity columns (30)}{LFQ normalized mass spectrometry intensity, A.U.}
-#'   \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ("+")}
-#'   \item{Reverse}{The protein is identified in the decoy database if marked ("+")}
-#'   \item{Potential.contaminant}{The protein is a known contaminant if marked ("+")}
+#'   \item{Only.identified.by.site}{The protein is only identified by a modification site if marked ('+')}
+#'   \item{Reverse}{The protein is identified in the decoy database if marked ('+')}
+#'   \item{Potential.contaminant}{The protein is a known contaminant if marked ('+')}
 #'   \item{id}{The protein group ID}
 #' }
+#' @return A data.frame with the DiUbi dataset
+#' @return A data.frame with the GFP Experimental design
 #' @source Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin signaling. Molecular Cell:
 #'   \url{http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7}
 #'
@@ -143,6 +150,7 @@
 #'   \item{condition}{Experimental conditions}
 #'   \item{replicate}{Replicate number}
 #' }
+#' @return A data.frame with the DiUbi experimental design
 #' @source Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin signaling. Molecular Cell:
 #'   \url{http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7}
 #'
