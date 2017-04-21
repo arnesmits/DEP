@@ -156,20 +156,20 @@ server <- shinyServer(function(input, output) {
 
     if (!is.null(cols_filt)) {
       if (length(cols_filt) == 1) {
-        data %<>% filter(.[,cols_filt] != "+")
+        data <- filter(data, data[,cols_filt] != "+")
       } else {
-        data %<>% filter(!apply(.[,cols_filt] == "+", 1, any))
+        data <- filter(data, !apply(data[,cols_filt] == "+", 1, any))
       }
     }
     data %<>% make_unique(., input$name, input$id)
 
     if (input$anno == "columns") {
-      data %<>% make_se_parse(., cols)
+      data <- make_se_parse(data, cols)
     }
     if (input$anno == "expdesign") {
-      data %<>% make_se(., cols, expdesign())
+      data <- make_se(data, cols, expdesign())
     }
-    data %>% filter_missval(., 0)
+    filter_missval(data, 0)
   })
 
   norm <- reactive({
