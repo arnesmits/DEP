@@ -1,17 +1,30 @@
 #' TMT workflow
 #'
-#' \code{TMT} is a wrapper function running the entire analysis workflow for TMT-based proteomics data.
+#' \code{TMT} is a wrapper function running the
+#' entire analysis workflow for TMT-based proteomics data.
 #'
-#' @param data Data.frame, The data object.
-#' @param expdesign Data.frame, The experimental design object.
-#' @param fun Character, Function used for data imputation based on \code{\link[MSnbase]{impute}}.
-#' @param control Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).
-#' @param type 'all' or 'control' The type of contrasts that will be generated.
-#' @param name Character, Name of the column representing gene names.
-#' @param ids 'Character, Name of the column representing protein IDs.
-#' @param alpha Numeric, sets the false discovery rate threshold.
-#' @param lfc Numeric, sets the log fold change threshold.
-#' @return A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset.
+#' @param data Data.frame,
+#' The data object.
+#' @param expdesign Data.frame,
+#' The experimental design object.
+#' @param fun Character,
+#' Function used for data imputation based on \code{\link[MSnbase]{impute}}.
+#' @param control Character,
+#' The sample name to which the contrasts are generated
+#' (the control sample would be most appropriate).
+#' @param type 'all' or 'control',
+#' The type of contrasts that will be generated.
+#' @param name Character,
+#' Name of the column representing gene names.
+#' @param ids 'Character,
+#' Name of the column representing protein IDs.
+#' @param alpha Numeric,
+#' sets the false discovery rate threshold.
+#' @param lfc Numeric,
+#' sets the log fold change threshold.
+#' @return A list of two data.frames:
+#' 1) \code{results} object containing the significant proteins,
+#' 2) \code{data} object containing the full dataset.
 #' @examples
 #' \dontrun{
 #'
@@ -82,19 +95,33 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name",
 
 #' LFQ workflow
 #'
-#' \code{LFQ} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
+#' \code{LFQ} is a wrapper function running the entire analysis workflow
+#' for label free quantification (LFQ)-based proteomics data.
 #'
-#' @param data Data.frame, The data object.
-#' @param expdesign Data.frame, The experimental design object.
-#' @param fun Character, Function used for data imputation based on \code{\link[MSnbase]{impute}}.
-#' @param control Character, The sample name to which the contrasts are generated (the control sample would be most appropriate).
-#' @param type 'all' or 'control' The type of contrasts that will be generated.
-#' @param filter Character, Name(s) of the column(s) to be filtered on.
-#' @param name Character, Name of the column representing gene names.
-#' @param ids 'Character, Name of the column representing protein IDs.
-#' @param alpha Numeric, sets the false discovery rate threshold.
-#' @param lfc Numeric, sets the log fold change threshold.
-#' @return A list of two data.frames: 1) \code{results} object containing the significant proteins, 2) \code{data} object containing the full dataset.
+#' @param data Data.frame,
+#' The data object.
+#' @param expdesign Data.frame,
+#' The experimental design object.
+#' @param fun Character,
+#' Function used for data imputation based on \code{\link[MSnbase]{impute}}.
+#' @param control Character,
+#' The sample name to which the contrasts are generated
+#' (the control sample would be most appropriate).
+#' @param type 'all' or 'control',
+#' The type of contrasts that will be generated.
+#' @param filter Character,
+#' Name(s) of the column(s) to be filtered on.
+#' @param name Character,
+#' Name of the column representing gene names.
+#' @param ids 'Character,
+#' Name of the column representing protein IDs.
+#' @param alpha Numeric,
+#' sets the false discovery rate threshold.
+#' @param lfc Numeric,
+#' sets the log fold change threshold.
+#' @return A list of two data.frames:
+#' 1) \code{results} object containing the significant proteins,
+#' 2) \code{data} object containing the full dataset.
 #' @examples
 #'
 #' data <- UbiLength
@@ -185,9 +212,11 @@ LFQ <- function(data, expdesign, fun, control, type,
 
 #' Generate a markdown report
 #'
-#' \code{report} is a wrapper function running the entire analysis workflow for label free quantification (LFQ)-based proteomics data.
+#' \code{report} is a wrapper function running the entire analysis workflow
+#' for label free quantification (LFQ)-based proteomics data.
 #'
-#' @param results List of SummarizedExperiments obtained from \code{\link{LFQ}} or \code{\link{TMT}} functions.
+#' @param results List of SummarizedExperiments obtained
+#' from \code{\link{LFQ}} or \code{\link{TMT}} functions.
 #' @return A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 #' @examples
 #' \dontrun{
@@ -204,7 +233,8 @@ report <- function(results) {
     # Show error if inputs are not the required classes
     assertthat::assert_that(is.list(results))
 
-    # Show error in case that the required objects are not present in the list object 'results'
+    # Show error in case that the required objects
+    # are not present in the list object 'results'
     if(any(!c("data", "se", "filt", "norm",
                "imputed", "diff", "signif",
                "results", "param") %in% names(results))) {
@@ -236,13 +266,21 @@ report <- function(results) {
 
 #' iBAQ workflow
 #'
-#' \code{iBAQ} is a wrapper function running the entire analysis workflow for stoichiometry analysis using intensity-based absolute quantification (iBAQ)-based proteomics data.
+#' \code{iBAQ} is a wrapper function running the entire analysis workflow
+#' for stoichiometry analysis using i
+#' ntensity-based absolute quantification (iBAQ)-based proteomics data.
 #'
-#' @param results List of SummarizedExperiments obtained from \code{\link{LFQ}} function.
-#' @param peptides Data.frame, Peptide table from MaxQuant ('peptides.txt').
-#' @param contrast Character, The specific contrast to calculate the stroichiometry for.
-#' @param bait Character, The name of the protein to which all other proteins will be scaled for the relative stoichiometry
-#' @param level Numerical, The level to which the bait will be scaled
+#' @param results #' List of SummarizedExperiments
+#' obtained from \code{\link{LFQ}} function.
+#' @param peptides Data.frame,
+#' Peptide table from MaxQuant ('peptides.txt').
+#' @param contrast Character,
+#' The specific contrast to calculate the stroichiometry for.
+#' @param bait Character,
+#' The name of the protein to which all other proteins
+#' will be scaled for the relative stoichiometry
+#' @param level Numerical,
+#' The level to which the bait will be scaled
 #' @return A data.frame with the relative stoichiometry data
 #' @examples
 #' # load data and test for differentially enriched proteins
@@ -264,7 +302,8 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
                             is.character(bait),
                             is.numeric(level))
 
-    # Show error in case that the required objects are not present in the list object 'results'
+    # Show error in case that the required objects
+    # are not present in the list object 'results'
     if(any(!c("data", "se", "filt", "norm",
                "imputed", "diff", "signif",
                "results", "param") %in% names(results))) {
@@ -272,7 +311,8 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
              call. = FALSE)
     }
     if(length(grep("iBAQ.", colnames(results$data))) < 1) {
-        stop(paste0("'iBAQ' columns are not present in '", deparse(substitute(results)), "'."),
+        stop(paste0("'iBAQ' columns are not present in '",
+                    deparse(substitute(results)), "'."),
              call. = FALSE)
     }
     if(any(!c("Protein.group.IDs", "Unique..Groups.") %in% colnames(peptides))) {

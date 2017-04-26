@@ -7,7 +7,8 @@
 se2msn(data)
 }
 \arguments{
-\item{data}{SummarizedExperiment, Data object which will be turned into a MSnSet object.}
+\item{data}{SummarizedExperiment,
+Data object which will be turned into a MSnSet object.}
 }
 \value{
 A MSnSet object.

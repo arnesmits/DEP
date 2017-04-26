@@ -7,17 +7,23 @@
 manual_impute(data, scale = 0.3, shift = 1.8)
 }
 \arguments{
-\item{data}{SummarizedExperiment, Proteomics data for which missing values will be imputed.}
+\item{data}{SummarizedExperiment,
+Proteomics data for which missing values will be imputed.}
 
-\item{scale}{Numeric, Sets the width of the distribution relative to the SD of the original distribution.}
+\item{scale}{Numeric,
+Sets the width of the distribution relative to the
+SD of the original distribution.}
 
-\item{shift}{Numeric, Sets the left-shift of the distribution in SD from the mean of the original distribution.}
+\item{shift}{Numeric,
+Sets the left-shift of the distribution in SD from
+the mean of the original distribution.}
 }
 \value{
 An imputed SummarizedExperiment object.
 }
 \description{
-\code{manual_impute} imputes missing values in a proteomics dataset by random draws from a manually defined distribution.
+\code{manual_impute} imputes missing values in a proteomics dataset
+by random draws from a manually defined distribution.
 }
 \examples{
 data <- UbiLength

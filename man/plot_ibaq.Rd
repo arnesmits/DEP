@@ -7,17 +7,22 @@
 plot_ibaq(data, contrast, labelsize = 3)
 }
 \arguments{
-\item{data}{SummarizedExperiment object, Proteomics dataset on which differential enrichment proteins are annotated by \code{\link{add_rejections}}.}
+\item{data}{SummarizedExperiment object,
+Proteomics dataset on which differential enrichment proteins
+are annotated by \code{\link{add_rejections}}.}
 
-\item{contrast}{Character, The specific contrast to plot.}
+\item{contrast}{Character,
+The specific contrast to plot.}
 
-\item{labelsize}{Integer, Sets the size of name labels.}
+\item{labelsize}{Integer,
+Sets the size of name labels.}
 }
 \value{
 A scatter plot
 }
 \description{
-\code{plot_ibaq} plots a scatter plot of the iBAQ intensities versus the LFQ fold changes.
+\code{plot_ibaq} plots a scatter plot of the
+iBAQ intensities versus the LFQ fold changes.
 }
 \examples{
 # load data

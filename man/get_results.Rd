@@ -7,13 +7,17 @@
 get_results(data)
 }
 \arguments{
-\item{data}{SummarizedExperiment, Proteomics dataset on which differential enrichment proteins are annotated by \code{\link{add_rejections}}.}
+\item{data}{SummarizedExperiment,
+Proteomics dataset on which differential enrichment proteins
+are annotated by \code{\link{add_rejections}}.}
 }
 \value{
-An data.frame object containing all results variables from the performed analysis.
+An data.frame object
+containing all results variables from the performed analysis.
 }
 \description{
-\code{get_results} generates a results table from a proteomics dataset on which differential enrichment analysis was performed.
+\code{get_results} generates a results table from a proteomics dataset
+on which differential enrichment analysis was performed.
 }
 \examples{
 data <- UbiLength

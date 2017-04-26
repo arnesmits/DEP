@@ -7,13 +7,16 @@
 normalize_vsn(data)
 }
 \arguments{
-\item{data}{SummarizedExperiment, Proteomics data with log2-transformed values (as data obtained from \code{\link{make_se}}.}
+\item{data}{SummarizedExperiment,
+Proteomics data with log2-transformed values
+(as data obtained from \code{\link{make_se}}.}
 }
 \value{
 A normalized SummarizedExperiment object.
 }
 \description{
-\code{normalize_vsn} performs normalization using \code{\link[vsn]{vsn-package}}.
+\code{normalize_vsn} performs normalization
+using \code{\link[vsn]{vsn-package}}.
 }
 \examples{
 data <- UbiLength

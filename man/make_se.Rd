@@ -2,22 +2,30 @@
 % Please edit documentation in R/functions.R
 \name{make_se}
 \alias{make_se}
-\title{Data.frame to SummarizedExperiment object conversion using an experimental design}
+\title{Data.frame to SummarizedExperiment object
+conversion using an experimental design}
 \usage{
 make_se(data, columns, expdesign)
 }
 \arguments{
-\item{data}{Data.frame, Protein table with unique names (in column 'name') which will be turned into a SummarizedExperiment.}
+\item{data}{Data.frame,
+Protein table with unique names (in column 'name')
+which will be turned into a SummarizedExperiment.}
 
-\item{columns}{Vector of integers, Column numbers indicating the columns containing assay data.}
+\item{columns}{Vector of integers,
+Column numbers indicating the columns containing assay data.}
 
-\item{expdesign}{Data.frame, Experimental design containing 'label', 'condition' and 'replicate' information.}
+\item{expdesign}{Data.frame,
+Experimental design containing 'label', 'condition'
+and 'replicate' information.}
 }
 \value{
-A SummarizedExperiment object with log2-transformed values.
+A SummarizedExperiment object
+with log2-transformed values.
 }
 \description{
-\code{make_se} creates a SummarizedExperiment object based on two data.frames: the protein table and experimental design.
+\code{make_se} creates a SummarizedExperiment object
+based on two data.frames: the protein table and experimental design.
 }
 \examples{
 data <- UbiLength

@@ -7,19 +7,25 @@
 make_unique(data, name, ids, delim = ";")
 }
 \arguments{
-\item{data}{Data.frame, Protein table for which unique names will be created.}
+\item{data}{Data.frame,
+Protein table for which unique names will be created.}
 
-\item{name}{Character, Name of the column containing feature names.}
+\item{name}{Character,
+Name of the column containing feature names.}
 
-\item{ids}{Character, Name of the column containing feature IDs.}
+\item{ids}{Character,
+Name of the column containing feature IDs.}
 
-\item{delim}{Character, Delimiter seperating the proteins within on protein group.}
+\item{delim}{Character,
+Delimiter seperating the proteins within on protein group.}
 }
 \value{
-A data.frame containing addiontal variables "name" and "ID" containing unique names and identifiers, respectively.
+A data.frame containing addiontal variables
+"name" and "ID" containing unique names and identifiers, respectively.
 }
 \description{
-\code{make_unique} generates unique identifiers for a proteomics dataset based on a "name" and "id" columns.
+\code{make_unique} generates unique identifiers
+for a proteomics dataset based on a "name" and "id" columns.
 }
 \examples{
 data <- UbiLength

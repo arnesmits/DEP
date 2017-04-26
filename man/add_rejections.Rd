@@ -7,14 +7,19 @@
 add_rejections(diff, alpha = 0.05, lfc = 1)
 }
 \arguments{
-\item{diff}{SummarizedExperiment, Proteomics dataset on which differential enrichment analysis has been performend by \code{\link{test_diff}}.}
+\item{diff}{SummarizedExperiment,
+Proteomics dataset on which differential enrichment analysis
+has been performend by \code{\link{test_diff}}.}
 
-\item{alpha}{Numeric, Sets the threshold for the false discovery rate (FDR).}
+\item{alpha}{Numeric,
+Sets the threshold for the false discovery rate (FDR).}
 
-\item{lfc}{Numeric, Sets the threshold for the log2 fold change (lfc).}
+\item{lfc}{Numeric,
+Sets the threshold for the log2 fold change (lfc).}
 }
 \value{
-A SummarizedExperiment object annotated with logical columns indicating significant proteins.
+A SummarizedExperiment object
+annotated with logical columns indicating significant proteins.
 }
 \description{
 \code{add_rejections} marks significant proteins based on defined cutoffs.
