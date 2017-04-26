@@ -30,5 +30,5 @@ run_app <- function(app) {
 
     # Launch the app
     appDir <- system.file("shiny_apps", app, package = "DEP")
-    suppressWarnings(shiny::runApp(appDir, display.mode = "normal"))
+    suppressWarnings(runApp(appDir, display.mode = "normal"))
 }
