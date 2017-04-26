@@ -4,20 +4,34 @@
 \alias{test_diff}
 \title{Differential enrichment test}
 \usage{
-test_diff(data, control, type)
+test_diff(data, control, type, ...)
 }
 \arguments{
-\item{data}{SummarizedExperiment, Proteomics data which will be tested for differentially enriched proteins.}
+\item{data}{SummarizedExperiment,
+Proteomics data which will be tested for differentially enriched proteins.}
 
-\item{control}{Character, The condition to which contrasts are generated (a control condition would be most appropriate).}
+\item{control}{Character,
+The condition to which contrasts are generated
+(a control condition would be most appropriate).}
 
-\item{type}{"all" or "control", The type of contrasts that will be tested. Either all possible pairwise comparisons ("all") or limited to the comparisons versus the control ("control").}
+\item{type}{"all", "control" or "manual",
+The type of contrasts that will be tested.
+This can be all possible pairwise comparisons ("all"),
+limited to the comparisons versus the control ("control"), or
+manually defined contrast(s) ("manual").}
+
+\item{...}{Additional arguments,
+For type = "manual" add 'contrasts' argument
+containing the contrasts to be tested}
 }
 \value{
-An SummarizedExperiment object containing FDR estimates of differential expression.
+An SummarizedExperiment object
+containing FDR estimates of differential expression.
 }
 \description{
-\code{test_diff} performs a differential enrichment test based on protein-wise linear models and empherical Bayes statistics (\code{\link[limma]{limma}}).
+\code{test_diff} performs a differential enrichment test based on
+protein-wise linear models and empherical Bayes
+statistics (\code{\link[limma]{limma}}).
 }
 \examples{
 data <- UbiLength
@@ -33,4 +47,6 @@ norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 diff <- test_diff(imputed, "Ctrl", "control")
+diff <- test_diff(imputed, "Ctrl", "manual",
+contrasts = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 }

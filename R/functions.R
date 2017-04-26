@@ -1,12 +1,18 @@
 #' Make unique names
 #'
-#' \code{make_unique} generates unique identifiers for a proteomics dataset based on a "name" and "id" columns.
+#' \code{make_unique} generates unique identifiers
+#' for a proteomics dataset based on a "name" and "id" columns.
 #'
-#' @param data Data.frame, Protein table for which unique names will be created.
-#' @param name Character, Name of the column containing feature names.
-#' @param ids Character, Name of the column containing feature IDs.
-#' @param delim Character, Delimiter seperating the proteins within on protein group.
-#' @return A data.frame containing addiontal variables "name" and "ID" containing unique names and identifiers, respectively.
+#' @param data Data.frame,
+#' Protein table for which unique names will be created.
+#' @param name Character,
+#' Name of the column containing feature names.
+#' @param ids Character,
+#' Name of the column containing feature IDs.
+#' @param delim Character,
+#' Delimiter seperating the proteins within on protein group.
+#' @return A data.frame containing addiontal variables
+#' "name" and "ID" containing unique names and identifiers, respectively.
 #' @examples
 #' data <- UbiLength
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
@@ -30,7 +36,9 @@ make_unique <- function(data, name, ids, delim = ";") {
          call. = FALSE)
   }
 
-  # Select the name and id columns, take the first identifier per row and make unique names. If there is no name, the ID will be taken.
+  # Select the name and id columns,
+  # take the first identifier per row and make unique names.
+  # If there is no name, the ID will be taken.
   names <- data %>% select(matches(paste("^", name, "$", sep = "")),
                            matches(paste("^", ids, "$", sep = ""))) %>%
     mutate(name = gsub(paste(delim, ".*", sep = ""), "", .[, 1]),
@@ -40,13 +48,19 @@ make_unique <- function(data, name, ids, delim = ";") {
   return(data_unique)
 }
 
-#' Data.frame to SummarizedExperiment object conversion using parsing from column names
+#' Data.frame to SummarizedExperiment object
+#' conversion using parsing from column names
 #'
-#' \code{make_se_parse} creates a SummarizedExperiment object based on a single data.frame.
+#' \code{make_se_parse} creates a SummarizedExperiment object
+#' based on a single data.frame.
 #'
-#' @param data Data.frame, Protein table with unique names (in column 'name') which will be turned into a SummarizedExperiment.
-#' @param columns Vector of integers, Column numbers indicating the columns containing assay data.
-#' @return A SummarizedExperiment object with log2-transformed values.
+#' @param data Data.frame,
+#' Protein table with unique names (in column 'name')
+#' which will be turned into a SummarizedExperiment.
+#' @param columns Vector of integers,
+#' Column numbers indicating the columns containing assay data.
+#' @return A SummarizedExperiment object
+#' with log2-transformed values.
 #' @examples
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
@@ -62,7 +76,8 @@ make_se_parse <- function(data, columns) {
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(data))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)), "'.\nRun make_unique() to obtain the required columns."),
+                deparse(substitute(data)),
+                "'.\nRun make_unique() to obtain the required columns."),
          call. = FALSE)
   }
   if(any(!apply(data[, columns], 2, is.numeric))) {
@@ -101,14 +116,22 @@ make_se_parse <- function(data, columns) {
   return(dataset)
 }
 
-#' Data.frame to SummarizedExperiment object conversion using an experimental design
+#' Data.frame to SummarizedExperiment object
+#' conversion using an experimental design
 #'
-#' \code{make_se} creates a SummarizedExperiment object based on two data.frames: the protein table and experimental design.
+#' \code{make_se} creates a SummarizedExperiment object
+#' based on two data.frames: the protein table and experimental design.
 #'
-#' @param data Data.frame, Protein table with unique names (in column 'name') which will be turned into a SummarizedExperiment.
-#' @param columns Vector of integers, Column numbers indicating the columns containing assay data.
-#' @param expdesign Data.frame, Experimental design containing 'label', 'condition' and 'replicate' information.
-#' @return A SummarizedExperiment object with log2-transformed values.
+#' @param data Data.frame,
+#' Protein table with unique names (in column 'name')
+#' which will be turned into a SummarizedExperiment.
+#' @param columns Vector of integers,
+#' Column numbers indicating the columns containing assay data.
+#' @param expdesign Data.frame,
+#' Experimental design containing 'label', 'condition'
+#' and 'replicate' information.
+#' @return A SummarizedExperiment object
+#' with log2-transformed values.
 #' @examples
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
@@ -127,14 +150,18 @@ make_se <- function(data, columns, expdesign) {
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(data))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)), "'.\nRun make_unique() to obtain the required columns."), call. = FALSE)
+                deparse(substitute(data)),
+                "'.\nRun make_unique() to obtain the required columns."),
+         call. = FALSE)
   }
   if(any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
-    stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.", call. = FALSE)
+    stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.",
+         call. = FALSE)
   }
   if(any(!apply(data[, columns], 2, is.numeric))) {
     stop(paste0("specified columns (", columns,
-                ") should be numeric.\nRun make_se_parse() with the appropriate columns as argument."), call. = FALSE)
+                ") should be numeric.\nRun make_se_parse() with the appropriate columns as argument."),
+         call. = FALSE)
   }
 
   # Select the assay data
@@ -143,7 +170,8 @@ make_se <- function(data, columns, expdesign) {
   raw[raw == 0] <- NA
   raw <- log2(raw)
 
-  # Generate the colData from the experimental design and match these with the assay data
+  # Generate the colData from the experimental design
+  # and match these with the assay data
   expdesign <- mutate(expdesign, condition = make.names(condition)) %>%
     unite(ID, condition, replicate, remove = FALSE)
   rownames(expdesign) <- expdesign$ID
@@ -167,8 +195,11 @@ make_se <- function(data, columns, expdesign) {
 #'
 #' \code{filter_missval} filters a proteomics dataset based on missing values.
 #'
-#' @param data SummarizedExperiment, Proteomics data which will be filtered (generated using \code{\link{make_se}} or \code{\link{make_se_parse}}).
-#' @param thr Integer, sets the threshold for the allowed number of missing values per condition.
+#' @param data SummarizedExperiment,
+#' Proteomics data which will be filtered
+#' (generated using \code{\link{make_se}} or \code{\link{make_se_parse}}).
+#' @param thr Integer,
+#'  sets the threshold for the allowed number of missing values per condition.
 #' @return A filtered SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -192,12 +223,14 @@ filter_missval <- function(data, thr = 0) {
   if(any(!c("name", "ID") %in% colnames(rowData(data)))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
                 deparse(substitute(data)),
-                "'.\nRun make_unique() and make_se() to obtain the required columns."), call. = FALSE)
+                "'.\nRun make_unique() and make_se() to obtain the required columns."),
+         call. = FALSE)
   }
   if(any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
     stop(paste0("'label', 'condition' and/or 'replicate' columns are not present in '",
                 deparse(substitute(data)),
-                "'.\nRun make_se() or make_se_parse() to obtain the required columns."), call. = FALSE)
+                "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
+         call. = FALSE)
   }
   if(thr < 0 | thr > max(colData(data)$replicate)) {
     stop("invalid filter threshold applied;\nRun filter_missval() with a threshold ranging from 0 to the number of replicates")
@@ -208,7 +241,8 @@ filter_missval <- function(data, thr = 0) {
   bin_data[!is.na(assay(data))] <- 1
   bin_data[is.na(assay(data))] <- 0
 
-  # Filter data on the maximum allowed number of missing values per condition (defined by thr)
+  # Filter data on the maximum allowed number of
+  # missing values per condition (defined by thr)
   keep <- bin_data %>%
     data.frame() %>%
     rownames_to_column(.) %>%
@@ -224,9 +258,12 @@ filter_missval <- function(data, thr = 0) {
 
 #' Normalization using vsn
 #'
-#' \code{normalize_vsn} performs normalization using \code{\link[vsn]{vsn-package}}.
+#' \code{normalize_vsn} performs normalization
+#' using \code{\link[vsn]{vsn-package}}.
 #'
-#' @param data SummarizedExperiment, Proteomics data with log2-transformed values (as data obtained from \code{\link{make_se}}.
+#' @param data SummarizedExperiment,
+#' Proteomics data with log2-transformed values
+#' (as data obtained from \code{\link{make_se}}.
 #' @return A normalized SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -253,11 +290,17 @@ normalize_vsn <- function(data) {
 
 #' Imputation by random draws from a manually defined distribution
 #'
-#' \code{manual_impute} imputes missing values in a proteomics dataset by random draws from a manually defined distribution.
+#' \code{manual_impute} imputes missing values in a proteomics dataset
+#' by random draws from a manually defined distribution.
 #'
-#' @param data SummarizedExperiment, Proteomics data for which missing values will be imputed.
-#' @param shift Numeric, Sets the left-shift of the distribution in SD from the mean of the original distribution.
-#' @param scale Numeric, Sets the width of the distribution relative to the SD of the original distribution.
+#' @param data SummarizedExperiment,
+#' Proteomics data for which missing values will be imputed.
+#' @param shift Numeric,
+#' Sets the left-shift of the distribution in SD from
+#' the mean of the original distribution.
+#' @param scale Numeric,
+#' Sets the width of the distribution relative to the
+#' SD of the original distribution.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -307,7 +350,8 @@ manual_impute <- function(data, scale = 0.3, shift = 1.8) {
 #'
 #' \code{se2msn} generats a MSnSet object from a SummarizedExperiment object.
 #'
-#' @param data SummarizedExperiment, Data object which will be turned into a MSnSet object.
+#' @param data SummarizedExperiment,
+#' Data object which will be turned into a MSnSet object.
 #' @return A MSnSet object.
 #' @examples
 #' data <- UbiLength
@@ -341,9 +385,14 @@ se2msn <- function(data) {
 #'
 #' \code{impute} imputes missing values in a proteomics dataset.
 #'
-#' @param data SummarizedExperiment, Proteomics data for which missing values will be imputed.
-#' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb", "min", "zero", "mixed" or "nbavg", Function used for data imputation based on \code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.
-#' @param ... Additional arguments for imputation functions as depicted in \code{\link{manual_impute}} \code{\link[MSnbase]{impute}}.
+#' @param data SummarizedExperiment,
+#' Proteomics data for which missing values will be imputed.
+#' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
+#' "MinProb", "min", "zero", "mixed" or "nbavg",
+#' Function used for data imputation based on \code{\link{manual_impute}}
+#' and \code{\link[MSnbase]{impute}}.
+#' @param ... Additional arguments for imputation functions as depicted in
+#' \code{\link{manual_impute}} \code{\link[MSnbase]{impute}}.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -397,12 +446,25 @@ impute <- function(data, fun, ...) {
 
 #' Differential enrichment test
 #'
-#' \code{test_diff} performs a differential enrichment test based on protein-wise linear models and empherical Bayes statistics (\code{\link[limma]{limma}}).
+#' \code{test_diff} performs a differential enrichment test based on
+#' protein-wise linear models and empherical Bayes
+#' statistics (\code{\link[limma]{limma}}).
 #'
-#' @param data SummarizedExperiment, Proteomics data which will be tested for differentially enriched proteins.
-#' @param control Character, The condition to which contrasts are generated (a control condition would be most appropriate).
-#' @param type "all" or "control", The type of contrasts that will be tested. Either all possible pairwise comparisons ("all") or limited to the comparisons versus the control ("control").
-#' @return An SummarizedExperiment object containing FDR estimates of differential expression.
+#' @param data SummarizedExperiment,
+#' Proteomics data which will be tested for differentially enriched proteins.
+#' @param control Character,
+#' The condition to which contrasts are generated
+#' (a control condition would be most appropriate).
+#' @param type "all", "control" or "manual",
+#' The type of contrasts that will be tested.
+#' This can be all possible pairwise comparisons ("all"),
+#' limited to the comparisons versus the control ("control"), or
+#' manually defined contrast(s) ("manual").
+#' @param ... Additional arguments,
+#' For type = "manual" add 'contrasts' argument
+#' containing the contrasts to be tested
+#' @return An SummarizedExperiment object
+#' containing FDR estimates of differential expression.
 #' @examples
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
@@ -417,8 +479,10 @@ impute <- function(data, fun, ...) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "Ctrl", "manual",
+#' contrasts = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 #' @export
-test_diff <- function(data, control, type) {
+test_diff <- function(data, control, type, ...) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(data, "SummarizedExperiment"),
                           is.character(control),
@@ -436,7 +500,7 @@ test_diff <- function(data, control, type) {
                 "'.\nRun make_se() or make_se_parse() to obtain the required columns."), call. = FALSE)
   }
   # Show error if inputs are not valid
-  if(!type %in% c("all", "control")) {
+  if(!type %in% c("all", "control", "manual")) {
     stop("run test_diff() with a valid type.\nValid types are: 'all', 'control'", call. = FALSE)
   }
   if(!control %in% unique(colData(data)$condition)) {
@@ -452,11 +516,13 @@ test_diff <- function(data, control, type) {
   colnames(design) <- gsub("conditions", "", colnames(design))
 
   # Generate contrasts to be tested
-  # Either make all possible combinations ("all") or only the contrast versus the control sample ("control")
+  # Either make all possible combinations ("all") or
+  # only the contrast versus the control sample ("control")
   if(type == "all") {
     cntrst <- apply(combn(colnames(design), 2), 2,
                     function(x) paste(x, collapse = " - "))
-    # Make sure that contrast containing the control sample have the control as denominator
+    # Make sure that contrast containing
+    # the control sample have the control as denominator
     flip <- grep(paste("^", control, sep = ""), cntrst)
     if(length(flip) >= 1) {
       cntrst[flip] <- cntrst[flip] %>%
@@ -469,19 +535,42 @@ test_diff <- function(data, control, type) {
                     control,
                     sep = " - ")
   }
+  if(type == "manual") {
+    if(is.null(contrasts)) {
+      stop("run test_diff(type = 'manual') with a 'contrasts' argument")
+    }
+    assertthat::assert_that(is.character(contrasts))
+
+    if(any(!unlist(strsplit(contrasts, "_vs_")) %in% conditions)) {
+      stop("run test_diff() with valid contrasts",
+           paste0(".\nValid contrasts should contain combinations of: '",
+                  paste0(unique(colData(data)$condition),
+                         collapse = "', '"),
+                  "'.\nFor example '",
+                  paste0(unique(colData(data)$condition)[1],
+                         "_vs_",
+                         unique(colData(data)$condition)[2])
+                  , "'."), call. = FALSE)
+    }
+
+    cntrst <- gsub("_vs_", " - ", contrasts)
+
+  }
   # Print tested contrasts
   cat("Tested contrasts: \n")
   print(gsub(" - ", "_vs_", cntrst))
 
-  # Test for differential expression by empirical Bayes moderation of a linear model on the predefined contrasts
+  # Test for differential expression by empirical Bayes moderation
+  # of a linear model on the predefined contrasts
   eB_fit <- eBayes(
     contrasts.fit(
       lmFit(assay(data), design = design),
       makeContrasts(contrasts = cntrst, levels = design)
-      )
     )
+  )
 
-  # function to retrieve the results of the differential expression test using 'fdrtool'
+  # function to retrieve the results of
+  # the differential expression test using 'fdrtool'
   retrieve_fun <- function(comp, fit = eB_fit){
     res <- topTable(fit, sort.by = "t", coef = comp, number = Inf)
     fdr_res <- fdrtool::fdrtool(res$t, plot = FALSE, verbose = FALSE)
@@ -520,10 +609,15 @@ test_diff <- function(data, control, type) {
 #'
 #' \code{add_rejections} marks significant proteins based on defined cutoffs.
 #'
-#' @param diff SummarizedExperiment, Proteomics dataset on which differential enrichment analysis has been performend by \code{\link{test_diff}}.
-#' @param alpha Numeric, Sets the threshold for the false discovery rate (FDR).
-#' @param lfc Numeric, Sets the threshold for the log2 fold change (lfc).
-#' @return A SummarizedExperiment object annotated with logical columns indicating significant proteins.
+#' @param diff SummarizedExperiment,
+#' Proteomics dataset on which differential enrichment analysis
+#' has been performend by \code{\link{test_diff}}.
+#' @param alpha Numeric,
+#' Sets the threshold for the false discovery rate (FDR).
+#' @param lfc Numeric,
+#' Sets the threshold for the log2 fold change (lfc).
+#' @return A SummarizedExperiment object
+#' annotated with logical columns indicating significant proteins.
 #' @examples
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
@@ -567,7 +661,8 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
   cols_p <- grep("_p.adj", colnames(row_data))
   cols_diff <- grep("_diff", colnames(row_data))
 
-  # Mark differential expressed proteins by applying alpha and log2FC parameters per protein
+  # Mark differential expressed proteins by
+  # applying alpha and log2FC parameters per protein
   if(length(cols_p) == 1) {
     rowData(diff)$significant <-
       row_data[, cols_p] <= alpha & row_data[, cols_diff] >= lfc |
@@ -592,10 +687,14 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 
 #' Generate a results table
 #'
-#' \code{get_results} generates a results table from a proteomics dataset on which differential enrichment analysis was performed.
+#' \code{get_results} generates a results table from a proteomics dataset
+#' on which differential enrichment analysis was performed.
 #'
-#' @param data SummarizedExperiment, Proteomics dataset on which differential enrichment proteins are annotated by \code{\link{add_rejections}}.
-#' @return An data.frame object containing all results variables from the performed analysis.
+#' @param data SummarizedExperiment,
+#' Proteomics dataset on which differential enrichment proteins
+#' are annotated by \code{\link{add_rejections}}.
+#' @return An data.frame object
+#' containing all results variables from the performed analysis.
 #' @examples
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
