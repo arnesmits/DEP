@@ -6,6 +6,9 @@ test_that("test_diff throws error without valid input", {
   expect_error(test_diff(test_impute, "Ctrl", all))
   expect_error(test_diff(test_impute, "Ctrl", "ALL"))
   expect_error(test_diff(test_impute, "control", "all"))
+  expect_error(test_diff(test_impute, "control", "manual"))
+  expect_error(test_diff(test_impute, "control", "manual", Ubi4_vs_Ctrl))
+  expect_error(test_diff(test_impute, "control", "manual", "test"))
 
   test_impute_error <- test_impute
   SummarizedExperiment::colData(test_impute_error) <- SummarizedExperiment::colData(test_impute_error)[,-(3)]
@@ -18,6 +21,7 @@ test_that("test_diff throws error without valid input", {
 
 test_that("test_diff returns a SummarizedExperiment object", {
   expect_is(test_diff(test_impute, "Ctrl", "all"), "SummarizedExperiment")
+  expect_is(test_diff(test_impute, "Ctrl", "manual", "Ubi4_vs_Ctrl"), "SummarizedExperiment")
 })
 
 test_that("test_diff returns an object with diff and p.adj columns", {
