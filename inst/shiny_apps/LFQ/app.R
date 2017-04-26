@@ -1,17 +1,5 @@
-library(tidyverse)
-library(magrittr)
-library(ggrepel)
-library(ComplexHeatmap)
-library(RColorBrewer)
-library(circlize)
-library(Rlibstree)
-library(DT)
-library(Biobase)
-library(MSnbase)
+library(dplyr)
 library(SummarizedExperiment)
-library(limma)
-library(vsn)
-library(fdrtool)
 library(DEP)
 library(shiny)
 library(shinydashboard)
@@ -161,7 +149,7 @@ server <- shinyServer(function(input, output) {
         data <- filter(data, !apply(data[,cols_filt] == "+", 1, any))
       }
     }
-    data %<>% make_unique(., input$name, input$id)
+    data <- make_unique(data, input$name, input$id)
 
     if (input$anno == "columns") {
       data <- make_se_parse(data, cols)
@@ -213,7 +201,7 @@ server <- shinyServer(function(input, output) {
       row_data <- rowData(sign())
       cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
-      names %<>% gsub("_significant","",.)
+      names <- gsub("_significant","",names)
       selectizeInput("select", "Select direct comparisons", choices=names, multiple = TRUE)
     })
 
@@ -221,7 +209,7 @@ server <- shinyServer(function(input, output) {
       row_data <- rowData(sign())
       cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
-      names %<>% gsub("_significant","",.)
+      names <- gsub("_significant","",names)
       selectizeInput("exclude", "Exclude direct comparisons", choices=names, multiple = TRUE)
     })
 
@@ -286,15 +274,17 @@ server <- shinyServer(function(input, output) {
         cols <- grep("_ratio", colnames(res))
         table <- res[,-cols]
         colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("significant", colnames(table))] %<>% gsub("[.]", " - ", .)
-        colnames(table) %<>% gsub("_centered", "", .) %>% gsub("[_]", " ", .)
+        colnames(table)[grep("significant", colnames(table))] <-
+          gsub("[.]", " - ", colnames(table)[grep("significant", colnames(table))])
+        colnames(table) <- gsub("_centered", "", colnames(table)) %>% gsub("[_]", " ", .)
       }
       if(input$pres == "contrast") {
         cols <- grep("_centered", colnames(res))
         table <- res[,-cols]
         colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("significant", colnames(table))] %<>% gsub("[.]", " - ", .)
-        colnames(table) %<>% gsub("_ratio", "", .) %>% gsub("[_]", " ", .)
+        colnames(table)[grep("significant", colnames(table))] <-
+          gsub("[.]", " - ", colnames(table)[grep("significant", colnames(table))])
+        colnames(table) <- gsub("_ratio", "", colnames(table)) %>% gsub("[_]", " ", .)
       }
       table
     })
