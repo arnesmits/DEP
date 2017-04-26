@@ -263,7 +263,7 @@ data_diff_all_contrasts <- test_diff(data_imp, control = "Ctrl", type = "all")
 
 # Test manually defined comparison
 data_diff_manual <- test_diff(data_imp, control = "Ctrl", 
-    type = "manual", test = test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
+    type = "manual", test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 ```
    
 Finally, significant proteins are defined by user-defined cutoffs using _add_rejections_.
