@@ -251,7 +251,7 @@ plot_imputation(data_norm, data_imp)
 Protein-wise linear models combined with empherical Bayes statistics are used for the differential enrichment analysis (or differential expression for analysis on expression levels).
 The _test_diff_ wrapper function introduced here uses `r Biocpkg("limma") ` and automatically generates the contrasts to be tested.
 For the contrasts generation, the control sample has to be specified.
-Additionally, the types of contrasts to be produced need to be indicated, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control ("control").
+Additionally, the types of contrasts to be produced need to be indicated, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control ("control"). Alternatively, the user can manually specify the contrasts to be tested (type = "manual") in the argument _test_. 
 
 ``` {r statistics}
 # Differential enrichment analysis  based on linear models and empherical Bayes statistics
@@ -260,6 +260,10 @@ data_diff <- test_diff(data_imp, control = "Ctrl", type = "control")
 
 # Test all possible comparisons of samples
 data_diff_all_contrasts <- test_diff(data_imp, control = "Ctrl", type = "all")
+
+# Test manually defined comparison
+data_diff_manual <- test_diff(data_imp, control = "Ctrl", 
+    type = "manual", test = test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 ```
    
 Finally, significant proteins are defined by user-defined cutoffs using _add_rejections_.
