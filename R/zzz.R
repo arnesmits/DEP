@@ -7,7 +7,7 @@
         "ID", ".", "condition", "label",
         "value", "rowname", "miss_val",
         "samples", "logFC", "qval", "comparison",
-        "val", "name", "significant",
+        "val", "name", "significant", "contrasts",
 
         # iBAQ.R globalVariables
         "Unique..Groups.", "Protein.group.IDs",

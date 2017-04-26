@@ -4,7 +4,7 @@
 \alias{test_diff}
 \title{Differential enrichment test}
 \usage{
-test_diff(data, control, type, ...)
+test_diff(data, control, type, test = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment,
@@ -20,9 +20,10 @@ This can be all possible pairwise comparisons ("all"),
 limited to the comparisons versus the control ("control"), or
 manually defined contrast(s) ("manual").}
 
-\item{...}{Additional arguments,
-For type = "manual" add 'contrasts' argument
-containing the contrasts to be tested}
+\item{test}{Character,
+The contrasts that will be tested if type = "manual".
+These should be formatted as "SampleA_vs_SampleB" or
+c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 }
 \value{
 An SummarizedExperiment object
@@ -48,5 +49,5 @@ imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 diff <- test_diff(imputed, "Ctrl", "control")
 diff <- test_diff(imputed, "Ctrl", "manual",
-contrasts = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
+    test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 }

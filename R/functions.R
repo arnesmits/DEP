@@ -460,9 +460,10 @@ impute <- function(data, fun, ...) {
 #' This can be all possible pairwise comparisons ("all"),
 #' limited to the comparisons versus the control ("control"), or
 #' manually defined contrast(s) ("manual").
-#' @param ... Additional arguments,
-#' For type = "manual" add 'contrasts' argument
-#' containing the contrasts to be tested
+#' @param test Character,
+#' The contrasts that will be tested if type = "manual".
+#' These should be formatted as "SampleA_vs_SampleB" or
+#' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
 #' @return An SummarizedExperiment object
 #' containing FDR estimates of differential expression.
 #' @examples
@@ -480,9 +481,9 @@ impute <- function(data, fun, ...) {
 #'
 #' diff <- test_diff(imputed, "Ctrl", "control")
 #' diff <- test_diff(imputed, "Ctrl", "manual",
-#' contrasts = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
+#'     test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 #' @export
-test_diff <- function(data, control, type, ...) {
+test_diff <- function(data, control, type, test = NULL) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(data, "SummarizedExperiment"),
                           is.character(control),
@@ -536,13 +537,13 @@ test_diff <- function(data, control, type, ...) {
                     sep = " - ")
   }
   if(type == "manual") {
-    if(is.null(contrasts)) {
-      stop("run test_diff(type = 'manual') with a 'contrasts' argument")
+    if(is.null(test)) {
+      stop("run test_diff(type = 'manual') with a 'test' argument")
     }
-    assertthat::assert_that(is.character(contrasts))
+    assertthat::assert_that(is.character(test))
 
-    if(any(!unlist(strsplit(contrasts, "_vs_")) %in% conditions)) {
-      stop("run test_diff() with valid contrasts",
+    if(any(!unlist(strsplit(test, "_vs_")) %in% conditions)) {
+      stop("run test_diff() with valid contrasts in 'test'",
            paste0(".\nValid contrasts should contain combinations of: '",
                   paste0(unique(colData(data)$condition),
                          collapse = "', '"),
@@ -553,7 +554,7 @@ test_diff <- function(data, control, type, ...) {
                   , "'."), call. = FALSE)
     }
 
-    cntrst <- gsub("_vs_", " - ", contrasts)
+    cntrst <- gsub("_vs_", " - ", test)
 
   }
   # Print tested contrasts
