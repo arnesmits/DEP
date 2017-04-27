@@ -39,7 +39,7 @@ ui <- shinyUI(
         ),
         column(width = 5,
                tabBox(title = "Result Plots", width = 12,
-                      tabPanel(title = "Selected Protein", plotOutput("selected_plot"), downloadButton('downloadPlot', 'Download plot')),
+                      tabPanel(title = "Selected Protein", plotOutput("selected_plot"), downloadButton('downloadPlot', 'Save plot')),
                       tabPanel(title = "Heatmap",
                                fluidRow(
                                  box(numericInput("k", "Kmeans clusters", min = 0, max = 15, value = 7), width = 4),
@@ -48,7 +48,7 @@ ui <- shinyUI(
                                ),
                                fluidRow(
                                  uiOutput("plot"),
-                                 downloadButton('downloadHeatmap', 'Download heatmap'))
+                                 downloadButton('downloadHeatmap', 'Save heatmap'))
                       ),
                       tabPanel(title = "Volcano plot",
                                fluidRow(
@@ -58,34 +58,34 @@ ui <- shinyUI(
                                ),
                                fluidRow(
                                  plotOutput("volcano", height = 600),
-                                 downloadButton('downloadVolcano', 'Download volcano')
+                                 downloadButton('downloadVolcano', 'Save volcano')
                                )
                       )
                ),
                tabBox(title = "QC Plots", width = 12,
                       tabPanel(title = "Protein Numbers",
                                plotOutput("numbers", height = 600),
-                               downloadButton('downloadNumbers', 'Download')
+                               downloadButton('downloadNumbers', 'Save')
                       ),
                       tabPanel(title = "Sample coverage",
                                plotOutput("coverage", height = 600),
-                               downloadButton('downloadCoverage', 'Download')
+                               downloadButton('downloadCoverage', 'Save')
                       ),
                       tabPanel(title = "Normalization",
                                plotOutput("norm", height = 600),
-                               downloadButton('downloadNorm', 'Download')
+                               downloadButton('downloadNorm', 'Save')
                       ),
                       tabPanel(title = "Missing values - Quant",
                                plotOutput("detect", height = 600),
-                               downloadButton('downloadDetect', 'Download')
+                               downloadButton('downloadDetect', 'Save')
                       ),
                       tabPanel(title = "Missing values - Heatmap",
                                plotOutput("missval", height = 600),
-                               downloadButton('downloadMissval', 'Download')
+                               downloadButton('downloadMissval', 'Save')
                       ),
                       tabPanel(title = "Imputation",
                                plotOutput("imputation", height = 600),
-                               downloadButton('downloadImputation', 'Download')
+                               downloadButton('downloadImputation', 'Save')
                       )
                )
         )
@@ -157,7 +157,7 @@ server <- shinyServer(function(input, output) {
     })
 
     output$downloadButton <- renderUI({
-      downloadButton('downloadData', 'Download')
+      downloadButton('downloadData', 'Save')
     })
 
     output$signBox <- renderInfoBox({
