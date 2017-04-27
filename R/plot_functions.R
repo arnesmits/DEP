@@ -91,8 +91,8 @@ plot_single <- function(data, protein, type) {
         # Plot the centered enrichment values for the replicates as well as the mean
         p1 <- ggplot(df, aes(condition, val, col = replicate)) +
           geom_hline(yintercept = 0) +
-          stat_summary(fun.y = "mean", colour = "black", size = 0,
-                       geom = "bar", fill = "black") +
+          stat_summary(fun.y = "mean", colour = "darkgrey", size = 0,
+                       geom = "bar", fill = "darkgrey") +
           geom_point(shape = 17, size = 4) +
           labs(title = unique(df$rowname),
                x = "Baits", y = "Enrichment (log2)") +
