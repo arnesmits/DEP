@@ -28,8 +28,8 @@ ui <- shinyUI(
 		dashboardBody(
 		  helpText("Please cite: "),
 		  fluidRow(
-				box(numericInput("p", "P value cut off", min = 0.0001, max = 0.1, value = 0.05), width = 2),
-				box(numericInput("lfc", "Fold change cut off (log2)", min = 0, max = 10, value = 1), width = 2),
+				box(numericInput("p", "adj. P value", min = 0.0001, max = 0.1, value = 0.05), width = 2),
+				box(numericInput("lfc", "Log2 fold change", min = 0, max = 10, value = 1), width = 2),
 				infoBoxOutput("signBox"),
 				box(radioButtons("pres", "Data presentation", c("contrast", "centered"), selected = "contrast"), width = 2),
 				box(radioButtons("contrasts", "Contrasts", c("control", "all"), selected = "control"), width = 2)
@@ -186,7 +186,7 @@ server <- shinyServer(function(input, output) {
 
     ### Interactive UI functions ### ----------------------------------------------------------------------------------------------
     output$downloadTable <- renderUI({
-      selectizeInput("dataset", "Choose a dataset to download" , c("results","significant_proteins","displayed_subset","full_dataset"))
+      selectizeInput("dataset", "Choose a dataset to save" , c("results","significant_proteins","displayed_subset","full_dataset"))
     })
 
     output$downloadButton <- renderUI({

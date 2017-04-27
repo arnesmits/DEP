@@ -33,8 +33,8 @@ ui <- shinyUI(
 		dashboardBody(
 		  helpText("Please cite:",a("Smits et al (2013). Stoichiometry of chromatin-associated protein complexes revealed by label-free quantitative mass spectrometry-based proteomics. Nucleic Acids Research. 41, e28", href="http://nar.oxfordjournals.org/content/41/1/e28.full")),
 		  fluidRow(
-				box(numericInput("p", "P value cut off", min = 0.0001, max = 0.1, value = 0.05), width = 2),
-				box(numericInput("lfc", "Fold change cut off (log2)", min = 0, max = 10, value = 1), width = 2),
+		    box(numericInput("p", "adj. P value", min = 0.0001, max = 0.1, value = 0.05), width = 2),
+		    box(numericInput("lfc", "Log2 fold change", min = 0, max = 10, value = 1), width = 2),
 				infoBoxOutput("signBox"),
 				box(radioButtons("pres", "Data presentation", c("contrast", "centered"), selected = "contrast"), width = 2),
 				box(radioButtons("contrasts", "Contrasts", c("control", "all"), selected = "control"), width = 2)
@@ -219,7 +219,7 @@ server <- shinyServer(function(input, output) {
     output$button_stoi <- renderUI ({ if (!is.null(peptides())) { actionButton("stoichiometry", "Stoichiometry") } })
 
     output$downloadTable <- renderUI({
-      selectizeInput("dataset", "Choose a dataset to download" , c("results","significant_proteins","displayed_subset","full_dataset"))
+      selectizeInput("dataset", "Choose a dataset to save" , c("results","significant_proteins","displayed_subset","full_dataset"))
     })
 
     output$downloadButton1 <- renderUI({
