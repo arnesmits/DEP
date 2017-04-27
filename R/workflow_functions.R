@@ -14,6 +14,10 @@
 #' (the control sample would be most appropriate).
 #' @param type 'all' or 'control',
 #' The type of contrasts that will be generated.
+#' @param test Character,
+#' The contrasts that will be tested if type = "manual".
+#' These should be formatted as "SampleA_vs_SampleB" or
+#' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
 #' @param name Character,
 #' Name of the column representing gene names.
 #' @param ids 'Character,
@@ -32,8 +36,9 @@
 #'
 #' }
 #' @export
-TMT <- function(data, expdesign, fun, control, type, name = "gene_name",
-                ids = "protein_id", alpha = 0.05, lfc = 1) {
+TMT <- function(data, expdesign, fun, control, type, test = NULL,
+                name = "gene_name", ids = "protein_id",
+                alpha = 0.05, lfc = 1) {
     # Show error if inputs are not the required classes
     if(is.integer(alpha)) alpha <- as.numeric(alpha)
     if(is.integer(lfc)) lfc <- as.numeric(lfc)
@@ -67,6 +72,10 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name",
         stop("run TMT() with a valid type.\nValid types are: 'all', 'control'.",
              call. = FALSE)
     }
+
+    # If input is a tibble, convert to data.frame
+    if(tibble::is.tibble(data)) data <- as.data.frame(data)
+    if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
 
     # Filter the data for Reverse hits (indicated by '###' in the gene_name)
     data <- data[-grep("###", data$gene_name), ]
@@ -109,6 +118,10 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name",
 #' (the control sample would be most appropriate).
 #' @param type 'all' or 'control',
 #' The type of contrasts that will be generated.
+#' @param test Character,
+#' The contrasts that will be tested if type = "manual".
+#' These should be formatted as "SampleA_vs_SampleB" or
+#' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
 #' @param filter Character,
 #' Name(s) of the column(s) to be filtered on.
 #' @param name Character,
@@ -129,7 +142,7 @@ TMT <- function(data, expdesign, fun, control, type, name = "gene_name",
 #' results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
 #'
 #' @export
-LFQ <- function(data, expdesign, fun, control, type,
+LFQ <- function(data, expdesign, fun, control, type, test = NULL,
                 filter = c("Reverse", "Potential.contaminant"),
                 name = "Gene.names", ids = "Protein.IDs",
                 alpha = 0.05, lfc = 1) {
@@ -174,15 +187,21 @@ LFQ <- function(data, expdesign, fun, control, type,
              call. = FALSE)
     }
 
+    # If input is a tibble, convert to data.frame
+    if(tibble::is.tibble(data)) data <- as.data.frame(data)
+    if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
+
     # Filter out the positive proteins (indicated by '+')
     # in the pre-defined columns
     cols_filt <- grep(paste("^", filter, "$", sep = "", collapse = "|"),
                       colnames(data))  # The columns to filter on
     if (!is.null(cols_filt)) {
         if (length(cols_filt) == 1) {
-            data <- filter(data, data[, cols_filt] != "+")
+          rows <- which(data[, cols_filt] == "+")
+          if(length(rows) > 0) data <- data[-rows,]
         } else {
-            data <- filter(data, !apply(data[, cols_filt] == "+", 1, any))
+          rows <- which(apply(data[, cols_filt] == "+", 1, any))
+          if(length(rows) > 0) data <- data[-rows,]
         }
     }
 
@@ -330,6 +349,9 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
                     deparse(substitute(results)), "'."),
              call. = FALSE)
     }
+
+    # If input is a tibble, convert to data.frame
+    if(tibble::is.tibble(peptides)) peptides <- as.data.frame(peptides)
 
     # Merge iBAQ values for peptides with shared peptides
     ibaq <- merge_ibaq(results$data, peptides)

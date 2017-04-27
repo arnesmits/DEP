@@ -36,6 +36,9 @@ make_unique <- function(data, name, ids, delim = ";") {
          call. = FALSE)
   }
 
+  # If input is a tibble, convert to data.frame
+  if(tibble::is.tibble(data)) data <- as.data.frame(data)
+
   # Select the name and id columns,
   # take the first identifier per row and make unique names.
   # If there is no name, the ID will be taken.
@@ -43,7 +46,7 @@ make_unique <- function(data, name, ids, delim = ";") {
                            matches(paste("^", ids, "$", sep = ""))) %>%
     mutate(name = gsub(paste(delim, ".*", sep = ""), "", .[, 1]),
            ID = gsub(paste(delim, ".*", sep = ""), "", .[, 2]),
-           name = make.unique(ifelse(name == "", ID, name)))
+           name = make.unique(ifelse(name == "" | is.na(name), ID, name)))
   data_unique <- left_join(data, names)
   return(data_unique)
 }
@@ -85,6 +88,9 @@ make_se_parse <- function(data, columns) {
                 \nRun make_se_parse() with the appropriate columns as argument."),
          call. = FALSE)
   }
+
+  # If input is a tibble, convert to data.frame
+  if(tibble::is.tibble(data)) data <- as.data.frame(data)
 
   # Select the assay values
   rownames(data) <- data$name
@@ -163,6 +169,10 @@ make_se <- function(data, columns, expdesign) {
                 ") should be numeric.\nRun make_se_parse() with the appropriate columns as argument."),
          call. = FALSE)
   }
+
+  # If input is a tibble, convert to data.frame
+  if(tibble::is.tibble(data)) data <- as.data.frame(data)
+  if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
 
   # Select the assay data
   rownames(data) <- data$name

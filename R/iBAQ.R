@@ -41,6 +41,10 @@ merge_ibaq <- function(data, peptides) {
              call. = FALSE)
     }
 
+    # If input is a tibble, convert to data.frame
+    if(tibble::is.tibble(data)) data <- as.data.frame(data)
+    if(tibble::is.tibble(peptides)) peptides <- as.data.frame(peptides)
+
     # Filter for peptides not unique to a single protein group
     # and sort their protein group IDs
     shared_pep <- peptides %>% filter(Unique..Groups. == "no")
@@ -226,8 +230,8 @@ get_stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
                     deparse(substitute(data)), "'."),
              call. = FALSE)
     }
-    if (length(grep("_sign|_diff", colnames(row_data))) < 1) {
-        stop(paste0("'[contrast]_sign' and '[contrast]_diff' columns are not present in '",
+    if (length(grep("_p.adj|_diff", colnames(row_data))) < 1) {
+        stop(paste0("'[contrast]_p.adj' and '[contrast]_diff' columns are not present in '",
                     deparse(substitute(data)),
                     "'.\nRun test_diff() to obtain the required columns."),
              call. = FALSE)
