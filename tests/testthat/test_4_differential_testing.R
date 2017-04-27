@@ -6,9 +6,9 @@ test_that("test_diff throws error without valid input", {
   expect_error(test_diff(test_impute, "Ctrl", all))
   expect_error(test_diff(test_impute, "Ctrl", "ALL"))
   expect_error(test_diff(test_impute, "control", "all"))
-  expect_error(test_diff(test_impute, "control", "manual"))
-  expect_error(test_diff(test_impute, "control", "manual", Ubi4_vs_Ctrl))
-  expect_error(test_diff(test_impute, "control", "manual", "test"))
+  expect_error(test_diff(test_impute, "Ctrl", "manual"))
+  expect_error(test_diff(test_impute, "Ctrl", "manual", Ubi4_vs_Ctrl))
+  expect_error(test_diff(test_impute, "Ctrl", "manual", "test"))
 
   test_impute_error <- test_impute
   SummarizedExperiment::colData(test_impute_error) <- SummarizedExperiment::colData(test_impute_error)[,-(3)]

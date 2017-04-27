@@ -8,6 +8,7 @@ test_that("make_unique throws error without valid input", {
 
 test_that("make_unique returns a data.frame", {
   expect_is(make_unique(test_data, "Gene.names", "Protein.IDs"), "data.frame")
+  expect_is(make_unique(tibble::as_tibble(test_data), "Gene.names", "Protein.IDs"), "data.frame")
 })
 
 test_that("make_unique returns unique names", {
@@ -23,6 +24,7 @@ test_that("make_se_parse trows error without valid input", {
 
 test_that("make_se_parse returns a SummarizedExperiment", {
   expect_is(make_se_parse(test_unique, 21:32), "SummarizedExperiment")
+  expect_is(make_se_parse(tibble::as_tibble(test_unique), 21:32), "SummarizedExperiment")
 })
 
 test_that("make_se trows error without valid input", {
@@ -37,5 +39,7 @@ test_that("make_se trows error without valid input", {
 
 test_that("make_se returns a SummarizedExperiment", {
   expect_is(make_se(test_unique, 21:32, UbiLength_ExpDesign), "SummarizedExperiment")
+  expect_is(make_se(tibble::as_tibble(test_unique), 21:32, UbiLength_ExpDesign), "SummarizedExperiment")
+  expect_is(make_se(test_unique, 21:32, tibble::as_tibble(UbiLength_ExpDesign)), "SummarizedExperiment")
 })
 

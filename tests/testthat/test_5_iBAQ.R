@@ -12,6 +12,8 @@ test_that("merge_ibaq throws error without valid input", {
 
 test_that("merge_ibaq returns a data.frame", {
   expect_is(merge_ibaq(test_ibaq, test_ibaq_pep), "data.frame")
+  expect_is(merge_ibaq(tibble::as_tibble(test_ibaq), test_ibaq_pep), "data.frame")
+  expect_is(merge_ibaq(test_ibaq, tibble::as_tibble(test_ibaq_pep)), "data.frame")
 })
 
 test_that("merge_ibaq returns an object with the rigth dimensions and columns", {
@@ -34,8 +36,12 @@ test_that("get_stoichiometry throws error without valid input", {
   expect_error(get_stoichiometry(test_ibaq_sign_error1, test_ibaq_ibaq, "GFP_vs_WT", "Rbbp4", 1))
 
   test_ibaq_sign_error2 <- test_ibaq_sign
-  SummarizedExperiment::rowData(test_ibaq_sign_error2) <- SummarizedExperiment::rowData(test_ibaq_sign_error2)[,-c(27,28,30)]
+  SummarizedExperiment::rowData(test_ibaq_sign_error2) <- SummarizedExperiment::rowData(test_ibaq_sign_error2)[,-c(27,28)]
   expect_error(get_stoichiometry(test_ibaq_sign_error2, test_ibaq_ibaq, "GFP_vs_WT", "Rbbp4", 1))
+
+  test_ibaq_sign_error3 <- test_ibaq_sign
+  SummarizedExperiment::rowData(test_ibaq_sign_error3) <- SummarizedExperiment::rowData(test_ibaq_sign_error3)[,-(30)]
+  expect_error(get_stoichiometry(test_ibaq_sign_error3, test_ibaq_ibaq, "GFP_vs_WT", "Rbbp4", 1))
 
 })
 
@@ -75,12 +81,16 @@ test_that("plot_ibaq throws error without valid input", {
   expect_error(plot_ibaq(test_ibaq_sign_error1, "GFP_vs_WT", 3))
 
   test_ibaq_sign_error2 <- test_ibaq_sign
-  SummarizedExperiment::rowData(test_ibaq_sign_error2) <- SummarizedExperiment::rowData(test_ibaq_sign_error2)[,-c(27,28,30)]
+  SummarizedExperiment::rowData(test_ibaq_sign_error2) <- SummarizedExperiment::rowData(test_ibaq_sign_error2)[,-c(27,28)]
   expect_error(plot_ibaq(test_ibaq_sign_error2, "GFP_vs_WT", 3))
 
   test_ibaq_sign_error3 <- test_ibaq_sign
   SummarizedExperiment::rowData(test_ibaq_sign_error3) <- SummarizedExperiment::rowData(test_ibaq_sign_error3)[,-(16:21)]
   expect_error(plot_ibaq(test_ibaq_sign_error3, "GFP_vs_WT", 3))
+
+  test_ibaq_sign_error4 <- test_ibaq_sign
+  SummarizedExperiment::rowData(test_ibaq_sign_error4) <- SummarizedExperiment::rowData(test_ibaq_sign_error4)[,-(30)]
+  expect_error(plot_ibaq(test_ibaq_sign_error4, "GFP_vs_WT", 3))
 
 })
 

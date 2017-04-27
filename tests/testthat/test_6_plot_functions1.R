@@ -65,8 +65,12 @@ test_that("plot_volcano throws error without valid input", {
   expect_error(plot_volcano(test_sign_error1, "Ubi6_vs_Ctrl", labelsize = 5, add_names = TRUE))
 
   test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(26:34)]
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(26:31)]
   expect_error(plot_volcano(test_sign_error2, "Ubi6_vs_Ctrl", labelsize = 5, add_names = TRUE))
+
+  test_sign_error3 <- test_sign
+  SummarizedExperiment::rowData(test_sign_error3) <- SummarizedExperiment::rowData(test_sign_error3)[,-(32:34)]
+  expect_error(plot_volcano(test_sign_error3, "Ubi6_vs_Ctrl", labelsize = 5, add_names = TRUE))
 })
 
 test_that("plot_volcano returns a ggplot object", {
