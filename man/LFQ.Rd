@@ -4,7 +4,7 @@
 \alias{LFQ}
 \title{LFQ workflow}
 \usage{
-LFQ(data, expdesign, fun, control, type, filter = c("Reverse",
+LFQ(data, expdesign, fun, control, type, test = NULL, filter = c("Reverse",
   "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs",
   alpha = 0.05, lfc = 1)
 }
@@ -24,6 +24,11 @@ The sample name to which the contrasts are generated
 
 \item{type}{'all' or 'control',
 The type of contrasts that will be generated.}
+
+\item{test}{Character,
+The contrasts that will be tested if type = "manual".
+These should be formatted as "SampleA_vs_SampleB" or
+c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 
 \item{filter}{Character,
 Name(s) of the column(s) to be filtered on.}

@@ -4,7 +4,7 @@
 \alias{TMT}
 \title{TMT workflow}
 \usage{
-TMT(data, expdesign, fun, control, type, name = "gene_name",
+TMT(data, expdesign, fun, control, type, test = NULL, name = "gene_name",
   ids = "protein_id", alpha = 0.05, lfc = 1)
 }
 \arguments{
@@ -23,6 +23,11 @@ The sample name to which the contrasts are generated
 
 \item{type}{'all' or 'control',
 The type of contrasts that will be generated.}
+
+\item{test}{Character,
+The contrasts that will be tested if type = "manual".
+These should be formatted as "SampleA_vs_SampleB" or
+c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 
 \item{name}{Character,
 Name of the column representing gene names.}
