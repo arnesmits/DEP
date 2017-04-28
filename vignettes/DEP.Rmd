@@ -38,7 +38,7 @@ Install and load the package
 source("https://bioconductor.org/biocLite.R")
 biocLite("arnesmits/DEP")
 
-library(DEP)
+library("DEP")
 
 ```
 
@@ -71,7 +71,7 @@ The raw mass spectrometry data were first analyzed using MaxQuant ([Cox and Mann
 
 ```{r load data}
 # Loading a package required for data handling
-library(dplyr)
+library("dplyr")
 
 # The data is provided with the package
 data <- UbiLength
