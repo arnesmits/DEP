@@ -1,4 +1,4 @@
-context("7 - Plot functions2")
+context("7 - Plot functions_2")
 
 test_that("plot_normalization throws error without valid input", {
   expect_error(plot_normalization("test_filter", test_vsn))

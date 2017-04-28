@@ -41,6 +41,10 @@
 #'   \item \code{\link{plot_numbers}}: Barplot of proteins identified
 #'   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between conditions
 #'   \item \code{\link{plot_coverage}}: Barplot of the protein coverage in conditions
+#'   \item \code{\link{plot_pca}}: PCA plot of top variable proteins
+#'   \item \code{\link{plot_corr}}: Correlation matrix
+#'   \item \code{\link{plot_cond_freq}}: Barplot of number of significant conditions per protein
+#'   \item \code{\link{plot_cond_overlap}}: Barplot of number of proteins per condition(s)
 #' }
 #'
 #' @section iBAQ functions:
@@ -74,8 +78,9 @@
 #' @importFrom tibble rownames_to_column column_to_rownames
 #' @importFrom purrr map_df
 #' @importFrom readr parse_factor
-#' @importFrom stats median model.matrix rnorm sd
+#' @importFrom stats median model.matrix rnorm sd cor prcomp
 #' @importFrom utils combn write.table
+#' @importFrom broom tidy
 #'
 #'
 NULL

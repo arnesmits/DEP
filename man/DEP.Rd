@@ -54,6 +54,10 @@ The DEP package provides all functionalities to analyze label free protein quant
   \item \code{\link{plot_numbers}}: Barplot of proteins identified
   \item \code{\link{plot_frequency}}: Barplot of protein identification overlap between conditions
   \item \code{\link{plot_coverage}}: Barplot of the protein coverage in conditions
+  \item \code{\link{plot_pca}}: PCA plot of top variable proteins
+  \item \code{\link{plot_corr}}: Correlation matrix
+  \item \code{\link{plot_cond_freq}}: Barplot of number of significant conditions per protein
+  \item \code{\link{plot_cond_overlap}}: Barplot of number of proteins per condition(s)
 }
 }
 

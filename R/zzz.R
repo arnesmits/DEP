@@ -17,7 +17,10 @@
         "bin", "Freq", "Var1", "missval", "num",
         "cs", "cs_frac", "cluster", "index",
         "iBAQ_value", "Peptides", "lfc", "ibaq",
-        "LFC", "ymin", "ymax", "x", "y", "z"
+        "LFC", "ymin", "ymax", "x", "y", "z",
+
+        # plot_functions2.R globalVariables
+        "n_con", "conditions", "category"
         )
     )
   invisible()
