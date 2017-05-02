@@ -36,10 +36,7 @@ Install and load the package
 ```{r install, eval = FALSE}
 
 setInternet2(TRUE) # only for windows
-
-source("https://bioconductor.org/biocLite.R")
-biocLite("devtools")
-biocLite("arnesmits/DEP")
+source("http://www.huber.embl.de/users/smits/install_DEP.R")
 
 library("DEP")
 
