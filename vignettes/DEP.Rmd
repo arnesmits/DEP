@@ -35,7 +35,10 @@ Even easier to use are the interactive Shiny apps that are provided by the packa
 Install and load the package
 ```{r install, eval = FALSE}
 
+setInternet2(TRUE) # only for windows
+
 source("https://bioconductor.org/biocLite.R")
+biocLite("devtools")
 biocLite("arnesmits/DEP")
 
 library("DEP")

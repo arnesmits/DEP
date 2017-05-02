@@ -42,9 +42,9 @@ Imports: ggplot2,
     grid,
     stats,
     utils,
-    stringr
-RoxygenNote: 6.0.1
-Suggests: testthat,
+    stringr,
     knitr
+RoxygenNote: 6.0.1
+Suggests: testthat
 biocViews: Proteomics, MassSpectrometry, DifferentialExpression
 VignetteBuilder: knitr
