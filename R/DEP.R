@@ -15,7 +15,7 @@
 #'   \item \code{\link{iBAQ}}: iBAQ-based stoichiometry workflow
 #' }
 #'
-#' @section Functions:
+#' @section Main functions:
 #' \itemize{
 #'   \item \code{\link{make_unique}}: Generate unique names
 #'   \item \code{\link{make_se_parse}}: Turn data.frame into SummarizedExperiment by parsing column names
@@ -52,6 +52,13 @@
 #'   \item \code{\link{merge_ibaq}}: Merge iBAQ intensities of protein groups with shared peptides
 #'   \item \code{\link{get_stoichiometry}}: Calculate relative stoichiometry of all significant proteins
 #'   \item \code{\link{plot_stoichiometry}}: Barplot of relative stoichiometries
+#' }
+#'
+#' @section Additional functions:
+#' \itemize{
+#'   \item \code{\link{se2msn}}: SummarizedExperiment to MSnSet object conversion
+#'   \item \code{\link{manual_impute}}: Imputation by random draws from a manually defined distribution
+#'   \item \code{\link{get_prefix}}: Obtain the longest common prefix
 #' }
 #'
 #' @section Example data:
