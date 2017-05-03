@@ -12,7 +12,7 @@ make_se_parse(data, columns)
 Protein table with unique names (in column 'name')
 which will be turned into a SummarizedExperiment.}
 
-\item{columns}{Vector of integers,
+\item{columns}{Integer vector,
 Column numbers indicating the columns containing assay data.}
 }
 \value{

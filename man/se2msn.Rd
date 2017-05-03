@@ -14,7 +14,7 @@ Data object which will be turned into a MSnSet object.}
 A MSnSet object.
 }
 \description{
-\code{se2msn} generats a MSnSet object from a SummarizedExperiment object.
+\code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
 }
 \examples{
 data <- UbiLength
