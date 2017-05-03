@@ -136,7 +136,7 @@ server <- shinyServer(function(input, output) {
              selectizeInput("filt", "Filter on columns" , colnames(data()), multiple = TRUE, selected = c("Reverse","Potential.contaminant")),
              if (input$anno == "columns" & !is.null(data())) {
                cols <- grep("^LFQ", colnames(data()))
-               prefix <- getCommonPrefix(data()[,cols] %>% colnames())
+               prefix <- get_prefix(data()[,cols] %>% colnames())
                selectizeInput("control", "Control", choices=make.names(colnames(data())[cols] %>% gsub(prefix,"",.) %>% substr(., 1, nchar(.)-1)))
              },
              if (input$anno == "expdesign" & !is.null(expdesign())) { selectizeInput("control", "Control", choices=make.names(expdesign()$condition)) }
