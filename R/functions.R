@@ -52,77 +52,6 @@ make_unique <- function(data, name, ids, delim = ";") {
 }
 
 #' Data.frame to SummarizedExperiment object
-#' conversion using parsing from column names
-#'
-#' \code{make_se_parse} creates a SummarizedExperiment object
-#' based on a single data.frame.
-#'
-#' @param data Data.frame,
-#' Protein table with unique names (in column 'name')
-#' which will be turned into a SummarizedExperiment.
-#' @param columns Vector of integers,
-#' Column numbers indicating the columns containing assay data.
-#' @return A SummarizedExperiment object
-#' with log2-transformed values.
-#' @examples
-#' data <- UbiLength
-#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
-#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
-#'
-#' columns <- grep("LFQ.", colnames(data_unique))
-#' se <- make_se_parse(data_unique, columns)
-#' @export
-make_se_parse <- function(data, columns) {
-  # Show error if inputs are not the required classes
-  assertthat::assert_that(is.data.frame(data), is.integer(columns))
-
-  # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(data))) {
-    stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
-                "'.\nRun make_unique() to obtain the required columns."),
-         call. = FALSE)
-  }
-  if(any(!apply(data[, columns], 2, is.numeric))) {
-    stop(paste0("specified columns (", columns, ") should be numeric.
-                \nRun make_se_parse() with the appropriate columns as argument."),
-         call. = FALSE)
-  }
-
-  # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(data)) data <- as.data.frame(data)
-
-  # Select the assay values
-  rownames(data) <- data$name
-  raw <- data[, columns]
-  raw[raw == 0] <- NA
-  raw <- log2(raw)
-  colnames(raw) <- gsub(Rlibstree::getCommonPrefix(colnames(raw)), "",
-                        colnames(raw)) %>% make.names()
-
-  # Select the rowData
-  row_data <- data[, -columns]
-  rownames(row_data) <- row_data$name
-
-  # Generate the colData
-  col_data <- data.frame(label = colnames(raw), stringsAsFactors = FALSE) %>%
-    mutate(condition = substr(label, 1, nchar(label) - 1),
-           replicate = substr(label, nchar(label), nchar(label))) %>%
-    unite(ID, condition, replicate, remove = FALSE)
-  rownames(col_data) <- col_data$ID
-  colnames(raw) <- col_data$ID[
-    lapply(col_data$label, function(x) grep(x, colnames(raw)))
-    %>% unlist()]
-  raw <- raw[, !is.na(colnames(raw))]
-
-  # Generate the SummarizedExperiment object
-  dataset <- SummarizedExperiment(assays = as.matrix(raw),
-                                  colData = col_data,
-                                  rowData = row_data)
-  return(dataset)
-}
-
-#' Data.frame to SummarizedExperiment object
 #' conversion using an experimental design
 #'
 #' \code{make_se} creates a SummarizedExperiment object
@@ -131,7 +60,7 @@ make_se_parse <- function(data, columns) {
 #' @param data Data.frame,
 #' Protein table with unique names (in column 'name')
 #' which will be turned into a SummarizedExperiment.
-#' @param columns Vector of integers,
+#' @param columns Integer vector,
 #' Column numbers indicating the columns containing assay data.
 #' @param expdesign Data.frame,
 #' Experimental design containing 'label', 'condition'
@@ -197,6 +126,127 @@ make_se <- function(data, columns, expdesign) {
   # Generate the SummarizedExperiment object
   dataset <- SummarizedExperiment(assays = as.matrix(raw),
                                   colData = expdesign,
+                                  rowData = row_data)
+  return(dataset)
+}
+
+#' Obtain the longest common prefix
+#'
+#' \code{get_prefix} returns the longest common prefix
+#' of the words supplied.
+#'
+#' @param words Character vector,
+#' A list of the words.
+#' @return A character vector containing the prefix.
+#' @examples
+#' data <- UbiLength
+#' columns <- grep("LFQ.", colnames(data))
+#'
+#' names <- colnames(data[, columns])
+#' get_prefix(names)
+#'
+#' @export
+get_prefix <- function(words) {
+  # Show error if input is not the required class
+  assertthat::assert_that(is.character(words))
+
+  # Show error if 'words' contains 1 or less elements
+  if(length(words) <= 1) {
+    stop(paste0("'", deparse(substitute(words)),
+                "' should contain more than one element."))
+  }
+
+  # Show error if 'words' contains NA
+  if(any(is.na(words))) {
+    stop(paste0("'", deparse(substitute(words)),
+                "' contains NA(s)."))
+  }
+
+  # Truncate words to smallest name
+  minlen <- min(nchar(words))
+  truncated <- substr(words, 1, minlen)
+
+  # Show error if one of the elements is shorter than one character
+  if(minlen <= 1) {
+    stop("At least one of the elements is too short.")
+  }
+
+  # Get identifical characters
+  mat <- data.frame(strsplit(truncated, ""), stringsAsFactors = FALSE)
+  identical <- apply(mat, 1, function(x) length(unique(x)) == 1)
+
+  # Obtain the longest common prefix
+  prefix <- as.logical(cumprod(identical))
+  paste(mat[prefix, 1], collapse = "")
+}
+
+#' Data.frame to SummarizedExperiment object
+#' conversion using parsing from column names
+#'
+#' \code{make_se_parse} creates a SummarizedExperiment object
+#' based on a single data.frame.
+#'
+#' @param data Data.frame,
+#' Protein table with unique names (in column 'name')
+#' which will be turned into a SummarizedExperiment.
+#' @param columns Integer vector,
+#' Column numbers indicating the columns containing assay data.
+#' @return A SummarizedExperiment object
+#' with log2-transformed values.
+#' @examples
+#' data <- UbiLength
+#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
+#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' columns <- grep("LFQ.", colnames(data_unique))
+#' se <- make_se_parse(data_unique, columns)
+#' @export
+make_se_parse <- function(data, columns) {
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(is.data.frame(data), is.integer(columns))
+
+  # Show error if inputs do not contain required columns
+  if(any(!c("name", "ID") %in% colnames(data))) {
+    stop(paste0("'name' and/or 'ID' columns are not present in '",
+                deparse(substitute(data)),
+                "'.\nRun make_unique() to obtain the required columns."),
+         call. = FALSE)
+  }
+  if(any(!apply(data[, columns], 2, is.numeric))) {
+    stop(paste0("specified columns (", columns, ") should be numeric.
+                \nRun make_se_parse() with the appropriate columns as argument."),
+         call. = FALSE)
+  }
+
+  # If input is a tibble, convert to data.frame
+  if(tibble::is.tibble(data)) data <- as.data.frame(data)
+
+  # Select the assay values
+  rownames(data) <- data$name
+  raw <- data[, columns]
+  raw[raw == 0] <- NA
+  raw <- log2(raw)
+  colnames(raw) <- gsub(get_prefix(colnames(raw)), "",
+                        colnames(raw)) %>% make.names()
+
+  # Select the rowData
+  row_data <- data[, -columns]
+  rownames(row_data) <- row_data$name
+
+  # Generate the colData
+  col_data <- data.frame(label = colnames(raw), stringsAsFactors = FALSE) %>%
+    mutate(condition = substr(label, 1, nchar(label) - 1),
+           replicate = substr(label, nchar(label), nchar(label))) %>%
+    unite(ID, condition, replicate, remove = FALSE)
+  rownames(col_data) <- col_data$ID
+  colnames(raw) <- col_data$ID[
+    lapply(col_data$label, function(x) grep(x, colnames(raw)))
+    %>% unlist()]
+  raw <- raw[, !is.na(colnames(raw))]
+
+  # Generate the SummarizedExperiment object
+  dataset <- SummarizedExperiment(assays = as.matrix(raw),
+                                  colData = col_data,
                                   rowData = row_data)
   return(dataset)
 }
@@ -358,7 +408,7 @@ manual_impute <- function(data, scale = 0.3, shift = 1.8) {
 
 #' SummarizedExperiment to MSnSet object conversion
 #'
-#' \code{se2msn} generats a MSnSet object from a SummarizedExperiment object.
+#' \code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
 #'
 #' @param data SummarizedExperiment,
 #' Data object which will be turned into a MSnSet object.
