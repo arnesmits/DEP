@@ -71,5 +71,6 @@ theme_DEP2 <- function() {
     theme <- theme_DEP1()
     theme$axis.text.x$angle <- 90
     theme$axis.text.x$hjust <- 1
+    theme$axis.text.x$vjust <- 0.5
     return(theme)
 }
