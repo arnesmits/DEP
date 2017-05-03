@@ -60,6 +60,6 @@ test_that("plot_cond_overlap throws error without valid input", {
   expect_error(plot_cond_overlap(test_sign_error2))
 })
 
-test_that("plot_cond_freq returns a ggplot object", {
-  expect_is(plot_cond_overlap(test_sign), "ggplot")
+test_that("plot_cond_freq returns a grob object", {
+  expect_is(plot_cond_overlap(test_sign), "grob")
 })

@@ -91,7 +91,7 @@ plot_pca <- function(data, x = 1, y = 2, n = 500) {
   pca_df$replicate <- as.factor(pca_df$replicate)
   ggplot(pca_df, aes(x = x, y = y, col = condition, shape = replicate)) +
     geom_point(size = 6) +
-    labs(title = "PCA plot",
+    labs(title = paste0("PCA plot - top ", n, " variable proteins"),
          x = colnames(pca_df)[PC_cols[x]],
          y = colnames(pca_df)[PC_cols[y]]) +
     theme_DEP1()
@@ -234,7 +234,7 @@ plot_corr <- function(data, significant = TRUE, lower = -1, upper = 1, pal = "PR
 #' results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
 #' signif <- results$signif # get the signifcance object
 #'
-#' # plot pca
+#' # plot frequencies
 #' plot_cond_freq(signif)
 #'
 #' # or perform the step-by-step analysis
@@ -361,8 +361,13 @@ plot_cond_overlap <- function(data) {
   cols <- grep("_significant", colnames(row_data))
   colnames(row_data)[cols] <- gsub("_significant", "", colnames(row_data)[cols])
 
+  # Rename column names
+  row_data_renamed <- row_data
+  colnames(row_data_renamed)[cols] <- LETTERS[seq(to = length(cols))]
+  legend <- data.frame(symbol = colnames(row_data_renamed)[cols], names = colnames(row_data)[cols])
+
   # Get co-occurence matrix
-  df <- select(row_data, name, ID, cols)
+  df <- select(row_data_renamed, name, ID, cols)
   counts <- table(df[,3:(length(cols)+2)]) %>%
     tidy() %>%
     filter(Freq > 0)
@@ -380,12 +385,24 @@ plot_cond_overlap <- function(data) {
     arrange(n_con, conditions)
   counts$conditions <- parse_factor(counts$conditions, levels = counts$conditions)
 
+  if(nrow(counts) <= 40 ) {
+    labelsize = 12
+  } else {
+    labelsize = 12 / (nrow(counts) / 40)
+  }
+
   # Plot conditions overlap histogram
-  ggplot(counts, aes(x = conditions, y = Freq)) +
+  p1 <- ggplot(counts, aes(x = conditions, y = Freq)) +
     geom_col(fill = "black") +
-    scale_x_discrete(labels = function(x) stringr::str_wrap(x, width = 10)) +
     labs(title = "Overlap between conditions",
-         x = "Condition(s)",
+         x = "Conditions",
          y = "Number of Proteins") +
-    theme_DEP1()
+    theme_DEP2() +
+    theme(axis.text=element_text(size = labelsize))
+
+  # Legend table
+  ttheme <- gridExtra::ttheme_minimal(
+    core=list(fg_params=list(hjust=0, x=0.1)))
+  p2 <- gridExtra::tableGrob(legend, theme = ttheme, rows = NULL, cols = NULL)
+  gridExtra::grid.arrange(p1, p2, ncol = 2, widths = c(0.8, 0.2))
 }

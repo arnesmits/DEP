@@ -27,7 +27,7 @@ exp_design <- UbiLength_ExpDesign
 results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
 signif <- results$signif # get the signifcance object
 
-# plot pca
+# plot frequencies
 plot_cond_freq(signif)
 
 # or perform the step-by-step analysis
