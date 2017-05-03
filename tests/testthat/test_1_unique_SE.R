@@ -15,19 +15,7 @@ test_that("make_unique returns unique names", {
   expect_false(any(duplicated(make_unique(test_data, "Gene.names", "Protein.IDs")$name)))
 })
 
-test_that("make_se_parse trows error without valid input", {
-  expect_error(make_se_parse("test_unique", 21:32))
-  expect_error(make_se_parse(test_unique, "21:32"))
-  expect_error(make_se_parse(test_unique, 1:10))
-  expect_error(make_se_parse(test_unique[,-(36:37)], 21:32))
-})
-
-test_that("make_se_parse returns a SummarizedExperiment", {
-  expect_is(make_se_parse(test_unique, 21:32), "SummarizedExperiment")
-  expect_is(make_se_parse(tibble::as_tibble(test_unique), 21:32), "SummarizedExperiment")
-})
-
-test_that("make_se trows error without valid input", {
+test_that("make_se throws error without valid input", {
   expect_error(make_se("test_unique", 21:32, UbiLength_ExpDesign))
   expect_error(make_se(test_unique, "21:32", UbiLength_ExpDesign))
   expect_error(make_se("test_unique", 21:32, "UbiLength_ExpDesign"))
@@ -43,3 +31,26 @@ test_that("make_se returns a SummarizedExperiment", {
   expect_is(make_se(test_unique, 21:32, tibble::as_tibble(UbiLength_ExpDesign)), "SummarizedExperiment")
 })
 
+test_that("get_prefix throws error without valid input", {
+  words <- c("AB", "ABC", "ABCD")
+  expect_error(get_prefix(10))
+  expect_error(get_prefix("words"))
+  expect_error(get_prefix(c(words, NA)))
+  expect_error(get_prefix(c(words, "A")))
+})
+
+test_that("get_prefix returns a character object", {
+  expect_is(get_prefix(c("AB", "ABC", "ABCD")), "character")
+})
+
+test_that("make_se_parse throws error without valid input", {
+  expect_error(make_se_parse("test_unique", 21:32))
+  expect_error(make_se_parse(test_unique, "21:32"))
+  expect_error(make_se_parse(test_unique, 1:10))
+  expect_error(make_se_parse(test_unique[,-(36:37)], 21:32))
+})
+
+test_that("make_se_parse returns a SummarizedExperiment", {
+  expect_is(make_se_parse(test_unique, 21:32), "SummarizedExperiment")
+  expect_is(make_se_parse(tibble::as_tibble(test_unique), 21:32), "SummarizedExperiment")
+})
