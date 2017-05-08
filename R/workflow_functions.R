@@ -2,9 +2,9 @@
 #'
 #' \code{TMT} is a wrapper function running the
 #' entire analysis workflow for TMT-based proteomics data.
-#' Protein results tables from
-#' [IsobarQuant](http://www.nature.com/nprot/journal/v10/n10/full/nprot.2015.101.html)
-#' are used as direct input.
+#' The protein results table from
+#' \href{http://www.nature.com/nprot/journal/v10/n10/full/nprot.2015.101.html}{IsobarQuant}
+#' is used as direct input.
 #'
 #' @param data Data.frame,
 #' The data object.
@@ -109,9 +109,9 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
 #'
 #' \code{LFQ} is a wrapper function running the entire analysis workflow
 #' for label free quantification (LFQ)-based proteomics data.
-#' Protein results tables from
-#' [MaxQuant](http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html)
-#' are used as direct input.
+#' The protein result table from
+#' \href{http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html}{MaxQuant}
+#' is used as direct input.
 #'
 #' @param data Data.frame,
 #' The data object.
