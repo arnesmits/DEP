@@ -15,7 +15,7 @@ The DEP package provides all functionalities to analyze label free protein quant
 }
 }
 
-\section{Workflows}{
+\section{Wrapper functions}{
 
 \itemize{
   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow

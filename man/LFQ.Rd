@@ -53,6 +53,9 @@ A list of two data.frames:
 \description{
 \code{LFQ} is a wrapper function running the entire analysis workflow
 for label free quantification (LFQ)-based proteomics data.
+Protein results tables from
+[MaxQuant](http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html)
+are used as direct input.
 }
 \examples{
 

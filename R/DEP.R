@@ -7,7 +7,7 @@
 #'   \item \code{\link{run_app}}: Shiny apps for interactive analysis
 #' }
 #'
-#' @section Workflows:
+#' @section Wrapper functions:
 #' \itemize{
 #'   \item \code{\link{LFQ}}: Label-free quantification (LFQ) workflow
 #'   \item \code{\link{TMT}}: Tandem-mass-tags (TMT) workflow

@@ -49,6 +49,9 @@ A list of two data.frames:
 \description{
 \code{TMT} is a wrapper function running the
 entire analysis workflow for TMT-based proteomics data.
+Protein results tables from
+[IsobarQuant](http://www.nature.com/nprot/journal/v10/n10/full/nprot.2015.101.html)
+are used as direct input.
 }
 \examples{
 \dontrun{

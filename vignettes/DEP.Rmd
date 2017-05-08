@@ -196,7 +196,7 @@ plot_normalization(data_filt, data_norm)
 
 The remaining missing values in the dataset need to be imputed.
 The data can be missing at random (MAR), for example if proteins are quantified in some replicates but not in others.
-Data can also be missing not at random (MNAR), for example if proteins which are quantified in some replicates but not in others (e.g. in all replicates of the control).
+Data can also be missing not at random (MNAR), for example if proteins are not quantified in specific conditions (e.g. in all replicates of the control).
 MNAR can indicate that proteins are below the detection limit in specific samples, which could be very well the case in proteomics experiments.
 For these different conditions, different imputation methods have to be used, as described in the `r Biocpkg("MSnbase") ` vignette and more specifically in the _impute_ function descriptions.  
 
@@ -248,10 +248,10 @@ plot_imputation(data_norm, data_imp)
 
 ## Differential enrichment analysis
 
-Protein-wise linear models combined with empherical Bayes statistics are used for the differential enrichment analysis (or differential expression for analysis on expression levels).
+Protein-wise linear models combined with empirical Bayes statistics are used for the differential enrichment analysis (or differential expression for analysis on expression levels).
 The _test_diff_ wrapper function introduced here uses `r Biocpkg("limma") ` and automatically generates the contrasts to be tested.
 For the contrasts generation, the control sample has to be specified.
-Additionally, the types of contrasts to be produced need to be indicated, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control ("control"). Alternatively, the user can manually specify the contrasts to be tested (type = "manual") in the argument _test_. 
+Additionally, the types of contrasts to be produced need to be indicated, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control ("control"). Alternatively, the user can manually specify the contrasts to be tested (type = "manual"), which need to be specified in the argument _test_. 
 
 ``` {r statistics}
 # Differential enrichment analysis  based on linear models and empherical Bayes statistics
@@ -293,7 +293,7 @@ The heatmap shows a clustering of replicates and indicates that 4Ubi and 6Ubi en
 
 ***
 
-Alternatively, a heatmap can be plotted using the contrast, ie. the direct sample comparisons, as columns. Here, this emphasises the enrichment of ubiquitin interactors compared to the control sample.
+Alternatively, a heatmap can be plotted using the contrasts, ie. the direct sample comparisons, as columns. Here, this emphasises the enrichment of ubiquitin interactors compared to the control sample.
 
 ``` {r heatmap2, fig.height = 6, fig.width = 4}
 # Plot a heatmap of all significant proteins (rows) and the tested contrasts (columns)
@@ -349,7 +349,7 @@ This analysis is incorporated in the DEP package and starts with differential en
 
 ## Example dataset for stoichiometry analysis: EED interactors
 
-We analyze a label-free proteomics dataset in which EED interactors were characterized in embryonic stem cells ([Kloet et al. Nature Structural & Molecular Biology 2016](http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html)). Again, the raw mass spectrometry data were analyzed using MaxQuant ([Cox and Mann, Nat Biotech 2007](http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html)).
+We analyze a label-free proteomics dataset in which EED interactors were characterized in embryonic stem cells ([Kloet et al. Nat. Struct. Mol. Biol. 2016](http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html)). Again, the raw mass spectrometry data were analyzed using MaxQuant ([Cox and Mann, Nat Biotech 2007](http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html)).
 
 ## Loading and preparation of the data
 
@@ -410,7 +410,7 @@ plot_volcano(data_signif, contrast = "GFP_vs_WT")
 
 The relative stoiciometries can be calculated for the significantly enriched proteins ([Smits et al (2013)](http://nar.oxfordjournals.org/content/41/1/e28.full)).
 For this analysis, the identified peptides are needed ("peptides.txt" from MaxQuant) to identify all proteins that share peptides.
-Proteins that share peptides are merged to a single protein group.
+Proteins that share peptides are merged into a single protein group.
 
 ``` {r GFPip_stoi_1}
 
@@ -462,10 +462,12 @@ data_results <- LFQ(data, experimental_design, fun = "MinProb",
 This wrapper produces a list of objects, which can be used to create a report and/or for further analysis.
 The reports function produces two reports (pdf and html) and a results table, which are saved in a generated "Report" folder.
 
-``` {r report}
+``` {r report1}
 # See all objects saved within the results object
 names(data_results)
+```
 
+``` {r report2, results = "hide"}
 # Make a markdown report and save the results
 report(data_results)
 ```
