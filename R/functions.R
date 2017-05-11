@@ -117,7 +117,7 @@ make_se <- function(data, columns, expdesign) {
   colnames(raw) <- expdesign$ID[lapply(expdesign$label,
                                        function(x) grep(x, colnames(raw)))
                                 %>% unlist()]
-  raw <- raw[, !is.na(colnames(raw))]
+  raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
   # Select the rowData
   row_data <- data[, -columns]

@@ -26,6 +26,7 @@ test_that("make_se throws error without valid input", {
 })
 
 test_that("make_se returns a SummarizedExperiment", {
+  expect_is(make_se(test_unique, 21:32, UbiLength_ExpDesign[c(7:12,1:6),]), "SummarizedExperiment")
   expect_is(make_se(test_unique, 21:32, UbiLength_ExpDesign), "SummarizedExperiment")
   expect_is(make_se(tibble::as_tibble(test_unique), 21:32, UbiLength_ExpDesign), "SummarizedExperiment")
   expect_is(make_se(test_unique, 21:32, tibble::as_tibble(UbiLength_ExpDesign)), "SummarizedExperiment")
