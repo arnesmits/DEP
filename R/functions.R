@@ -114,9 +114,9 @@ make_se <- function(data, columns, expdesign) {
   expdesign <- mutate(expdesign, condition = make.names(condition)) %>%
     unite(ID, condition, replicate, remove = FALSE)
   rownames(expdesign) <- expdesign$ID
-  colnames(raw) <- expdesign$ID[lapply(expdesign$label,
-                                       function(x) grep(x, colnames(raw)))
-                                %>% unlist()]
+  colnames(raw)[lapply(expdesign$label,
+                       function(x) grep(x, colnames(raw)))
+                %>% unlist()] <- expdesign$ID
   raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
   # Select the rowData
