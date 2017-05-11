@@ -28,7 +28,7 @@ exp_design <- UbiLength_ExpDesign
 results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
 signif <- results$signif # get the signifcance object
 
-# plot pca
+# plot overlap
 plot_cond_overlap(signif)
 
 # or perform the step-by-step analysis
