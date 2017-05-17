@@ -10,7 +10,8 @@ theme_DEP1()
 ggplot theme
 }
 \description{
-\code{theme_DEP1} is the ggplot theme's used for plotting in \code{\link{DEP}} with horizontal x-axis labels. \code{theme_DEP2} has vertical x-axis labels.
+\code{theme_DEP1} is the default ggplot theme used for plotting
+in \code{\link{DEP}} with horizontal x-axis labels.
 }
 \examples{
 data <- UbiLength

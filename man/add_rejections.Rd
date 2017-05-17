@@ -9,13 +9,13 @@ add_rejections(diff, alpha = 0.05, lfc = 1)
 \arguments{
 \item{diff}{SummarizedExperiment,
 Proteomics dataset on which differential enrichment analysis
-has been performend by \code{\link{test_diff}}.}
+has been performed by \code{\link{test_diff}}.}
 
 \item{alpha}{Numeric,
-Sets the threshold for the false discovery rate (FDR).}
+Sets the threshold for the adjusted P value.}
 
 \item{lfc}{Numeric,
-Sets the threshold for the log2 fold change (lfc).}
+Sets the threshold for the log2 fold change.}
 }
 \value{
 A SummarizedExperiment object

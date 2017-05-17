@@ -3,7 +3,7 @@
 \docType{data}
 \name{GFPip_pep}
 \alias{GFPip_pep}
-\title{GFPip_pep - Peptides table of EED interactors in ESCs (GFP IP - MS dataset)}
+\title{GFPip_pep - Peptides table of the GFPip dataset}
 \format{A data.frame with 12750 observations and 29 variables:
 \describe{
   \item{Sequence}{Peptide sequence}
@@ -22,16 +22,21 @@
   \item{Protein.group.IDs}{The protein group ID of the protein to which the peptide is matched}
 }}
 \source{
-Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb complexes during stem-cell differentiation. Nature Structural & Molecular Biology:
-  \url{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}
+Kloet et al (2016).
+The dynamic interactome and genomic targets of
+Polycomb complexes during stem-cell differentiation.
+Nature Structural & Molecular Biology 23(7): 682-90.
+\href{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}{doi: 10.1038/nsmb.3248}
 }
 \usage{
 GFPip_pep
 }
 \value{
-A data.frame with the GFPip peptides table
+A data.frame.
 }
 \description{
-This dataset contains the identified peptides (MaxQuant output \url{http://www.maxquant.org}).
+The GFPip_pep object contains the identified peptides
+of the GFPip dataset. The dataset contains the peptides table from
+\href{http://www.maxquant.org}{MaxQuant}
 }
 \keyword{datasets}

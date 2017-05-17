@@ -17,15 +17,15 @@ Name of the column containing feature names.}
 Name of the column containing feature IDs.}
 
 \item{delim}{Character,
-Delimiter seperating the proteins within on protein group.}
+Delimiter separating the feature names within on protein group.}
 }
 \value{
-A data.frame containing addiontal variables
+A data.frame with the additional variables
 "name" and "ID" containing unique names and identifiers, respectively.
 }
 \description{
 \code{make_unique} generates unique identifiers
-for a proteomics dataset based on a "name" and "id" columns.
+for a proteomics dataset based on "name" and "id" columns.
 }
 \examples{
 data <- UbiLength

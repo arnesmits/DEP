@@ -8,7 +8,12 @@ test_diff(data, control, type, test = NULL)
 }
 \arguments{
 \item{data}{SummarizedExperiment,
-Proteomics data which will be tested for differentially enriched proteins.}
+Proteomics data with unique names and identifiers
+annotated in 'name' and 'ID' columns.
+Additionally, the colData should contain sample annotation including
+'label', 'condition' and 'replicate' columns.
+The appropriate columns and objects can be generated
+using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
 
 \item{control}{Character,
 The condition to which contrasts are generated
@@ -18,7 +23,7 @@ The condition to which contrasts are generated
 The type of contrasts that will be tested.
 This can be all possible pairwise comparisons ("all"),
 limited to the comparisons versus the control ("control"), or
-manually defined contrast(s) ("manual").}
+manually defined contrasts ("manual").}
 
 \item{test}{Character,
 The contrasts that will be tested if type = "manual".
@@ -26,13 +31,13 @@ These should be formatted as "SampleA_vs_SampleB" or
 c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 }
 \value{
-An SummarizedExperiment object
+A SummarizedExperiment object
 containing FDR estimates of differential expression.
 }
 \description{
 \code{test_diff} performs a differential enrichment test based on
-protein-wise linear models and empherical Bayes
-statistics (\code{\link[limma]{limma}}).
+protein-wise linear models and empirical Bayes
+statistics using \code{\link[limma]{limma}}.
 }
 \examples{
 data <- UbiLength

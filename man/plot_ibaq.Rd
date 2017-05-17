@@ -2,13 +2,13 @@
 % Please edit documentation in R/iBAQ.R
 \name{plot_ibaq}
 \alias{plot_ibaq}
-\title{Plot the iBAQ values versus log fold change}
+\title{Plot iBAQ values versus log fold change}
 \usage{
 plot_ibaq(data, contrast, labelsize = 3)
 }
 \arguments{
 \item{data}{SummarizedExperiment object,
-Proteomics dataset on which differential enrichment proteins
+Proteomics dataset on which differential enriched proteins
 are annotated by \code{\link{add_rejections}}.}
 
 \item{contrast}{Character,

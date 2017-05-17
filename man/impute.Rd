@@ -8,7 +8,10 @@ impute(data, fun, ...)
 }
 \arguments{
 \item{data}{SummarizedExperiment,
-Proteomics data for which missing values will be imputed.}
+Proteomics data with unique names and identifiers
+annotated in 'name' and 'ID' columns.
+The appropriate columns and objects can be generated
+using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
 
 \item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 "MinProb", "min", "zero", "mixed" or "nbavg",
@@ -16,7 +19,7 @@ Function used for data imputation based on \code{\link{manual_impute}}
 and \code{\link[MSnbase]{impute}}.}
 
 \item{...}{Additional arguments for imputation functions as depicted in
-\code{\link{manual_impute}} \code{\link[MSnbase]{impute}}.}
+\code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.}
 }
 \value{
 An imputed SummarizedExperiment object.

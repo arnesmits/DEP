@@ -9,11 +9,10 @@ make_se_parse(data, columns)
 }
 \arguments{
 \item{data}{Data.frame,
-Protein table with unique names (in column 'name')
-which will be turned into a SummarizedExperiment.}
+Protein table with unique names annotated in the 'name' column.}
 
 \item{columns}{Integer vector,
-Column numbers indicating the columns containing assay data.}
+Column numbers indicating the columns containing the assay data.}
 }
 \value{
 A SummarizedExperiment object

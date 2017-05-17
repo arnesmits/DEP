@@ -9,15 +9,15 @@ make_se(data, columns, expdesign)
 }
 \arguments{
 \item{data}{Data.frame,
-Protein table with unique names (in column 'name')
-which will be turned into a SummarizedExperiment.}
+Protein table with unique names annotated in the 'name' column.}
 
 \item{columns}{Integer vector,
-Column numbers indicating the columns containing assay data.}
+Column numbers indicating the columns containing the assay data.}
 
 \item{expdesign}{Data.frame,
-Experimental design containing 'label', 'condition'
-and 'replicate' information.}
+Experimental design with 'label', 'condition'
+and 'replicate' information.
+See \code{\link{UbiLength_ExpDesign}} for an example experimental design.}
 }
 \value{
 A SummarizedExperiment object

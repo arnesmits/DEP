@@ -12,10 +12,10 @@ Proteomics data for which missing values will be imputed.}
 
 \item{scale}{Numeric,
 Sets the width of the distribution relative to the
-SD of the original distribution.}
+standard deviation of the original distribution.}
 
 \item{shift}{Numeric,
-Sets the left-shift of the distribution in SD from
+Sets the left-shift of the distribution in standard deviation from
 the mean of the original distribution.}
 }
 \value{

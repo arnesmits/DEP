@@ -12,7 +12,7 @@ Proteomics dataset on which differential enrichment proteins
 are annotated by \code{\link{add_rejections}}.}
 }
 \value{
-An data.frame object
+A data.frame object
 containing all results variables from the performed analysis.
 }
 \description{

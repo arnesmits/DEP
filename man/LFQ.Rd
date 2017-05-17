@@ -51,9 +51,10 @@ A list of two data.frames:
 2) \code{data} object containing the full dataset.
 }
 \description{
-\code{LFQ} is a wrapper function running the entire analysis workflow
+\code{LFQ} is a wrapper function running the entire
+differential enrichment/expression analysis workflow
 for label free quantification (LFQ)-based proteomics data.
-The protein result table from
+The protein table from
 \href{http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html}{MaxQuant}
 is used as direct input.
 }

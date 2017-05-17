@@ -8,28 +8,28 @@ iBAQ(results, peptides, contrast, bait, level = 1)
 }
 \arguments{
 \item{results}{#' List of SummarizedExperiments
-obtained from \code{\link{LFQ}} function.}
+obtained from the \code{\link{LFQ}} wrapper function.}
 
 \item{peptides}{Data.frame,
 Peptide table from MaxQuant ('peptides.txt').}
 
 \item{contrast}{Character,
-The specific contrast to calculate the stroichiometry for.}
+The specific contrast for which to calculate the stroichiometry.}
 
 \item{bait}{Character,
 The name of the protein to which all other proteins
-will be scaled for the relative stoichiometry}
+will be scaled for the relative stoichiometry.}
 
 \item{level}{Numerical,
 The level to which the bait will be scaled}
 }
 \value{
-A data.frame with the relative stoichiometry data
+A data.frame with the relative stoichiometry data.
 }
 \description{
 \code{iBAQ} is a wrapper function running the entire analysis workflow
-for stoichiometry analysis using i
-ntensity-based absolute quantification (iBAQ)-based proteomics data.
+for stoichiometry analysis using
+intensity-based absolute quantification (iBAQ)-based proteomics data.
 }
 \examples{
 # load data and test for differentially enriched proteins

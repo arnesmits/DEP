@@ -1,8 +1,9 @@
 #' TMT workflow
 #'
 #' \code{TMT} is a wrapper function running the
-#' entire analysis workflow for TMT-based proteomics data.
-#' The protein results table from
+#' entire differential enrichment/expression analysis workflow
+#' for TMT-based proteomics data.
+#' The protein table from
 #' \href{http://www.nature.com/nprot/journal/v10/n10/full/nprot.2015.101.html}{IsobarQuant}
 #' is used as direct input.
 #'
@@ -107,9 +108,10 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
 
 #' LFQ workflow
 #'
-#' \code{LFQ} is a wrapper function running the entire analysis workflow
+#' \code{LFQ} is a wrapper function running the entire
+#' differential enrichment/expression analysis workflow
 #' for label free quantification (LFQ)-based proteomics data.
-#' The protein result table from
+#' The protein table from
 #' \href{http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html}{MaxQuant}
 #' is used as direct input.
 #'
@@ -237,11 +239,12 @@ LFQ <- function(data, expdesign, fun, control, type, test = NULL,
 
 #' Generate a markdown report
 #'
-#' \code{report} is a wrapper function running the entire analysis workflow
-#' for label free quantification (LFQ)-based proteomics data.
+#' \code{report} generates a report of the analysis performed
+#' by \code{\link{TMT}} and \code{\link{LFQ}} wrapper functions.
+#' Additionally, the results table is saved as a tab-delimited file.
 #'
 #' @param results List of SummarizedExperiments obtained
-#' from \code{\link{LFQ}} or \code{\link{TMT}} functions.
+#' from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.
 #' @return A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 #' @examples
 #' \dontrun{
@@ -292,21 +295,21 @@ report <- function(results) {
 #' iBAQ workflow
 #'
 #' \code{iBAQ} is a wrapper function running the entire analysis workflow
-#' for stoichiometry analysis using i
-#' ntensity-based absolute quantification (iBAQ)-based proteomics data.
+#' for stoichiometry analysis using
+#' intensity-based absolute quantification (iBAQ)-based proteomics data.
 #'
 #' @param results #' List of SummarizedExperiments
-#' obtained from \code{\link{LFQ}} function.
+#' obtained from the \code{\link{LFQ}} wrapper function.
 #' @param peptides Data.frame,
 #' Peptide table from MaxQuant ('peptides.txt').
 #' @param contrast Character,
-#' The specific contrast to calculate the stroichiometry for.
+#' The specific contrast for which to calculate the stroichiometry.
 #' @param bait Character,
 #' The name of the protein to which all other proteins
-#' will be scaled for the relative stoichiometry
+#' will be scaled for the relative stoichiometry.
 #' @param level Numerical,
 #' The level to which the bait will be scaled
-#' @return A data.frame with the relative stoichiometry data
+#' @return A data.frame with the relative stoichiometry data.
 #' @examples
 #' # load data and test for differentially enriched proteins
 #' data <- GFPip

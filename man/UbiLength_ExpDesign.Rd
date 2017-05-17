@@ -11,16 +11,20 @@
   \item{replicate}{Replicate number}
 }}
 \source{
-Zhang, Smits, van Tilburg, et al (2017). An interaction landscape of ubiquitin signaling. Molecular Cell:
-  \url{http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7}
+Zhang, Smits, van Tilburg, et al (2017).
+An interaction landscape of ubiquitin signaling.
+Molecular Cell 65(5): 941-955.
+\href{http://www.cell.com/molecular-cell/fulltext/S1097-2765(17)30004-7}{doi: 10.1016/j.molcel.2017.01.004}.
 }
 \usage{
 UbiLength_ExpDesign
 }
 \value{
-A data.frame with the UbiLength Experimental design
+A data.frame.
 }
 \description{
-This dataset annotates 12 different samples in 4 conditions and 3 replicates.
+The UbiLength_ExpDesign object annotates
+12 different samples of the UbiLength dataset
+in 4 conditions and 3 replicates.
 }
 \keyword{datasets}

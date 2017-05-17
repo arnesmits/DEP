@@ -13,7 +13,9 @@ run_app(app)
 Launches a browser with the shiny app
 }
 \description{
-\code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
+\code{run_app} launches an interactive shiny app
+for interactive differential enrichment/expression analysis
+of proteomics data.
 }
 \examples{
 \dontrun{

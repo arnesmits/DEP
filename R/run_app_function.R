@@ -1,6 +1,8 @@
 #' DEP shiny apps
 #'
-#' \code{run_app} Launches an interactive shiny app for interactive analysis of proteomics data.
+#' \code{run_app} launches an interactive shiny app
+#' for interactive differential enrichment/expression analysis
+#' of proteomics data.
 #'
 #' @param app 'LFQ', 'TMT' or 'iBAQ', The name of the app.
 #' @return Launches a browser with the shiny app

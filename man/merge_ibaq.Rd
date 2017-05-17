@@ -2,24 +2,24 @@
 % Please edit documentation in R/iBAQ.R
 \name{merge_ibaq}
 \alias{merge_ibaq}
-\title{Merge iBAQ intensities of protein groups based on shared peptides}
+\title{Merge iBAQ intensities}
 \usage{
 merge_ibaq(data, peptides)
 }
 \arguments{
 \item{data}{Data.frame,
-Protein table with unique names (in column 'name').}
+Protein table with unique names annotated in the 'name' column.}
 
 \item{peptides}{Data.frame,
-Peptide table from MaxQuant ('peptides.txt').}
+Peptides table from MaxQuant ('peptides.txt').}
 }
 \value{
 A data.frame with iBAQ intensities per protein group.
-All protein groups contain peptides unique to this group.
+Every protein group contains peptides unique to this group.
 }
 \description{
-\code{merge_ibaq} generates a data.frame with iBAQ intensities,
-which are merged for proteins with shared peptides.
+\code{merge_ibaq} generates a data.frame with merged iBAQ intensities
+for proteins with shared peptides.
 }
 \examples{
 data <- GFPip

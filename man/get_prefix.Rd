@@ -8,14 +8,14 @@ get_prefix(words)
 }
 \arguments{
 \item{words}{Character vector,
-A list of the words.}
+A list of words.}
 }
 \value{
 A character vector containing the prefix.
 }
 \description{
 \code{get_prefix} returns the longest common prefix
-of the words supplied.
+of the supplied words.
 }
 \examples{
 data <- UbiLength
@@ -23,5 +23,4 @@ columns <- grep("LFQ.", colnames(data))
 
 names <- colnames(data[, columns])
 get_prefix(names)
-
 }

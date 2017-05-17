@@ -26,7 +26,7 @@ exp_design <- UbiLength_ExpDesign
 
 # perform the differential enrichment test
 results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
-signif <- results$signif # get the signifcance object
+signif <- results$signif # get the significance object
 
 # plot overlap
 plot_cond_overlap(signif)

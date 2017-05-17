@@ -1,7 +1,7 @@
 #' Make unique names
 #'
 #' \code{make_unique} generates unique identifiers
-#' for a proteomics dataset based on a "name" and "id" columns.
+#' for a proteomics dataset based on "name" and "id" columns.
 #'
 #' @param data Data.frame,
 #' Protein table for which unique names will be created.
@@ -10,8 +10,8 @@
 #' @param ids Character,
 #' Name of the column containing feature IDs.
 #' @param delim Character,
-#' Delimiter seperating the proteins within on protein group.
-#' @return A data.frame containing addiontal variables
+#' Delimiter separating the feature names within on protein group.
+#' @return A data.frame with the additional variables
 #' "name" and "ID" containing unique names and identifiers, respectively.
 #' @examples
 #' data <- UbiLength
@@ -58,13 +58,13 @@ make_unique <- function(data, name, ids, delim = ";") {
 #' based on two data.frames: the protein table and experimental design.
 #'
 #' @param data Data.frame,
-#' Protein table with unique names (in column 'name')
-#' which will be turned into a SummarizedExperiment.
+#' Protein table with unique names annotated in the 'name' column.
 #' @param columns Integer vector,
-#' Column numbers indicating the columns containing assay data.
+#' Column numbers indicating the columns containing the assay data.
 #' @param expdesign Data.frame,
-#' Experimental design containing 'label', 'condition'
+#' Experimental design with 'label', 'condition'
 #' and 'replicate' information.
+#' See \code{\link{UbiLength_ExpDesign}} for an example experimental design.
 #' @return A SummarizedExperiment object
 #' with log2-transformed values.
 #' @examples
@@ -133,10 +133,10 @@ make_se <- function(data, columns, expdesign) {
 #' Obtain the longest common prefix
 #'
 #' \code{get_prefix} returns the longest common prefix
-#' of the words supplied.
+#' of the supplied words.
 #'
 #' @param words Character vector,
-#' A list of the words.
+#' A list of words.
 #' @return A character vector containing the prefix.
 #' @examples
 #' data <- UbiLength
@@ -144,7 +144,6 @@ make_se <- function(data, columns, expdesign) {
 #'
 #' names <- colnames(data[, columns])
 #' get_prefix(names)
-#'
 #' @export
 get_prefix <- function(words) {
   # Show error if input is not the required class
@@ -187,10 +186,9 @@ get_prefix <- function(words) {
 #' based on a single data.frame.
 #'
 #' @param data Data.frame,
-#' Protein table with unique names (in column 'name')
-#' which will be turned into a SummarizedExperiment.
+#' Protein table with unique names annotated in the 'name' column.
 #' @param columns Integer vector,
-#' Column numbers indicating the columns containing assay data.
+#' Column numbers indicating the columns containing the assay data.
 #' @return A SummarizedExperiment object
 #' with log2-transformed values.
 #' @examples
@@ -256,10 +254,12 @@ make_se_parse <- function(data, columns) {
 #' \code{filter_missval} filters a proteomics dataset based on missing values.
 #'
 #' @param data SummarizedExperiment,
-#' Proteomics data which will be filtered
-#' (generated using \code{\link{make_se}} or \code{\link{make_se_parse}}).
+#' Proteomics data with unique names and identifiers
+#' annotated in 'name' and 'ID' columns.
+#' The appropriate columns and objects can be generated
+#' using \code{\link{make_se}} or \code{\link{make_se_parse}}.
 #' @param thr Integer,
-#'  sets the threshold for the allowed number of missing values per condition.
+#' Sets the threshold for the allowed number of missing values per condition.
 #' @return A filtered SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -318,8 +318,8 @@ filter_missval <- function(data, thr = 0) {
 
 #' Normalization using vsn
 #'
-#' \code{normalize_vsn} performs normalization
-#' using \code{\link[vsn]{vsn-package}}.
+#' \code{normalize_vsn} performs variance stabilizing transformation
+#' using the \code{\link[vsn]{vsn-package}}.
 #'
 #' @param data SummarizedExperiment,
 #' Proteomics data with log2-transformed values
@@ -356,11 +356,11 @@ normalize_vsn <- function(data) {
 #' @param data SummarizedExperiment,
 #' Proteomics data for which missing values will be imputed.
 #' @param shift Numeric,
-#' Sets the left-shift of the distribution in SD from
+#' Sets the left-shift of the distribution in standard deviation from
 #' the mean of the original distribution.
 #' @param scale Numeric,
 #' Sets the width of the distribution relative to the
-#' SD of the original distribution.
+#' standard deviation of the original distribution.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -411,7 +411,7 @@ manual_impute <- function(data, scale = 0.3, shift = 1.8) {
 #' \code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
 #'
 #' @param data SummarizedExperiment,
-#' Data object which will be turned into a MSnSet object.
+#' Object which will be turned into a MSnSet object.
 #' @return A MSnSet object.
 #' @examples
 #' data <- UbiLength
@@ -446,13 +446,16 @@ se2msn <- function(data) {
 #' \code{impute} imputes missing values in a proteomics dataset.
 #'
 #' @param data SummarizedExperiment,
-#' Proteomics data for which missing values will be imputed.
+#' Proteomics data with unique names and identifiers
+#' annotated in 'name' and 'ID' columns.
+#' The appropriate columns and objects can be generated
+#' using \code{\link{make_se}} or \code{\link{make_se_parse}}.
 #' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
 #' and \code{\link[MSnbase]{impute}}.
 #' @param ... Additional arguments for imputation functions as depicted in
-#' \code{\link{manual_impute}} \code{\link[MSnbase]{impute}}.
+#' \code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -507,11 +510,16 @@ impute <- function(data, fun, ...) {
 #' Differential enrichment test
 #'
 #' \code{test_diff} performs a differential enrichment test based on
-#' protein-wise linear models and empherical Bayes
-#' statistics (\code{\link[limma]{limma}}).
+#' protein-wise linear models and empirical Bayes
+#' statistics using \code{\link[limma]{limma}}.
 #'
 #' @param data SummarizedExperiment,
-#' Proteomics data which will be tested for differentially enriched proteins.
+#' Proteomics data with unique names and identifiers
+#' annotated in 'name' and 'ID' columns.
+#' Additionally, the colData should contain sample annotation including
+#' 'label', 'condition' and 'replicate' columns.
+#' The appropriate columns and objects can be generated
+#' using \code{\link{make_se}} or \code{\link{make_se_parse}}.
 #' @param control Character,
 #' The condition to which contrasts are generated
 #' (a control condition would be most appropriate).
@@ -519,12 +527,12 @@ impute <- function(data, fun, ...) {
 #' The type of contrasts that will be tested.
 #' This can be all possible pairwise comparisons ("all"),
 #' limited to the comparisons versus the control ("control"), or
-#' manually defined contrast(s) ("manual").
+#' manually defined contrasts ("manual").
 #' @param test Character,
 #' The contrasts that will be tested if type = "manual".
 #' These should be formatted as "SampleA_vs_SampleB" or
 #' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
-#' @return An SummarizedExperiment object
+#' @return A SummarizedExperiment object
 #' containing FDR estimates of differential expression.
 #' @examples
 #' data <- UbiLength
@@ -672,11 +680,11 @@ test_diff <- function(data, control, type, test = NULL) {
 #'
 #' @param diff SummarizedExperiment,
 #' Proteomics dataset on which differential enrichment analysis
-#' has been performend by \code{\link{test_diff}}.
+#' has been performed by \code{\link{test_diff}}.
 #' @param alpha Numeric,
-#' Sets the threshold for the false discovery rate (FDR).
+#' Sets the threshold for the adjusted P value.
 #' @param lfc Numeric,
-#' Sets the threshold for the log2 fold change (lfc).
+#' Sets the threshold for the log2 fold change.
 #' @return A SummarizedExperiment object
 #' annotated with logical columns indicating significant proteins.
 #' @examples
@@ -754,7 +762,7 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' @param data SummarizedExperiment,
 #' Proteomics dataset on which differential enrichment proteins
 #' are annotated by \code{\link{add_rejections}}.
-#' @return An data.frame object
+#' @return A data.frame object
 #' containing all results variables from the performed analysis.
 #' @examples
 #' data <- UbiLength

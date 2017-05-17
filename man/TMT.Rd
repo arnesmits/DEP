@@ -48,8 +48,9 @@ A list of two data.frames:
 }
 \description{
 \code{TMT} is a wrapper function running the
-entire analysis workflow for TMT-based proteomics data.
-The protein results table from
+entire differential enrichment/expression analysis workflow
+for TMT-based proteomics data.
+The protein table from
 \href{http://www.nature.com/nprot/journal/v10/n10/full/nprot.2015.101.html}{IsobarQuant}
 is used as direct input.
 }

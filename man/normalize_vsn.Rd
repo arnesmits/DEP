@@ -15,8 +15,8 @@ Proteomics data with log2-transformed values
 A normalized SummarizedExperiment object.
 }
 \description{
-\code{normalize_vsn} performs normalization
-using \code{\link[vsn]{vsn-package}}.
+\code{normalize_vsn} performs variance stabilizing transformation
+using the \code{\link[vsn]{vsn-package}}.
 }
 \examples{
 data <- UbiLength

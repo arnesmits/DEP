@@ -11,16 +11,21 @@
   \item{replicate}{Replicate number}
 }}
 \source{
-Kloet et al (2016). The dynamic interactome and genomic targets of Polycomb complexes during stem-cell differentiation. Nature Structural & Molecular Biology:
-  \url{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}
+Kloet et al (2016).
+The dynamic interactome and genomic targets of
+Polycomb complexes during stem-cell differentiation.
+Nature Structural & Molecular Biology 23(7): 682-90.
+\href{http://www.nature.com/nsmb/journal/v23/n7/full/nsmb.3248.html}{doi: 10.1038/nsmb.3248}
 }
 \usage{
 GFPip_ExpDesign
 }
 \value{
-A data.frame with the GFPip experimental design
+A data.frame.
 }
 \description{
-This dataset annotates 6 different samples in 2 conditions and 3 replicates.
+The GFPip_ExpDesign object annotates
+6 different samples of the GFPip dataset
+in 2 conditions and 3 replicates.
 }
 \keyword{datasets}

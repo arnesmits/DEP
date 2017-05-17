@@ -1,6 +1,7 @@
 #' DEP ggplot theme 1
 #'
-#' \code{theme_DEP1} is the ggplot theme's used for plotting in \code{\link{DEP}} with horizontal x-axis labels. \code{theme_DEP2} has vertical x-axis labels.
+#' \code{theme_DEP1} is the default ggplot theme used for plotting
+#' in \code{\link{DEP}} with horizontal x-axis labels.
 #' @return ggplot theme
 #' @examples
 #' data <- UbiLength
@@ -50,7 +51,8 @@ theme_DEP1 <- function() {
 
 #' DEP ggplot theme 2
 #'
-#' \code{theme_DEP2} is the ggplot theme's used for plotting in \code{\link{DEP}} with vertical x-axis labels.
+#' \code{theme_DEP2} is the ggplot theme used for plotting
+#' in \code{\link{DEP}} with vertical x-axis labels.
 #' @return ggplot theme
 #' @examples
 #' data <- UbiLength

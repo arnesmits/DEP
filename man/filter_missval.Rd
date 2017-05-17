@@ -8,11 +8,13 @@ filter_missval(data, thr = 0)
 }
 \arguments{
 \item{data}{SummarizedExperiment,
-Proteomics data which will be filtered
-(generated using \code{\link{make_se}} or \code{\link{make_se_parse}}).}
+Proteomics data with unique names and identifiers
+annotated in 'name' and 'ID' columns.
+The appropriate columns and objects can be generated
+using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
 
 \item{thr}{Integer,
-sets the threshold for the allowed number of missing values per condition.}
+Sets the threshold for the allowed number of missing values per condition.}
 }
 \value{
 A filtered SummarizedExperiment object.

@@ -8,14 +8,15 @@ report(results)
 }
 \arguments{
 \item{results}{List of SummarizedExperiments obtained
-from \code{\link{LFQ}} or \code{\link{TMT}} functions.}
+from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.}
 }
 \value{
 A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 }
 \description{
-\code{report} is a wrapper function running the entire analysis workflow
-for label free quantification (LFQ)-based proteomics data.
+\code{report} generates a report of the analysis performed
+by \code{\link{TMT}} and \code{\link{LFQ}} wrapper functions.
+Additionally, the results table is saved as a tab-delimited file.
 }
 \examples{
 \dontrun{
