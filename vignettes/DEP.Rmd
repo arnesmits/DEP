@@ -32,7 +32,12 @@ Even easier to use are the interactive Shiny apps that are provided by the packa
 
 # Installation
 
-Install and load the package
+The most recent version of R can be downloaded from [CRAN](https://cran.r-project.org).
+Additional system requirements are [Pandoc](http://pandoc.org/index.html),
+as well as [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for Windows and 
+[NetCDF](https://www.unidata.ucar.edu/software/netcdf/) for Linux.   
+
+Start R and install the DEP package:
 ```{r install, eval = FALSE}
 
 setInternet2(TRUE) # only for windows
@@ -44,9 +49,10 @@ library("DEP")
 
 # Interactive analysis using the DEP Shiny apps
 
-The package contains two `r CRANpkg("shiny") ` apps, which allow for interactive analysis entailing the entire workflow described below.
-These are especially relevant for users with limited or no experience in R.
-Currently, there are three different apps. One for label-free quantification (LFQ)-based analysis (output from MaxQuant) and the second for tandem-mass-tags (TMT)-based analysis (output from IsobarQuant). The third app, is a extension of the LFQ-based analysis for iBAQ-based stoichiometry analysis.
+The package contains `r CRANpkg("shiny") ` apps, which allow for the interactive analysis entailing the entire workflow described below.
+These apps are especially relevant for users with limited or no experience in R.
+Currently, there are three different apps. One for label-free quantification (LFQ)-based analysis (output from MaxQuant) and the second for tandem-mass-tags (TMT)-based analysis (output from IsobarQuant).
+The third app is an extension of the LFQ-based analysis for iBAQ-based stoichiometry analysis.
 To run the apps, simply run this single command:
 
 ``` {r run_app, eval = FALSE}
@@ -128,7 +134,11 @@ Many [Bioconductor](http://www.bioconductor.org/) packages use SummarizedExperim
 This class of objects contains and coordinates the actual (assay) data, information on the samples as well as feature annotation.
 We can generate the SummarizedExperiment object from our data using two different approaches.
 We can extract sample information directly from the column names or we add sample information using an experimental design template.
-For our example dataset, an experimental design is included in the package.
+For our example dataset, an experimental design is included in the package.   
+
+The experimental design must contain 'label', 'condition' and 'replicate' columns.
+The 'label' column contains the identifiers of the different samples and they should correspond to the column names containing the assay data.
+The 'condition' and 'replicate' columns contain the annotation of these samples as defined by the user.
 
 ``` {r expdesign, echo = FALSE}
 # Display experimental design
@@ -152,9 +162,18 @@ data_se
 
 ## Filter on missing values
 
-The dataset contains proteins which are not quantified in all replicates. Some proteins are even only detected in a single replicate.
-This leaves our dataset with missing values, which need to be imputed. However, this should not be done for proteins that contain too many missing values.
-Therefore, we first filter out proteins that contain too many missing values. This is done by setting the threshold for the allowed number of missing values per condition in the _filter_missval_ function.
+The dataset contains proteins which are not quantified in all replicates.
+Some proteins are even only quantified in a single replicate.
+
+``` {r plot_data_noFilt, fig.width = 5, fig.height = 4}
+# Plot a barplot of the protein identification overlap between samples
+plot_frequency(data_se)
+```
+
+This leaves our dataset with missing values, which need to be imputed. 
+However, this should not be done for proteins that contain too many missing values.
+Therefore, we first filter out proteins that contain too many missing values. 
+This is done by setting the threshold for the allowed number of missing values per condition in the _filter_missval_ function.
 
 ``` {r filter_missval}
 # Filter for proteins that are identified in all replicates of at least one condition
@@ -165,21 +184,19 @@ data_filt <- filter_missval(data_se, thr = 0)
 data_filt2 <- filter_missval(data_se, thr = 1)
 ```
 
-After filtering the number of identified proteins per sample can be plotted as well as the overlap in identifications between samples.
+After filtering, the number of identified proteins per sample can be plotted as well as the overlap in identifications between samples.
 
-``` {r plot_data, , fig.width = 4, fig.height = 4}
+``` {r plot_data, fig.width = 4, fig.height = 4}
 # Plot a barplot of the number of identified proteins per samples
 plot_numbers(data_filt)
 # Plot a barplot of the protein identification overlap between samples
 plot_coverage(data_filt)
-# Plot a barplot of the protein identification overlap between samples
-plot_frequency(data_filt)
 ```
 
 ## Normalization
 
-The data is background corrected and normalized by variance stabilization transformation (`r Biocpkg("vsn") `). 
-
+The data is background corrected and normalized by variance stabilizing transformation (`r Biocpkg("vsn") `). 
+  
 ``` {r normalize}
 # Normalize the data
 data_norm <- normalize_vsn(data_filt)
@@ -196,7 +213,7 @@ plot_normalization(data_filt, data_norm)
 
 The remaining missing values in the dataset need to be imputed.
 The data can be missing at random (MAR), for example if proteins are quantified in some replicates but not in others.
-Data can also be missing not at random (MNAR), for example if proteins are not quantified in specific conditions (e.g. in all replicates of the control).
+Data can also be missing not at random (MNAR), for example if proteins are not quantified in specific conditions (e.g. in the control samples).
 MNAR can indicate that proteins are below the detection limit in specific samples, which could be very well the case in proteomics experiments.
 For these different conditions, different imputation methods have to be used, as described in the `r Biocpkg("MSnbase") ` vignette and more specifically in the _impute_ function descriptions.  
 
@@ -210,7 +227,7 @@ plot_missval(data_filt)
 This heatmap indicates that missing values are highly biased to specific samples.
 The example dataset is an affinity enrichment dataset of ubiquitin interactors, which is likely to have proteins which are below the detection limit in specific samples.
 These can be proteins that are specifically enriched in the ubiquitin purifications, but are not enriched in the controls samples, or vice versa.
-To check whether missing values are biased to lower intense proteins, the densities and cumulative sums are plotted for proteins with and without missing values.   
+To check whether missing values are biased to lower intense proteins, the densities and cumulative fractions are plotted for proteins with and without missing values.   
 
 ``` {r plot_detect, fig.height = 4, fig.width = 4}
 # Plot intensity distributions and cumulative fraction 
@@ -235,7 +252,7 @@ data_imp_man <- impute(data_norm, fun = "man", shift = 1.8, scale = 0.3)
 
 # Impute missing data using the k-nearest neighbour approach
 # (for MAR)
-data_imp_knn <- impute(data_norm, fun = "knn")
+data_imp_knn <- impute(data_norm, fun = "knn", rowmax = 0.9)
 
 ```
    
@@ -261,7 +278,7 @@ data_diff <- test_diff(data_imp, control = "Ctrl", type = "control")
 # Test all possible comparisons of samples
 data_diff_all_contrasts <- test_diff(data_imp, control = "Ctrl", type = "all")
 
-# Test manually defined comparison
+# Test manually defined comparisons
 data_diff_manual <- test_diff(data_imp, control = "Ctrl", 
     type = "manual", test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 ```
@@ -392,7 +409,7 @@ data_se <- make_se(data_unique, cols, expdesign)
 
 ## Filter on missing values, normalization and imputation
 
-As described in ["differential analysis"](#~differential~analysis), the dataset is filtered on missing values, variance stabilized and any remaining missing values are imputed.
+As described in ["differential analysis"](#differential-analysis), the dataset is filtered on missing values, variance stabilized and any remaining missing values are imputed.
 
 ``` {r GFPip_filt, fig.width = 4, fig.height = 4}
 
@@ -462,11 +479,11 @@ plot_stoichiometry(stoi, thr = 0.01)
 
 # Wrapper functions for the entire workflow
 
-The package also contains wrapper functions that entail the complete analysis workflow and generate a report. 
+The package contains wrapper functions that entail the complete analysis workflow and generate a report. 
 
 ## LFQ-based DEP analysis
 
-Differential enrichment analysis of label-free proteomics data can be performed by the _LFQ_ wrapper function.
+Differential enrichment analysis of label-free proteomics data can be performed using the _LFQ_ wrapper function.
 
 ``` {r LFQ}
 # The data is provided with the package 
@@ -479,12 +496,7 @@ data_results <- LFQ(data, experimental_design, fun = "MinProb",
 ```
 
 This wrapper produces a list of objects, which can be used to create a report and/or for further analysis.
-The reports function produces two reports (pdf and html) and a results table, which are saved in a generated "Report" folder.
-
-``` {r report1}
-# See all objects saved within the results object
-names(data_results)
-```
+The _report_ function produces two reports (pdf and html), a results table and a RData object, which are saved in a generated "Report" folder.
 
 ``` {r report2, results = "hide"}
 # Make a markdown report and save the results
@@ -492,6 +504,12 @@ report(data_results)
 ```
 
 The results generated by the LFQ function contain, among others, the _results_ object (data.frame object) and the _sign_ object (SummarizedExperiment object).
+
+``` {r report1}
+# See all objects saved within the results object
+names(data_results)
+```
+
 The _results_ object contains the essential results and the _sign_ object contains the full SummarizedExperiment object which can be used for further visualization.
 
 ``` {r LFQ_results}
@@ -560,7 +578,7 @@ TMTdata <- example_data
 Exp_Design <- example_Exp_Design
 
 # The wrapper function performs the full analysis
-TMTdata_results <- TMT(data, expdesign = Exp_Design, fun = "QRILC",
+TMTdata_results <- TMT(TMTdata, expdesign = Exp_Design, fun = "QRILC",
     control = "Con_", type = "control", alpha = 0.05, lfc = 1)
 ```
 
