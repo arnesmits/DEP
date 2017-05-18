@@ -73,8 +73,9 @@ plot_normalization(filt, norm)
 
 ## Missing values
 
-A heatmap of missing values to asses the type of missing data (random or not).
-If data is randomly missing, use the "knn" option for imputation. If the missing data is biased to certain samples (e.g. controls) which are expected to be devoid of certain proteins, use the "QRILC", "MinProb" or "man" options for imputation.
+To asses the type of missing data (random or not), a heatmap of missing values is plotted.
+If data is randomly missing, use the "knn" option for imputation.
+If the missing data is biased to certain samples (e.g. controls) which are expected to be depleted of certain proteins, use the "QRILC", "MinProb" or "man" options for imputation.
 
 
 ```{r missval, echo=FALSE, fig.width = 5, fig.height = 5}
@@ -89,6 +90,8 @@ Quantitative information of proteins with and without missing values.
 plot_detect(norm)
 ```
 
+\pagebreak
+
 Intensity distributions before and after imputation.
 
 ```{r imputation, echo=FALSE, fig.width = 5, fig.height = 5}
@@ -98,6 +101,18 @@ plot_imputation(norm, signif)
 \pagebreak
 
 ## Output plots of the data
+
+### PCA plot
+
+```{r, echo=FALSE, fig.width = 5.5, fig.height= 4}
+plot_pca(signif)
+```
+
+### Correlation matrix
+
+```{r, echo=FALSE, fig.width = 5.5, fig.height= 4}
+plot_corr(signif)
+```
 
 ### Heatmaps
 ```{r,echo=FALSE}
