@@ -104,8 +104,13 @@ plot_imputation(norm, signif)
 
 ### PCA plot
 
+```{r, echo=FALSE}
+num = 400
+if (nrow(signif) < 400) num = nrow(signif)
+```
+
 ```{r, echo=FALSE, fig.width = 5.5, fig.height= 4}
-plot_pca(signif)
+plot_pca(signif, n = num)
 ```
 
 ### Correlation matrix
