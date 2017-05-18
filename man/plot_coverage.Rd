@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_functions_frequencies.R
 \name{plot_coverage}
 \alias{plot_coverage}
-\title{Plot protein coverage in conditions}
+\title{Plot protein coverage}
 \usage{
 plot_coverage(data)
 }
@@ -16,7 +16,7 @@ Barplot of protein coverage in samples
 }
 \description{
 \code{plot_coverage} generates a barplot
-of the protein coverage in samples.
+of the protein coverage in all samples.
 }
 \examples{
 data <- UbiLength

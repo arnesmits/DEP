@@ -87,13 +87,14 @@ plot_frequency <- function(data) {
     labs(title = "Protein identifications overlap",
          x = "Identified in number of samples",
          y = "Number of ProteinGroups") +
-    theme_DEP1()
+    theme_DEP1() +
+    theme(legend.position="none")
 }
 
-#' Plot protein coverage in conditions
+#' Plot protein coverage
 #'
 #' \code{plot_coverage} generates a barplot
-#' of the protein coverage in samples.
+#' of the protein coverage in all samples.
 #'
 #' @param data ExpressionSet,
 #' Data object for which to plot observation frequency.
@@ -133,9 +134,10 @@ plot_coverage <- function(data) {
   ggplot(table, aes(x = "all", y = Freq, fill = Var1)) +
     geom_col(col = "white") +
     scale_fill_grey(start = 0.8, end = 0.2) +
-    labs(title = "Protein coverage in samples", x = "",
-         y = "Number of ProteinGroups") +
-    guides(fill = guide_legend(title = "samples")) +
+    labs(title = "Protein coverage",
+         x = "",
+         y = "Number of ProteinGroups",
+         fill = "samples") +
     theme_DEP1()
 }
 

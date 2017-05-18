@@ -95,7 +95,9 @@ plot_single <- function(data, protein, type) {
                    geom = "bar", fill = "darkgrey") +
       geom_point(shape = 17, size = 4) +
       labs(title = unique(df$rowname),
-           x = "Baits", y = "Enrichment (log2)") +
+           x = "Baits",
+           y = "Enrichment (log2)",
+           col = "rep") +
       theme_DEP2()
   }
   if(type == "contrast") {
@@ -115,7 +117,9 @@ plot_single <- function(data, protein, type) {
     p1 <- ggplot(df, aes(condition, LFC)) +
       geom_hline(yintercept = 0) +
       geom_bar(stat = "unique", size = 0, col = "black", fill = "black") +
-      labs(title = unique(df$rowname), x = "", y = "Enrichment (log2)") +
+      labs(title = unique(df$rowname),
+           x = "",
+           y = "Enrichment (log2)") +
       theme_DEP2()
   }
   p1
@@ -381,7 +385,9 @@ plot_volcano <- function(data, contrast, labelsize = 3, add_names = TRUE) {
       ggrepel::geom_text_repel(data = signif_prots,
                                aes(label = name),
                                size = labelsize,
-                               point.padding = unit(0.3, "lines")) +
+                               box.padding = unit(0.1, 'lines'),
+                               point.padding = unit(0.1, 'lines'),
+                               segment.size = 0.5) +
       geom_text(data = data.frame(), aes(x = c(Inf, -Inf),
                                          y = c(-Inf, -Inf),
                                          hjust = c(1, 0),
