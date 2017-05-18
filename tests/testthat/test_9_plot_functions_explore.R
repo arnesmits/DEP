@@ -1,4 +1,4 @@
-context("8 - Plot functions2")
+context("9 - Plot functions explore")
 
 test_that("plot_pca throws error without valid input", {
   expect_error(plot_pca("test_sign", x = 1, y = 2, n = 100))
@@ -30,36 +30,4 @@ test_that("plot_corr throws error without valid input", {
 
 test_that("plot_corr_matrix returns a ComplexHeatmap object", {
   expect_is(plot_corr(test_sign, TRUE, -1, 1, "PRGn", FALSE), "HeatmapList")
-})
-
-test_that("plot_cond_freq throws error without valid input", {
-  expect_error(plot_cond_freq("test_sign"))
-
-  test_sign_error <- test_sign
-  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(35)]
-  expect_error(plot_cond_freq(test_sign_error))
-
-  test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(32:34)]
-  expect_error(plot_cond_freq(test_sign_error2))
-})
-
-test_that("plot_cond_freq returns a ggplot object", {
-  expect_is(plot_cond_freq(test_sign), "ggplot")
-})
-
-test_that("plot_cond_overlap throws error without valid input", {
-  expect_error(plot_cond_overlap("test_sign"))
-
-  test_sign_error <- test_sign
-  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(35)]
-  expect_error(plot_cond_overlap(test_sign_error))
-
-  test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(32:34)]
-  expect_error(plot_cond_overlap(test_sign_error2))
-})
-
-test_that("plot_cond_freq returns a grob object", {
-  expect_is(plot_cond_overlap(test_sign), "grob")
 })

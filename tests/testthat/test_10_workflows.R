@@ -1,4 +1,4 @@
-context("8 - Workflows")
+context("10 - Workflows")
 
 test_that("LFQ throws error without valid input", {
   expect_error(LFQ("test_data", UbiLength_ExpDesign, "MinProb", "Ctrl", "control", filter = c("Reverse", "Potential.contaminant"),

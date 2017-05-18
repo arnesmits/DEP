@@ -1,4 +1,4 @@
-context("6 - Plot functions_1")
+context("6 - Plot functions results")
 
 test_that("plot_single throws error without valid input", {
   expect_error(plot_single("test_sign", "USP19", "centered"))
