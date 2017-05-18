@@ -289,6 +289,9 @@ report <- function(results) {
     write.table(table, paste(wd, "results.txt", sep = "/"),
                 row.names = FALSE, sep = "\t")
 
+    # Save the results object for later use
+    save(results, file = paste(wd, "results.RData", sep = "/"))
+
     cat(paste0("Report and results.txt file saved in: '", wd, "'"))
 }
 
