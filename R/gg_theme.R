@@ -23,7 +23,7 @@ theme_DEP1 <- function() {
 
     # Change plot title appearance
     theme$plot.title$face <- "bold"
-    theme$plot.title$size <- basesize + 4
+    theme$plot.title$size <- basesize + 2
     theme$plot.title$hjust <- 0.5
 
     # Change axis title appearance
