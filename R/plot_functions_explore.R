@@ -172,16 +172,17 @@ plot_corr <- function(data, significant = TRUE, lower = -1, upper = 1, pal = "PR
          call. = FALSE)
   }
 
-  # Check for significant column
-  if(!"significant" %in% colnames(rowData(data))) {
-    stop(paste0("'significant' column is not present in '",
-                deparse(substitute(data)),
-                "'.\nRun add_rejections() to obtain the required column."),
-         call. = FALSE)
-  }
-
   # Filter for significant proteins
   if(significant) {
+
+    # Check for significant column
+    if(!"significant" %in% colnames(rowData(data))) {
+      stop(paste0("'significant' column is not present in '",
+                  deparse(substitute(data)),
+                  "'.\nRun add_rejections() to obtain the required column."),
+           call. = FALSE)
+    }
+
     data <- data[rowData(data)$significant, ]
   }
 
