@@ -27,7 +27,7 @@ Functions are provided for data preparation, filtering, variance normalization a
 It also includes tools to check intermediate steps in the workflow, such as normalization and missing values imputation. 
 Finally, visualization tools are provided to explore the results, including heatmap, volcano plot and barplot representations. 
 Besides differential analysis, the package includes a set of functions to calculate relative stoichiometry, as originally described in [Smits et al (2013)](http://nar.oxfordjournals.org/content/41/1/e28.full). 
-For scientists with limited experience in R, the package also entails wrapper functions that entail the complete analysis workflow and generate a report (see the chapter on [Wrapper functions](#wrapper-functions-for-the-entire-workflow)). 
+For scientists with limited experience in R, the package also contains wrapper functions that entail the complete analysis workflow and generate a report (see the chapter on [Wrapper functions](#wrapper-functions-for-the-entire-workflow)). 
 Even easier to use are the interactive Shiny apps that are provided by the package (see the chapter on [Shiny apps](#interactive-analysis-using-the-dep-shiny-apps)).
 
 # Installation
