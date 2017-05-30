@@ -14,7 +14,7 @@ obtained from the \code{\link{LFQ}} wrapper function.}
 Peptide table from MaxQuant ('peptides.txt').}
 
 \item{contrast}{Character,
-The specific contrast for which to calculate the stroichiometry.}
+The specific contrast for which to calculate stoichiometries.}
 
 \item{bait}{Character,
 The name of the protein to which all other proteins

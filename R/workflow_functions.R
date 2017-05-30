@@ -306,7 +306,7 @@ report <- function(results) {
 #' @param peptides Data.frame,
 #' Peptide table from MaxQuant ('peptides.txt').
 #' @param contrast Character,
-#' The specific contrast for which to calculate the stroichiometry.
+#' The specific contrast for which to calculate stoichiometries.
 #' @param bait Character,
 #' The name of the protein to which all other proteins
 #' will be scaled for the relative stoichiometry.
