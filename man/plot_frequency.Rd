@@ -7,7 +7,7 @@
 plot_frequency(data)
 }
 \arguments{
-\item{data}{ExpressionSet,
+\item{data}{SummarizedExperiment,
 Data object for which to plot observation frequency.}
 }
 \value{
