@@ -24,7 +24,7 @@ The upper limit of the color scale.}
 \item{pal}{Character,
 The name of the color panel from \code{\link[RColorBrewer]{brewer.pal}}.}
 
-\item{pal_rev}{Boolean,
+\item{pal_rev}{Logical,
 Whether or not to invert the color palette.}
 }
 \value{

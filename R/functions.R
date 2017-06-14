@@ -532,6 +532,9 @@ impute <- function(data, fun, ...) {
 #' The contrasts that will be tested if type = "manual".
 #' These should be formatted as "SampleA_vs_SampleB" or
 #' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
+#' @param incl_repl Logical,
+#' Whether or not to add a blocking factor
+#' for the replicates in the design matrix.
 #' @return A SummarizedExperiment object
 #' containing FDR estimates of differential expression.
 #' @examples
@@ -551,11 +554,12 @@ impute <- function(data, fun, ...) {
 #' diff <- test_diff(imputed, "Ctrl", "manual",
 #'     test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 #' @export
-test_diff <- function(data, control, type, test = NULL) {
+test_diff <- function(data, control, type, test = NULL, incl_repl = FALSE) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(data, "SummarizedExperiment"),
                           is.character(control),
-                          is.character(type))
+                          is.character(type),
+                          is.logical(incl_repl))
 
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(rowData(data)))) {
@@ -581,14 +585,21 @@ test_diff <- function(data, control, type, test = NULL) {
 
   # Make an appropriate design matrix
   conditions <- factor(colData(data)$condition)
-  design <- model.matrix(~ 0 + conditions)
-  colnames(design) <- gsub("conditions", "", colnames(design))
+  replicate <- factor(colData(data)$replicate)
+  if(incl_repl) {
+    design <- model.matrix(~ 0 + conditions + replicate)
+    colnames(design) <- gsub("conditions", "", colnames(design))
+  } else {
+    design <- model.matrix(~ 0 + conditions)
+    colnames(design) <- gsub("conditions", "", colnames(design))
+  }
 
   # Generate contrasts to be tested
   # Either make all possible combinations ("all") or
   # only the contrast versus the control sample ("control")
+  conditions <- as.character(unique(conditions))
   if(type == "all") {
-    cntrst <- apply(combn(colnames(design), 2), 2,
+    cntrst <- apply(combn(conditions, 2), 2,
                     function(x) paste(x, collapse = " - "))
     # Make sure that contrast containing
     # the control sample have the control as denominator
@@ -600,7 +611,7 @@ test_diff <- function(data, control, type, test = NULL) {
     }
   }
   if(type == "control") {
-    cntrst <- paste(colnames(design)[!colnames(design) %in% control],
+    cntrst <- paste(conditions[!conditions %in% control],
                     control,
                     sep = " - ")
   }
@@ -613,12 +624,12 @@ test_diff <- function(data, control, type, test = NULL) {
     if(any(!unlist(strsplit(test, "_vs_")) %in% conditions)) {
       stop("run test_diff() with valid contrasts in 'test'",
            paste0(".\nValid contrasts should contain combinations of: '",
-                  paste0(unique(colData(data)$condition),
+                  paste0(conditions,
                          collapse = "', '"),
                   "'.\nFor example '",
-                  paste0(unique(colData(data)$condition)[1],
+                  paste0(conditions[1],
                          "_vs_",
-                         unique(colData(data)$condition)[2])
+                         conditions[2])
                   , "'."), call. = FALSE)
     }
 
@@ -847,4 +858,125 @@ get_results <- function(data) {
   table <- left_join(table, df, by = c("name" = "rowname")) %>%
     arrange(desc(significant))
   return(table)
+}
+
+#' Generate a wide data.frame from a SummerizedExperiment
+#'
+#' \code{get_df_wide} generate a wide data.frame from a SummerizedExperiment.
+#'
+#' @param se SummarizedExperiment,
+#' Proteomics dataset.
+#' @return A data.frame object
+#' containing all data in a wide format,
+#' where each row represents a protein.
+#' @examples
+#' data <- UbiLength
+#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
+#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' columns <- grep("LFQ.", colnames(data_unique))
+#' exp_design <- UbiLength_ExpDesign
+#' se <- make_se(data_unique, columns, exp_design)
+#'
+#' filt <- filter_missval(se, thr = 0)
+#' norm <- normalize_vsn(filt)
+#' imputed <- impute(norm, fun = "MinProb", q = 0.01)
+#'
+#' diff <- test_diff(imputed, "Ctrl", "control")
+#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#'
+#' wide <- get_df_wide(signif)
+#' colnames(wide)
+#' @export
+get_df_wide <- function(se) {
+  # Show error if inputs are not the required classes
+  assert_that(inherits(se, "SummarizedExperiment"))
+
+  # Show error if inputs do not contain required columns
+  if (!"name" %in% colnames(rowData(se))) {
+    stop(paste0("'name' column is not present in '",
+                deparse(substitute(se)),
+                "'.\nRun make_unique() and make_se() to obtain the required columns."),
+         call. = FALSE)
+  }
+
+# Extract row data
+row_data <- rowData(se) %>%
+  data.frame()
+# Extract assay data
+assay_data <- assay(se) %>%
+  data.frame() %>%
+  rownames_to_column()
+colnames(assay_data)[1] <- "name"
+
+# Merge row and assay data into a wide data.frame
+wide <- full_join(assay_data, row_data, by = "name")
+
+return(wide)
+}
+
+#' Generate a long data.frame from a SummerizedExperiment
+#'
+#' \code{get_df_long} generate a wide data.frame from a SummerizedExperiment.
+#'
+#' @param se SummarizedExperiment,
+#' Proteomics dataset.
+#' @return A data.frame object
+#' containing all data in a wide format,
+#' where each row represents a single measurement.
+#' @examples
+#' data <- UbiLength
+#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
+#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' columns <- grep("LFQ.", colnames(data_unique))
+#' exp_design <- UbiLength_ExpDesign
+#' se <- make_se(data_unique, columns, exp_design)
+#'
+#' filt <- filter_missval(se, thr = 0)
+#' norm <- normalize_vsn(filt)
+#' imputed <- impute(norm, fun = "MinProb", q = 0.01)
+#'
+#' diff <- test_diff(imputed, "Ctrl", "control")
+#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#'
+#' long <- get_df_long(signif)
+#' colnames(long)
+#' @export
+get_df_long <- function(se) {
+  # Show error if inputs are not the required classes
+  assert_that(inherits(se, "SummarizedExperiment"))
+
+  # Show error if inputs do not contain required columns
+  if (!"name" %in% colnames(rowData(se))) {
+    stop(paste0("'name' column is not present in '",
+                deparse(substitute(se)),
+                "'.\nRun make_unique() and make_se() to obtain the required columns."),
+         call. = FALSE)
+  }
+
+# Extract column data
+col_data <- colData(se) %>%
+  data.frame() %>%
+  rownames_to_column()
+# Extract row data
+row_data <- rowData(se) %>%
+  data.frame()
+# Extract assay data
+assay_data <- assay(se) %>%
+  data.frame() %>%
+  rownames_to_column()
+colnames(assay_data)[1] <- "name"
+
+# Transform assay_data in long format
+long_assay <- assay_data %>%
+  gather("rowname", "intensity", 2:ncol(.))
+
+# Merge row and assay data into a wide data.frame
+long <- long_assay %>%
+  full_join(col_data, ., by = "rowname") %>%
+  select(-rowname) %>%
+  full_join(., row_data, by = "name")
+
+return(long)
 }

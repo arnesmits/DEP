@@ -109,6 +109,10 @@
 #'
 #' @section Additional functions:
 #' \itemize{
+#'   \item \code{\link{get_df_wide}}:
+#'   Generate a wide data.frame from a SummerizedExperiment.
+#'   \item \code{\link{get_df_long}}:
+#'   Generate a long data.frame from a SummerizedExperiment.
 #'   \item \code{\link{se2msn}}:
 #'   SummarizedExperiment object to MSnSet object conversion.
 #'   \item \code{\link{manual_impute}}:

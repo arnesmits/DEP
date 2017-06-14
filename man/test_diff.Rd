@@ -4,7 +4,7 @@
 \alias{test_diff}
 \title{Differential enrichment test}
 \usage{
-test_diff(data, control, type, test = NULL)
+test_diff(data, control, type, test = NULL, incl_repl = FALSE)
 }
 \arguments{
 \item{data}{SummarizedExperiment,
@@ -29,6 +29,10 @@ manually defined contrasts ("manual").}
 The contrasts that will be tested if type = "manual".
 These should be formatted as "SampleA_vs_SampleB" or
 c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
+
+\item{incl_repl}{Logical,
+Whether or not to add a blocking factor
+for the replicates in the design matrix.}
 }
 \value{
 A SummarizedExperiment object

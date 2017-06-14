@@ -9,6 +9,7 @@ test_that("test_diff throws error without valid input", {
   expect_error(test_diff(test_impute, "Ctrl", "manual"))
   expect_error(test_diff(test_impute, "Ctrl", "manual", Ubi4_vs_Ctrl))
   expect_error(test_diff(test_impute, "Ctrl", "manual", "test"))
+  expect_error(test_diff(test_impute, "Ctrl", "control", incl_repl = "TRUE"))
 
   test_impute_error <- test_impute
   SummarizedExperiment::colData(test_impute_error) <- SummarizedExperiment::colData(test_impute_error)[,-(3)]
@@ -22,6 +23,7 @@ test_that("test_diff throws error without valid input", {
 test_that("test_diff returns a SummarizedExperiment object", {
   expect_is(test_diff(test_impute, "Ctrl", "all"), "SummarizedExperiment")
   expect_is(test_diff(test_impute, "Ctrl", "manual", "Ubi4_vs_Ctrl"), "SummarizedExperiment")
+  expect_is(test_diff(test_impute, "Ctrl", "all", incl_repl = TRUE), "SummarizedExperiment")
 })
 
 test_that("test_diff returns an object with diff and p.adj columns", {
@@ -72,4 +74,28 @@ test_that("get_results returns a data.frame with the expected column", {
   expect_equal(grep("_centered$", colnames(result)), 13:16)
   expect_equal(grep("_ratio$", colnames(result)), 10:12)
   expect_equal(nrow(result[result$significant,]), 45)
+})
+
+test_that("get_df_wide throws error without valid input", {
+  expect_error(get_df_wide("test_sign"))
+
+  test_sign_error <- test_sign
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(1)]
+  expect_error(get_df_wide(test_sign_error))
+})
+
+test_that("get_df_wide returns a data.frame", {
+  expect_is(get_df_wide(test_sign), "data.frame")
+})
+
+test_that("get_df_long throws error without valid input", {
+  expect_error(get_df_long("test_sign"))
+
+  test_sign_error <- test_sign
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(1)]
+  expect_error(get_df_long(test_sign_error))
+})
+
+test_that("get_df_long returns a data.frame", {
+  expect_is(get_df_long(test_sign), "data.frame")
 })
