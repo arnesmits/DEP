@@ -652,7 +652,7 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
   # function to retrieve the results of
   # the differential expression test using 'fdrtool'
   retrieve_fun <- function(comp, fit = eB_fit){
-    res <- topTable(fit, sort.by = "t", coef = comp, number = Inf)
+    res <- topTable(fit, sort.by = "t", coef = comp, number = Inf, confint = TRUE)
     fdr_res <- fdrtool::fdrtool(res$t, plot = FALSE, verbose = FALSE)
     res$qval <- fdr_res$qval
     res$lfdr <- fdr_res$lfdr
@@ -664,9 +664,9 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
   # Retrieve the differential expression test restuls
   limma_res <- map_df(cntrst, retrieve_fun)
 
-  # Select the logFC and qval variables
+  # Select the logFC, CI and qval variables
   limma_res_small <- limma_res %>%
-    select(rowname, logFC, qval, comparison) %>%
+    select(rowname, logFC, CI.L, CI.R, qval, comparison) %>%
     mutate(comparison = gsub(" - ", "_vs_", comparison))
   # Obtain a wide table with all log2 fold changes
   table_diff <- limma_res_small %>%
@@ -674,13 +674,26 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
     spread(comparison, logFC)
   colnames(table_diff)[2:ncol(table_diff)] <-
     paste(colnames(table_diff)[2:ncol(table_diff)], "diff", sep = "_")
+  # Obtain a wide table with all CI values
+  table_CI.L <- limma_res_small %>%
+    select(rowname, CI.L, comparison) %>%
+    spread(comparison, CI.L)
+  colnames(table_CI.L)[2:ncol(table_CI.L)] <-
+    paste(colnames(table_CI.L)[2:ncol(table_CI.L)], "CI.L", sep = "_")
+  table_CI.R <- limma_res_small %>%
+    select(rowname, CI.R, comparison) %>%
+    spread(comparison, CI.R)
+  colnames(table_CI.R)[2:ncol(table_CI.R)] <-
+    paste(colnames(table_CI.R)[2:ncol(table_CI.R)], "CI.R", sep = "_")
   # Obtain a wide table with all q-values
   table_padj <- limma_res_small %>%
     select(rowname, qval, comparison) %>% spread(comparison, qval)
   colnames(table_padj)[2:ncol(table_padj)] <-
     paste(colnames(table_padj)[2:ncol(table_padj)], "p.adj", sep = "_")
   # Join the two tables with the rowData
-  table <- left_join(table_diff, table_padj, by = "rowname")
+  table <- left_join(table_diff, table_CI.L, by = "rowname")
+  table <- left_join(table, table_CI.R, by = "rowname")
+  table <- left_join(table, table_padj, by = "rowname")
   rowData(se) <- merge(rowData(se), table, by.x = "name", by.y = "rowname")
   return(se)
 }

@@ -24,7 +24,7 @@ test_that("plot_corr throws error without valid input", {
   expect_error(plot_corr(test_sign, TRUE, -1, 2, "Accent", FALSE))
 
   test_sign_error <- test_sign
-  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(35)]
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(41)]
   expect_error(plot_corr(test_sign_error, TRUE, -1, 1, "PRGn", FALSE))
 })
 

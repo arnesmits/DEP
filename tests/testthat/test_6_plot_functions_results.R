@@ -17,7 +17,7 @@ test_that("plot_single throws error without valid input", {
   expect_error(plot_single(test_sign_error2, "USP19", "centered"))
 
   test_sign_error3 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error3) <- SummarizedExperiment::rowData(test_sign_error3)[,-(26:31)]
+  SummarizedExperiment::rowData(test_sign_error3) <- SummarizedExperiment::rowData(test_sign_error3)[,-c(26:28,35:37)]
   expect_error(plot_single(test_sign_error3, "USP19", "centered"))
 })
 
@@ -39,7 +39,7 @@ test_that("plot_heatmap throws error without valid input", {
   expect_error(plot_heatmap(test_sign_error1, "centered", k = 6, col_limit = 4, labelsize = 8))
 
   test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(35)]
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(41)]
   expect_error(plot_heatmap(test_sign_error2, "centered", k = 6, col_limit = 4, labelsize = 8))
 
   test_sign_error3 <- test_sign
@@ -65,11 +65,11 @@ test_that("plot_volcano throws error without valid input", {
   expect_error(plot_volcano(test_sign_error1, "Ubi6_vs_Ctrl", labelsize = 5, add_names = TRUE))
 
   test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(26:31)]
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-c(26:28,35:37)]
   expect_error(plot_volcano(test_sign_error2, "Ubi6_vs_Ctrl", labelsize = 5, add_names = TRUE))
 
   test_sign_error3 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error3) <- SummarizedExperiment::rowData(test_sign_error3)[,-(32:34)]
+  SummarizedExperiment::rowData(test_sign_error3) <- SummarizedExperiment::rowData(test_sign_error3)[,-(38:40)]
   expect_error(plot_volcano(test_sign_error3, "Ubi6_vs_Ctrl", labelsize = 5, add_names = TRUE))
 })
 

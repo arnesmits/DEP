@@ -101,25 +101,41 @@ plot_single <- function(dep, protein, type) {
       theme_DEP2()
   }
   if(type == "contrast") {
-    # Obtain average enrichments of conditions versus the control condition
-    df <- rowData(dep) %>%
+    # Select values for a single protein
+    protein <- rowData(dep) %>%
       data.frame() %>%
+      filter(name == protein)
+    # Obtain average enrichments of conditions versus the control condition
+    diff <- protein %>%
       column_to_rownames(var = "name") %>%
       select(ends_with("_diff")) %>%
-      rownames_to_column(.)
-    colnames(df)[2:ncol(df)] <-
-      gsub("_diff", "", colnames(df)[2:ncol(df)]) %>%
-      gsub("_vs_", " - ", .)
-    # Select values for a single protein in long format
-    df <- filter(df, rowname == protein) %>%
-      gather(condition, LFC, 2:ncol(.))
+      rownames_to_column(.) %>%
+      gather(condition, LFC, 2:ncol(.)) %>%
+      mutate(condition = gsub("_diff", "", condition) %>%
+               gsub("_vs_", " - ", .))
+    CI.L <- protein %>%
+      column_to_rownames(var = "name") %>%
+      select(ends_with("_CI.L")) %>%
+      gather(condition, CI.L)%>%
+      mutate(condition = gsub("_CI.L", "", condition) %>%
+               gsub("_vs_", " - ", .))
+    CI.R <- protein %>%
+      column_to_rownames(var = "name") %>%
+      select(ends_with("_CI.R")) %>%
+      gather(condition, CI.R) %>%
+      mutate(condition = gsub("_CI.R", "", condition) %>%
+               gsub("_vs_", " - ", .))
+    df <- left_join(diff, CI.L, by = "condition")
+    df <- left_join(df, CI.R, by = "condition")
+
     # Plot the average enrichments of conditions versus the control condition
     p1 <- ggplot(df, aes(condition, LFC)) +
       geom_hline(yintercept = 0) +
-      geom_bar(stat = "unique", size = 0, col = "black", fill = "black") +
+      geom_bar(stat = "unique", size = 0, fill = "grey") +
+      geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
       labs(title = unique(df$rowname),
            x = "",
-           y = "Enrichment (log2)") +
+           y = "Enrichment +/- 95% CI (log2)") +
       theme_DEP2()
   }
   p1
