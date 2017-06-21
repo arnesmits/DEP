@@ -4,12 +4,12 @@
 \alias{normalize_vsn}
 \title{Normalization using vsn}
 \usage{
-normalize_vsn(data)
+normalize_vsn(se)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Proteomics data with log2-transformed values
-(as data obtained from \code{\link{make_se}}.}
+(as obtained from \code{\link{make_se}}.}
 }
 \value{
 A normalized SummarizedExperiment object.

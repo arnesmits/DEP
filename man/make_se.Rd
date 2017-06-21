@@ -5,10 +5,10 @@
 \title{Data.frame to SummarizedExperiment object
 conversion using an experimental design}
 \usage{
-make_se(data, columns, expdesign)
+make_se(proteins_unique, columns, expdesign)
 }
 \arguments{
-\item{data}{Data.frame,
+\item{proteins_unique}{Data.frame,
 Protein table with unique names annotated in the 'name' column.}
 
 \item{columns}{Integer vector,

@@ -4,10 +4,10 @@
 \alias{plot_cond_freq}
 \title{Plot frequency of significant conditions per protein}
 \usage{
-plot_cond_freq(data)
+plot_cond_freq(dep)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{dep}{SummarizedExperiment,
 Data object for which differentially enriched proteins are annotated
 by \code{\link{test_diff}} and \code{\link{add_rejections}}.}
 }
@@ -23,14 +23,6 @@ data <- UbiLength
 data <- data[data$Reverse != '+' & data$Potential.contaminant != '+',]
 exp_design <- UbiLength_ExpDesign
 
-# perform the differential enrichment test
-results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
-signif <- results$signif # get the significance object
-
-# plot frequencies
-plot_cond_freq(signif)
-
-# or perform the step-by-step analysis
 data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs', delim = ';')
 columns <- grep('LFQ.', colnames(data_unique))
 se <- make_se(data_unique, columns, exp_design)
@@ -40,7 +32,7 @@ norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = 'MinProb', q = 0.01)
 
 diff <- test_diff(imputed, 'Ctrl', 'control')
-signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
-plot_cond_freq(signif)
+plot_cond_freq(dep)
 }

@@ -4,10 +4,10 @@
 \alias{test_diff}
 \title{Differential enrichment test}
 \usage{
-test_diff(data, control, type, test = NULL, incl_repl = FALSE)
+test_diff(se, control, type, test = NULL, incl_repl = FALSE)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Proteomics data with unique names and identifiers
 annotated in 'name' and 'ID' columns.
 Additionally, the colData should contain sample annotation including

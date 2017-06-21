@@ -4,10 +4,10 @@
 \alias{impute}
 \title{Impute missing values}
 \usage{
-impute(data, fun, ...)
+impute(se, fun, ...)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Proteomics data with unique names and identifiers
 annotated in 'name' and 'ID' columns.
 The appropriate columns and objects can be generated

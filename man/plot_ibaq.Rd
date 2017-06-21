@@ -4,10 +4,10 @@
 \alias{plot_ibaq}
 \title{Plot iBAQ values versus log fold change}
 \usage{
-plot_ibaq(data, contrast, labelsize = 3)
+plot_ibaq(dep, contrast, labelsize = 3)
 }
 \arguments{
-\item{data}{SummarizedExperiment object,
+\item{dep}{SummarizedExperiment object,
 Proteomics dataset on which differential enriched proteins
 are annotated by \code{\link{add_rejections}}.}
 

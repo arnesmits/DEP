@@ -4,10 +4,10 @@
 \alias{merge_ibaq}
 \title{Merge iBAQ intensities}
 \usage{
-merge_ibaq(data, peptides)
+merge_ibaq(protein_unique, peptides)
 }
 \arguments{
-\item{data}{Data.frame,
+\item{protein_unique}{Data.frame,
 Protein table with unique names annotated in the 'name' column.}
 
 \item{peptides}{Data.frame,

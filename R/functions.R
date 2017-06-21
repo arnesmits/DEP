@@ -3,7 +3,7 @@
 #' \code{make_unique} generates unique identifiers
 #' for a proteomics dataset based on "name" and "id" columns.
 #'
-#' @param data Data.frame,
+#' @param proteins Data.frame,
 #' Protein table for which unique names will be created.
 #' @param name Character,
 #' Name of the column containing feature names.
@@ -17,38 +17,38 @@
 #' data <- UbiLength
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #' @export
-make_unique <- function(data, name, ids, delim = ";") {
+make_unique <- function(proteins, name, ids, delim = ";") {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(is.data.frame(data),
+  assertthat::assert_that(is.data.frame(proteins),
                           is.character(name),
                           is.character(ids),
                           is.character(delim))
 
   # Show error if inputs do not contain required columns
-  if(length(grep(paste("^", name, "$", sep = ""), colnames(data))) < 1) {
+  if(length(grep(paste("^", name, "$", sep = ""), colnames(proteins))) < 1) {
     stop(paste0("'", name, "' is not a column in '",
-                deparse(substitute(data)), "'."),
+                deparse(substitute(proteins)), "'."),
          call. = FALSE)
   }
-  if(length(grep(paste("^", ids, "$", sep = ""), colnames(data))) < 1) {
+  if(length(grep(paste("^", ids, "$", sep = ""), colnames(proteins))) < 1) {
     stop(paste0("'", ids, "' is not a column in '",
-                deparse(substitute(data)), "'."),
+                deparse(substitute(proteins)), "'."),
          call. = FALSE)
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(data)) data <- as.data.frame(data)
+  if(tibble::is.tibble(proteins)) proteins <- as.data.frame(proteins)
 
   # Select the name and id columns,
   # take the first identifier per row and make unique names.
   # If there is no name, the ID will be taken.
-  names <- data %>% select(matches(paste("^", name, "$", sep = "")),
+  names <- proteins %>% select(matches(paste("^", name, "$", sep = "")),
                            matches(paste("^", ids, "$", sep = ""))) %>%
     mutate(name = gsub(paste(delim, ".*", sep = ""), "", .[, 1]),
            ID = gsub(paste(delim, ".*", sep = ""), "", .[, 2]),
            name = make.unique(ifelse(name == "" | is.na(name), ID, name)))
-  data_unique <- left_join(data, names)
-  return(data_unique)
+  proteins_unique <- left_join(proteins, names)
+  return(proteins_unique)
 }
 
 #' Data.frame to SummarizedExperiment object
@@ -57,7 +57,7 @@ make_unique <- function(data, name, ids, delim = ";") {
 #' \code{make_se} creates a SummarizedExperiment object
 #' based on two data.frames: the protein table and experimental design.
 #'
-#' @param data Data.frame,
+#' @param proteins_unique Data.frame,
 #' Protein table with unique names annotated in the 'name' column.
 #' @param columns Integer vector,
 #' Column numbers indicating the columns containing the assay data.
@@ -76,16 +76,16 @@ make_unique <- function(data, name, ids, delim = ";") {
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #' @export
-make_se <- function(data, columns, expdesign) {
+make_se <- function(proteins_unique, columns, expdesign) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(is.data.frame(data),
+  assertthat::assert_that(is.data.frame(proteins_unique),
                           is.integer(columns),
                           is.data.frame(expdesign))
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(data))) {
+  if(any(!c("name", "ID") %in% colnames(proteins_unique))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(proteins_unique)),
                 "'.\nRun make_unique() to obtain the required columns."),
          call. = FALSE)
   }
@@ -93,19 +93,19 @@ make_se <- function(data, columns, expdesign) {
     stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.",
          call. = FALSE)
   }
-  if(any(!apply(data[, columns], 2, is.numeric))) {
+  if(any(!apply(proteins_unique[, columns], 2, is.numeric))) {
     stop(paste0("specified columns (", columns,
                 ") should be numeric.\nRun make_se_parse() with the appropriate columns as argument."),
          call. = FALSE)
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(data)) data <- as.data.frame(data)
+  if(tibble::is.tibble(proteins_unique)) proteins_unique <- as.data.frame(proteins_unique)
   if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
 
   # Select the assay data
-  rownames(data) <- data$name
-  raw <- data[, columns]
+  rownames(proteins_unique) <- proteins_unique$name
+  raw <- proteins_unique[, columns]
   raw[raw == 0] <- NA
   raw <- log2(raw)
 
@@ -120,14 +120,14 @@ make_se <- function(data, columns, expdesign) {
   raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
   # Select the rowData
-  row_data <- data[, -columns]
+  row_data <- proteins_unique[, -columns]
   rownames(row_data) <- row_data$name
 
   # Generate the SummarizedExperiment object
-  dataset <- SummarizedExperiment(assays = as.matrix(raw),
+  se <- SummarizedExperiment(assays = as.matrix(raw),
                                   colData = expdesign,
                                   rowData = row_data)
-  return(dataset)
+  return(se)
 }
 
 #' Obtain the longest common prefix
@@ -185,7 +185,7 @@ get_prefix <- function(words) {
 #' \code{make_se_parse} creates a SummarizedExperiment object
 #' based on a single data.frame.
 #'
-#' @param data Data.frame,
+#' @param proteins_unique Data.frame,
 #' Protein table with unique names annotated in the 'name' column.
 #' @param columns Integer vector,
 #' Column numbers indicating the columns containing the assay data.
@@ -199,36 +199,36 @@ get_prefix <- function(words) {
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' se <- make_se_parse(data_unique, columns)
 #' @export
-make_se_parse <- function(data, columns) {
+make_se_parse <- function(proteins_unique, columns) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(is.data.frame(data), is.integer(columns))
+  assertthat::assert_that(is.data.frame(proteins_unique), is.integer(columns))
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(data))) {
+  if(any(!c("name", "ID") %in% colnames(proteins_unique))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(proteins_unique)),
                 "'.\nRun make_unique() to obtain the required columns."),
          call. = FALSE)
   }
-  if(any(!apply(data[, columns], 2, is.numeric))) {
+  if(any(!apply(proteins_unique[, columns], 2, is.numeric))) {
     stop(paste0("specified columns (", columns, ") should be numeric.
                 \nRun make_se_parse() with the appropriate columns as argument."),
          call. = FALSE)
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(data)) data <- as.data.frame(data)
+  if(tibble::is.tibble(proteins_unique)) proteins_unique <- as.data.frame(proteins_unique)
 
   # Select the assay values
-  rownames(data) <- data$name
-  raw <- data[, columns]
+  rownames(proteins_unique) <- proteins_unique$name
+  raw <- proteins_unique[, columns]
   raw[raw == 0] <- NA
   raw <- log2(raw)
   colnames(raw) <- gsub(get_prefix(colnames(raw)), "",
                         colnames(raw)) %>% make.names()
 
   # Select the rowData
-  row_data <- data[, -columns]
+  row_data <- proteins_unique[, -columns]
   rownames(row_data) <- row_data$name
 
   # Generate the colData
@@ -243,17 +243,17 @@ make_se_parse <- function(data, columns) {
   raw <- raw[, !is.na(colnames(raw))]
 
   # Generate the SummarizedExperiment object
-  dataset <- SummarizedExperiment(assays = as.matrix(raw),
+  se <- SummarizedExperiment(assays = as.matrix(raw),
                                   colData = col_data,
                                   rowData = row_data)
-  return(dataset)
+  return(se)
 }
 
 #' Filter on missing values
 #'
 #' \code{filter_missval} filters a proteomics dataset based on missing values.
 #'
-#' @param data SummarizedExperiment,
+#' @param se SummarizedExperiment,
 #' Proteomics data with unique names and identifiers
 #' annotated in 'name' and 'ID' columns.
 #' The appropriate columns and objects can be generated
@@ -273,47 +273,47 @@ make_se_parse <- function(data, columns) {
 #' stringent_filter <- filter_missval(se, thr = 0)
 #' less_stringent_filter <- filter_missval(se, thr = 1)
 #' @export
-filter_missval <- function(data, thr = 0) {
+filter_missval <- function(se, thr = 0) {
   # Show error if inputs are not the required classes
   if(is.integer(thr)) thr <- as.numeric(thr)
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"),
                           is.numeric(thr))
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(data)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(se)),
                 "'.\nRun make_unique() and make_se() to obtain the required columns."),
          call. = FALSE)
   }
-  if(any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+  if(any(!c("label", "condition", "replicate") %in% colnames(colData(se)))) {
     stop(paste0("'label', 'condition' and/or 'replicate' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(se)),
                 "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
          call. = FALSE)
   }
-  if(thr < 0 | thr > max(colData(data)$replicate)) {
+  if(thr < 0 | thr > max(colData(se)$replicate)) {
     stop("invalid filter threshold applied;\nRun filter_missval() with a threshold ranging from 0 to the number of replicates")
   }
 
   # Make assay values binary (1 = valid value)
-  bin_data <- assay(data)
-  bin_data[!is.na(assay(data))] <- 1
-  bin_data[is.na(assay(data))] <- 0
+  bin_data <- assay(se)
+  bin_data[!is.na(assay(se))] <- 1
+  bin_data[is.na(assay(se))] <- 0
 
-  # Filter data on the maximum allowed number of
+  # Filter se on the maximum allowed number of
   # missing values per condition (defined by thr)
   keep <- bin_data %>%
     data.frame() %>%
     rownames_to_column(.) %>%
     gather(ID, value, 2:ncol(.)) %>%
-    left_join(., data.frame(colData(data)), by = "ID") %>%
+    left_join(., data.frame(colData(se)), by = "ID") %>%
     group_by(rowname, condition) %>%
     summarize(miss_val = n() - sum(value)) %>%
     filter(miss_val <= thr) %>%
     spread(condition, miss_val)
-  filt <- data[keep$rowname, ]
-  return(filt)
+  se_fltrd <- se[keep$rowname, ]
+  return(se_fltrd)
 }
 
 #' Normalization using vsn
@@ -321,9 +321,9 @@ filter_missval <- function(data, thr = 0) {
 #' \code{normalize_vsn} performs variance stabilizing transformation
 #' using the \code{\link[vsn]{vsn-package}}.
 #'
-#' @param data SummarizedExperiment,
+#' @param se SummarizedExperiment,
 #' Proteomics data with log2-transformed values
-#' (as data obtained from \code{\link{make_se}}.
+#' (as obtained from \code{\link{make_se}}.
 #' @return A normalized SummarizedExperiment object.
 #' @examples
 #' data <- UbiLength
@@ -337,15 +337,15 @@ filter_missval <- function(data, thr = 0) {
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' @export
-normalize_vsn <- function(data) {
+normalize_vsn <- function(se) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"))
 
   # Variance stabilization transformation on assay data
-  data_vsn <- data
-  vsn.fit <- vsn::vsnMatrix(2 ^ assay(data_vsn))
-  assay(data_vsn) <- vsn::predict(vsn.fit, 2 ^ assay(data_vsn))
-  return(data_vsn)
+  se_vsn <- se
+  vsn.fit <- vsn::vsnMatrix(2 ^ assay(se_vsn))
+  assay(se_vsn) <- vsn::predict(vsn.fit, 2 ^ assay(se_vsn))
+  return(se_vsn)
 }
 
 #' Imputation by random draws from a manually defined distribution
@@ -353,7 +353,7 @@ normalize_vsn <- function(data) {
 #' \code{manual_impute} imputes missing values in a proteomics dataset
 #' by random draws from a manually defined distribution.
 #'
-#' @param data SummarizedExperiment,
+#' @param se SummarizedExperiment,
 #' Proteomics data for which missing values will be imputed.
 #' @param shift Numeric,
 #' Sets the left-shift of the distribution in standard deviation from
@@ -376,16 +376,16 @@ normalize_vsn <- function(data) {
 #'
 #' imputed_manual <- impute(norm, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
-manual_impute <- function(data, scale = 0.3, shift = 1.8) {
+manual_impute <- function(se, scale = 0.3, shift = 1.8) {
   if(is.integer(scale)) scale <- is.numeric(scale)
   if(is.integer(shift)) shift <- is.numeric(shift)
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"),
                           is.numeric(scale),
                           is.numeric(shift))
 
   # Get descriptive parameters of the current sample distributions
-  stat <- assay(data) %>%
+  stat <- assay(se) %>%
     data.frame() %>%
     rownames_to_column(.) %>%
     gather(samples, value, 2:ncol(.)) %>%
@@ -394,23 +394,23 @@ manual_impute <- function(data, scale = 0.3, shift = 1.8) {
               median = median(value),
               sd = sd(value),
               n = n(),
-              infin = nrow(assay(data)) - n)
+              infin = nrow(assay(se)) - n)
   # Impute missing values by random draws from a distribution
   # which is left-shifted by parameters 'shift' * sd and scaled by parameter 'scale' * sd.
   for (a in 1:nrow(stat)) {
-    assay(data)[is.na(assay(data)[, stat$samples[a]]), stat$samples[a]] <-
+    assay(se)[is.na(assay(se)[, stat$samples[a]]), stat$samples[a]] <-
       rnorm(stat$infin[a],
             mean = stat$median[a] - shift * stat$sd[a],
             sd = stat$sd[a] * scale)
   }
-  return(data)
+  return(se)
 }
 
 #' SummarizedExperiment to MSnSet object conversion
 #'
 #' \code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
 #'
-#' @param data SummarizedExperiment,
+#' @param se SummarizedExperiment,
 #' Object which will be turned into a MSnSet object.
 #' @return A MSnSet object.
 #' @examples
@@ -424,15 +424,15 @@ manual_impute <- function(data, scale = 0.3, shift = 1.8) {
 #'
 #' data_msn <- se2msn(se)
 #' @export
-se2msn <- function(data) {
+se2msn <- function(se) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"))
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"))
 
   # Extract expression, feature and pheno data
-  raw <- assay(data)
-  feat_data <- data.frame(rowData(data))
+  raw <- assay(se)
+  feat_data <- data.frame(rowData(se))
   rownames(feat_data) <- feat_data$name
-  pheno_data <- data.frame(colData(data))
+  pheno_data <- data.frame(colData(se))
 
   # Generate MSnSet object
   msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
@@ -445,7 +445,7 @@ se2msn <- function(data) {
 #'
 #' \code{impute} imputes missing values in a proteomics dataset.
 #'
-#' @param data SummarizedExperiment,
+#' @param se SummarizedExperiment,
 #' Proteomics data with unique names and identifiers
 #' annotated in 'name' and 'ID' columns.
 #' The appropriate columns and objects can be generated
@@ -477,15 +477,15 @@ se2msn <- function(data) {
 #'
 #' imputed_manual <- impute(norm, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
-impute <- function(data, fun, ...) {
+impute <- function(se, fun, ...) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"),
                           is.character(fun))
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(data)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(se)),
                 "'.\nRun make_unique() and make_se() to obtain the required columns."), call. = FALSE)
   }
   if(!fun %in% c("man", MSnbase::imputeMethods())) {
@@ -496,15 +496,15 @@ impute <- function(data, fun, ...) {
 
   # if the "man" function is selected, use the manual impution method
   if(fun == "man") {
-    data <- manual_impute(data, ...)
+    se <- manual_impute(se, ...)
   }
   # else use the MSnSet::impute function
   else {
-    MSnSet_data <- se2msn(data)
+    MSnSet_data <- se2msn(se)
     MSnSet_imputed <- MSnbase::impute(MSnSet_data, method = fun, ...)
-    assay(data) <- MSnbase::exprs(MSnSet_imputed)
+    assay(se) <- MSnbase::exprs(MSnSet_imputed)
   }
-  return(data)
+  return(se)
 }
 
 #' Differential enrichment test
@@ -513,7 +513,7 @@ impute <- function(data, fun, ...) {
 #' protein-wise linear models and empirical Bayes
 #' statistics using \code{\link[limma]{limma}}.
 #'
-#' @param data SummarizedExperiment,
+#' @param se SummarizedExperiment,
 #' Proteomics data with unique names and identifiers
 #' annotated in 'name' and 'ID' columns.
 #' Additionally, the colData should contain sample annotation including
@@ -554,38 +554,38 @@ impute <- function(data, fun, ...) {
 #' diff <- test_diff(imputed, "Ctrl", "manual",
 #'     test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 #' @export
-test_diff <- function(data, control, type, test = NULL, incl_repl = FALSE) {
+test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"),
                           is.character(control),
                           is.character(type),
                           is.logical(incl_repl))
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(data)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(se)),
                 "'.\nRun make_unique() and make_se() to obtain the required columns."), call. = FALSE)
   }
-  if(any(!c("label", "condition", "replicate") %in% colnames(colData(data)))) {
+  if(any(!c("label", "condition", "replicate") %in% colnames(colData(se)))) {
     stop(paste0("'label', 'condition' and/or 'replicate' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(se)),
                 "'.\nRun make_se() or make_se_parse() to obtain the required columns."), call. = FALSE)
   }
   # Show error if inputs are not valid
   if(!type %in% c("all", "control", "manual")) {
     stop("run test_diff() with a valid type.\nValid types are: 'all', 'control'", call. = FALSE)
   }
-  if(!control %in% unique(colData(data)$condition)) {
+  if(!control %in% unique(colData(se)$condition)) {
     stop("run test_diff() with a valid control",
          paste0(".\nValid controls are: '",
-                paste0(unique(colData(data)$condition),
+                paste0(unique(colData(se)$condition),
                        collapse = "', '"), "'"), call. = FALSE)
   }
 
   # Make an appropriate design matrix
-  conditions <- factor(colData(data)$condition)
-  replicate <- factor(colData(data)$replicate)
+  conditions <- factor(colData(se)$condition)
+  replicate <- factor(colData(se)$replicate)
   if(incl_repl) {
     design <- model.matrix(~ 0 + conditions + replicate)
     colnames(design) <- gsub("conditions", "", colnames(design))
@@ -644,7 +644,7 @@ test_diff <- function(data, control, type, test = NULL, incl_repl = FALSE) {
   # of a linear model on the predefined contrasts
   eB_fit <- eBayes(
     contrasts.fit(
-      lmFit(assay(data), design = design),
+      lmFit(assay(se), design = design),
       makeContrasts(contrasts = cntrst, levels = design)
     )
   )
@@ -681,8 +681,8 @@ test_diff <- function(data, control, type, test = NULL, incl_repl = FALSE) {
     paste(colnames(table_padj)[2:ncol(table_padj)], "p.adj", sep = "_")
   # Join the two tables with the rowData
   table <- left_join(table_diff, table_padj, by = "rowname")
-  rowData(data) <- merge(rowData(data), table, by.x = "name", by.y = "rowname")
-  return(data)
+  rowData(se) <- merge(rowData(se), table, by.x = "name", by.y = "rowname")
+  return(se)
 }
 
 #' Mark significant proteins
@@ -770,7 +770,7 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' \code{get_results} generates a results table from a proteomics dataset
 #' on which differential enrichment analysis was performed.
 #'
-#' @param data SummarizedExperiment,
+#' @param dep SummarizedExperiment,
 #' Proteomics dataset on which differential enrichment proteins
 #' are annotated by \code{\link{add_rejections}}.
 #' @return A data.frame object
@@ -798,33 +798,33 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' nrow(significant_proteins)
 #' head(significant_proteins)
 #' @export
-get_results <- function(data) {
+get_results <- function(dep) {
   # Show error if inputs are not the required classes
-  assert_that(inherits(data, "SummarizedExperiment"))
+  assert_that(inherits(dep, "SummarizedExperiment"))
 
   # Show error if inputs do not contain required columns
-  if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+  if (any(!c("name", "ID") %in% colnames(rowData(dep)))) {
     stop(paste0("'name' and/or 'ID' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(dep)),
                 "'.\nRun make_unique() and make_se() to obtain the required columns."),
          call. = FALSE)
   }
-  if (length(grep("_p.adj|_diff", colnames(rowData(data)))) < 1) {
+  if (length(grep("_p.adj|_diff", colnames(rowData(dep)))) < 1) {
     stop(paste0("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in '",
-                deparse(substitute(data)),
+                deparse(substitute(dep)),
                 "'.\nRun test_diff() to obtain the required columns."),
          call. = FALSE)
   }
 
-  row_data <- data.frame(rowData(data))
+  row_data <- data.frame(rowData(dep))
 
   # Obtain average protein-centered enrichment values per condition
-  rowData(data)$mean <- rowMeans(assay(data))
-  centered <- assay(data) - rowData(data)$mean
+  rowData(dep)$mean <- rowMeans(assay(dep))
+  centered <- assay(dep) - rowData(dep)$mean
   centered <- data.frame(centered) %>%
     rownames_to_column(.) %>%
     gather(ID, val, 2:ncol(.)) %>%
-    left_join(., data.frame(colData(data)), by = "ID")
+    left_join(., data.frame(colData(dep)), by = "ID")
   centered <- group_by(centered, rowname, condition) %>%
     summarize(val = mean(val)) %>%
     mutate(val = signif(val, digits = 3)) %>%

@@ -3,7 +3,7 @@
 #' \code{merge_ibaq} generates a data.frame with merged iBAQ intensities
 #' for proteins with shared peptides.
 #'
-#' @param data Data.frame,
+#' @param protein_unique Data.frame,
 #' Protein table with unique names annotated in the 'name' column.
 #' @param peptides Data.frame,
 #' Peptides table from MaxQuant ('peptides.txt').
@@ -18,21 +18,21 @@
 #' colnames(ibaq)
 #' head(ibaq)
 #' @export
-merge_ibaq <- function(data, peptides) {
+merge_ibaq <- function(protein_unique, peptides) {
     # Show error if inputs are not the required classes
-    assertthat::assert_that(is.data.frame(data),
+    assertthat::assert_that(is.data.frame(protein_unique),
                             is.data.frame(peptides))
 
     # Show error if inputs do not contain required columns
-    if (any(!c("name", "ID") %in% colnames(data))) {
+    if (any(!c("name", "ID") %in% colnames(protein_unique))) {
         stop(paste0("'name' and/or 'ID' columns are not present in '",
-                    deparse(substitute(data)),
+                    deparse(substitute(protein_unique)),
                     "'.\nRun make_unique() to obtain the required columns."),
              call. = FALSE)
     }
-    if (length(grep("iBAQ.", colnames(data))) < 1) {
+    if (length(grep("iBAQ.", colnames(protein_unique))) < 1) {
         stop(paste0("'iBAQ' columns are not present in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(protein_unique)), "'."),
              call. = FALSE)
     }
     if (any(!c("Protein.group.IDs", "Unique..Groups.") %in% colnames(peptides))) {
@@ -42,7 +42,7 @@ merge_ibaq <- function(data, peptides) {
     }
 
     # If input is a tibble, convert to data.frame
-    if(tibble::is.tibble(data)) data <- as.data.frame(data)
+    if(tibble::is.tibble(protein_unique)) protein_unique <- as.data.frame(protein_unique)
     if(tibble::is.tibble(peptides)) peptides <- as.data.frame(peptides)
 
     # Filter for peptides not unique to a single protein group
@@ -130,10 +130,10 @@ merge_ibaq <- function(data, peptides) {
       lapply(as.data.frame) %>%
       bind_rows()
 
-    columns <- grep("iBAQ.", colnames(data))
+    columns <- grep("iBAQ.", colnames(protein_unique))
     # Function to merge protein groups with shared peptides
     merge_sum <- function(rows) {
-        sub <- data %>%
+        sub <- protein_unique %>%
           filter(grepl(paste("^", rows, "$", collapse = "|", sep = ""), id))
         sub[1, columns] <- colSums(sub[, columns])
         sub$name[1] <- paste(sort(unique(sub$name)), collapse = ";")
@@ -152,7 +152,7 @@ merge_ibaq <- function(data, peptides) {
     merged$Peptides <- peps
 
     # Select all protein groups that only have peptides unique to this group
-    data_unique <- data %>% filter(!id %in% shared_ids)
+    data_unique <- protein_unique %>% filter(!id %in% shared_ids)
 
     # Generate the final list of all protein groups
     final <- rbind(data_unique %>%
@@ -172,7 +172,7 @@ merge_ibaq <- function(data, peptides) {
 #' \code{get_stoichiometry} calculates the relative stoichiometries of
 #' all differentially enriched proteins.
 #'
-#' @param data SummarizedExperiment,
+#' @param dep SummarizedExperiment,
 #' Proteomics dataset in which differential enriched proteins
 #' are annotated by \code{\link{add_rejections}}.
 #' @param ibaq Data.frame,
@@ -213,34 +213,34 @@ merge_ibaq <- function(data, peptides) {
 #' stoi <- get_stoichiometry(final, ibaq, contrast = 'GFP_vs_WT', bait = 'Suz12')
 #'
 #' @export
-get_stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
+get_stoichiometry <- function(dep, ibaq, contrast, bait, level = 1) {
     # Show error if inputs are not the required classes
     if (is.integer(level))
         level <- as.numeric(level)
-    assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+    assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
                             is.data.frame(ibaq),
                             is.character(contrast),
                             is.character(bait),
                             is.numeric(level))
 
     # Get rowData
-    row_data <- rowData(data)
+    row_data <- rowData(dep)
 
     # Show error if inputs do not contain required columns
     if (any(!c("name", "ID") %in% colnames(row_data))) {
         stop(paste0("'name' and/or 'ID' columns are not present in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(dep)), "'."),
              call. = FALSE)
     }
     if (length(grep("_p.adj|_diff", colnames(row_data))) < 1) {
         stop(paste0("'[contrast]_p.adj' and '[contrast]_diff' columns are not present in '",
-                    deparse(substitute(data)),
+                    deparse(substitute(dep)),
                     "'.\nRun test_diff() to obtain the required columns."),
              call. = FALSE)
     }
     if (length(grep("_significant", colnames(row_data))) < 1) {
         stop(paste0("[contrast]_significant' columns are not present in '",
-                    deparse(substitute(data)),
+                    deparse(substitute(dep)),
                     "'.\nRun get_rejections() to obtain the required columns."),
              call. = FALSE)
     }
@@ -288,7 +288,7 @@ get_stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
     # Generate an annotated and tidy table
     ip <- gsub("_vs_.*", "", contrast)
     control <- gsub(".*_vs_", "", contrast)
-    ibaq_anno <- colData(data) %>%
+    ibaq_anno <- colData(dep) %>%
       data.frame() %>%
       mutate(sample = paste("iBAQ.", label, sep = ""))
     long <- sub %>%
@@ -347,7 +347,7 @@ get_stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
 #' \code{plot_stoichiometry} plots a barplot of the
 #' relative stoichiometries.
 #'
-#' @param data Data.frame,
+#' @param protein_stoichiometry Data.frame,
 #' Stoichiometry table generated by \code{\link{get_stoichiometry}}.
 #' @param thr Numerical,
 #' The stoichiometry threshold above which proteins will be plotted.
@@ -384,10 +384,10 @@ get_stoichiometry <- function(data, ibaq, contrast, bait, level = 1) {
 #' plot_stoichiometry(stoi)
 #'
 #' @export
-plot_stoichiometry <- function(data, thr = 0.01, max_y = NULL) {
+plot_stoichiometry <- function(protein_stoichiometry, thr = 0.01, max_y = NULL) {
     # Show error if inputs are not the required classes
     if (is.integer(thr)) thr <- as.numeric(thr)
-    assertthat::assert_that(is.data.frame(data),
+    assertthat::assert_that(is.data.frame(protein_stoichiometry),
                             is.numeric(thr))
     if (!is.null(max_y)) {
         if (is.integer(max_y)) max_y <- as.numeric(max_y)
@@ -395,15 +395,15 @@ plot_stoichiometry <- function(data, thr = 0.01, max_y = NULL) {
     }
 
     # Show error if data does not contain the required columns
-    if (any(!c("name", "condition", "stoichiometry", "sd") %in% colnames(data))) {
+    if (any(!c("name", "condition", "stoichiometry", "sd") %in% colnames(protein_stoichiometry))) {
         stop(paste0("'name', 'condition', 'stoichiometry' and/or 'sd' columns are not present in '",
-                    deparse(substitute(data)),
+                    deparse(substitute(protein_stoichiometry)),
                     "'.\nRun get_stoichiometry() to obtain required columns"),
             call. = FALSE)
     }
 
     # Obtain a table with stoichiometries
-    df <- data %>%
+    df <- protein_stoichiometry %>%
       filter(stoichiometry >= thr) %>%
       mutate(name = ifelse(nchar(name) > 20,
                            paste(substr(name, 1, 20), "...", sep = ""),
@@ -440,7 +440,7 @@ plot_stoichiometry <- function(data, thr = 0.01, max_y = NULL) {
 #' \code{plot_ibaq} plots a scatter plot of the
 #' iBAQ intensities versus the LFQ fold changes.
 #'
-#' @param data SummarizedExperiment object,
+#' @param dep SummarizedExperiment object,
 #' Proteomics dataset on which differential enriched proteins
 #' are annotated by \code{\link{add_rejections}}.
 #' @param contrast Character,
@@ -474,39 +474,39 @@ plot_stoichiometry <- function(data, thr = 0.01, max_y = NULL) {
 #' plot_ibaq(final, 'GFP_vs_WT', labelsize = 3)
 #'
 #' @export
-plot_ibaq <- function(data, contrast, labelsize = 3) {
+plot_ibaq <- function(dep, contrast, labelsize = 3) {
     # Show error if inputs are not the required classes
     if (is.integer(labelsize)) labelsize <- as.numeric(labelsize)
-    assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+    assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
                             is.character(contrast),
                             is.numeric(labelsize))
 
     # Show error if inputs do not contain required columns
-    if (any(!c("name", "ID") %in% colnames(rowData(data)))) {
+    if (any(!c("name", "ID") %in% colnames(rowData(dep)))) {
         stop(paste0("'name' and/or 'ID' columns are not present in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(dep)), "'."),
              call. = FALSE)
     }
-    if (length(grep("_p.adj|_diff", colnames(rowData(data)))) < 1) {
+    if (length(grep("_p.adj|_diff", colnames(rowData(dep)))) < 1) {
         stop(paste0("'[contrast]_diff' and '[contrast]_p.adj' columns are not present in '",
-                    deparse(substitute(data)),
+                    deparse(substitute(dep)),
                     "'.\nRun test_diff() to obtain the required columns."),
              call. = FALSE)
     }
-    if (length(grep("_significant", colnames(rowData(data)))) < 1) {
+    if (length(grep("_significant", colnames(rowData(dep)))) < 1) {
         stop(paste0("'[contrast]_significant' columns are not present in '",
-                    deparse(substitute(data)),
+                    deparse(substitute(dep)),
                     "'.\nRun get_rejections() to obtain the required columns."),
              call. = FALSE)
     }
-    if (length(grep("iBAQ.", colnames(rowData(data)))) < 1) {
+    if (length(grep("iBAQ.", colnames(rowData(dep)))) < 1) {
         stop(paste0("iBAQ columns are not present in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(dep)), "'."),
              call. = FALSE)
     }
 
     # Get rowData
-    row_data <- rowData(data) %>% data.frame()
+    row_data <- rowData(dep) %>% data.frame()
 
     if (length(grep(paste(contrast, "_diff", sep = ""),
                     colnames(row_data))) == 0) {
@@ -525,7 +525,7 @@ plot_ibaq <- function(data, contrast, labelsize = 3) {
     # Generate an annotated and tidy table
     ip <- gsub("_vs_.*", "", contrast)
     control <- gsub(".*_vs_", "", contrast)
-    ibaq_anno <- colData(data) %>%
+    ibaq_anno <- colData(dep) %>%
       data.frame() %>%
       mutate(sample = paste("iBAQ.", label, sep = ""))
     long <- row_data %>%

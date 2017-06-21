@@ -4,10 +4,10 @@
 \alias{plot_coverage}
 \title{Plot protein coverage}
 \usage{
-plot_coverage(data)
+plot_coverage(se)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Data object for which to plot observation frequency.}
 }
 \value{

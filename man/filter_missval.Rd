@@ -4,10 +4,10 @@
 \alias{filter_missval}
 \title{Filter on missing values}
 \usage{
-filter_missval(data, thr = 0)
+filter_missval(se, thr = 0)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Proteomics data with unique names and identifiers
 annotated in 'name' and 'ID' columns.
 The appropriate columns and objects can be generated

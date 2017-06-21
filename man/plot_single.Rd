@@ -4,10 +4,10 @@
 \alias{plot_single}
 \title{Plot values for a protein of interest}
 \usage{
-plot_single(data, protein, type)
+plot_single(dep, protein, type)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{dep}{SummarizedExperiment,
 Data object which has been generated
 by \code{\link{test_diff}} and \code{\link{add_rejections}}.}
 
@@ -37,8 +37,8 @@ norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = 'MinProb', q = 0.01)
 
 diff <- test_diff(imputed, 'Ctrl', 'control')
-signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
-plot_single(signif, 'USP15', 'centered')
-plot_single(signif, 'USP15', 'contrast')
+plot_single(dep, 'USP15', 'centered')
+plot_single(dep, 'USP15', 'contrast')
 }

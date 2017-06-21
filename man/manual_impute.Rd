@@ -4,10 +4,10 @@
 \alias{manual_impute}
 \title{Imputation by random draws from a manually defined distribution}
 \usage{
-manual_impute(data, scale = 0.3, shift = 1.8)
+manual_impute(se, scale = 0.3, shift = 1.8)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Proteomics data for which missing values will be imputed.}
 
 \item{scale}{Numeric,

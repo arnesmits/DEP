@@ -4,10 +4,10 @@
 \alias{se2msn}
 \title{SummarizedExperiment to MSnSet object conversion}
 \usage{
-se2msn(data)
+se2msn(se)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Object which will be turned into a MSnSet object.}
 }
 \value{

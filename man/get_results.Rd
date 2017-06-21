@@ -4,10 +4,10 @@
 \alias{get_results}
 \title{Generate a results table}
 \usage{
-get_results(data)
+get_results(dep)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{dep}{SummarizedExperiment,
 Proteomics dataset on which differential enrichment proteins
 are annotated by \code{\link{add_rejections}}.}
 }

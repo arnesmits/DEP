@@ -4,10 +4,10 @@
 \alias{plot_numbers}
 \title{Plot protein numbers}
 \usage{
-plot_numbers(data)
+plot_numbers(se)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Data object for which to plot protein numbers.}
 }
 \value{

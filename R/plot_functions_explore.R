@@ -2,7 +2,7 @@
 #'
 #' \code{plot_pca} generates a PCA plot using the top variable proteins.
 #'
-#' @param data SummarizedExperiment,
+#' @param dep SummarizedExperiment,
 #' Data object for which differentially enriched proteins are annotated
 #' by \code{\link{test_diff}} and \code{\link{add_rejections}}.
 #' @param x Integer,
@@ -18,14 +18,6 @@
 #' data <- data[data$Reverse != '+' & data$Potential.contaminant != '+',]
 #' exp_design <- UbiLength_ExpDesign
 #'
-#' # perform the differential enrichment test
-#' results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
-#' signif <- results$signif # get the significance object
-#'
-#' # plot pca
-#' plot_pca(signif)
-#'
-#' # or perform the step-by-step analysis
 #' data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs', delim = ';')
 #' columns <- grep('LFQ.', colnames(data_unique))
 #' se <- make_se(data_unique, columns, exp_design)
@@ -35,48 +27,48 @@
 #' imputed <- impute(norm, fun = 'MinProb', q = 0.01)
 #'
 #' diff <- test_diff(imputed, 'Ctrl', 'control')
-#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
-#' plot_pca(signif)
+#' plot_pca(dep)
 #' @export
-plot_pca <- function(data, x = 1, y = 2, n = 500) {
+plot_pca <- function(dep, x = 1, y = 2, n = 500) {
   if(is.numeric(x)) x <- as.integer(x)
   if(is.numeric(y)) y <- as.integer(y)
   if(is.numeric(n)) n <- as.integer(n)
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+  assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
                           is.integer(x),
                           is.integer(y),
                           is.integer(n))
 
   # Check for valid x and y values
-  if(x > ncol(data) & x > ncol(data)) {
+  if(x > ncol(dep) & x > ncol(dep)) {
     stop(paste0("'x' and/or 'y' arguments are not valid.\n",
                 "Run plot_pca() with 'x' and 'y' <= ",
-                ncol(data),
+                ncol(dep),
                 "."),
          call. = FALSE)
   }
 
   # Check for valid n value
-  if(n > nrow(data)) {
+  if(n > nrow(dep)) {
     stop(paste0("'n' argument is not valid.\n",
                 "Run plot_pca() with 'n' <= ",
-                nrow(data),
+                nrow(dep),
                 "."),
          call. = FALSE)
   }
 
   # Get the variance per protein and take the top n variable proteins
-  var <- apply(assay(data), 1, sd)
-  df <- assay(data)[order(var, decreasing = TRUE)[1:n],]
+  var <- apply(assay(dep), 1, sd)
+  df <- assay(dep)[order(var, decreasing = TRUE)[1:n],]
 
   # Calculate PCA
   pca <- prcomp(t(df), scale = FALSE)
   pca_df <- pca$x %>%
     data.frame() %>%
     rownames_to_column() %>%
-    left_join(., data.frame(colData(data)), by = c("rowname" = "ID"))
+    left_join(., data.frame(colData(dep)), by = c("rowname" = "ID"))
 
   # Calculate the percentage of variance explained
   percent <- round(100 * pca$sdev^2 / sum(pca$sdev^2), 1)
@@ -101,7 +93,7 @@ plot_pca <- function(data, x = 1, y = 2, n = 500) {
 #'
 #' \code{plot_corr} generates a Pearson correlation matrix.
 #'
-#' @param data SummarizedExperiment,
+#' @param dep SummarizedExperiment,
 #' Data object for which differentially enriched proteins are annotated
 #' by \code{\link{test_diff}} and \code{\link{add_rejections}}.
 #' @param significant Boolean,
@@ -121,15 +113,6 @@ plot_pca <- function(data, x = 1, y = 2, n = 500) {
 #' data <- data[data$Reverse != '+' & data$Potential.contaminant != '+',]
 #' exp_design <- UbiLength_ExpDesign
 #'
-#' # perform the differential enrichment test
-#' results <- LFQ(data, exp_design, "MinProb", "Ctrl", "control")
-#' signif <- results$signif # get the significance object
-#'
-#' # plot correlation matrix
-#' plot_corr(signif)
-#' plot_corr(signif, lower = 0, upper = 1, pal = "Reds")
-#'
-#' # or perform the step-by-step analysis
 #' data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs', delim = ';')
 #' columns <- grep('LFQ.', colnames(data_unique))
 #' se <- make_se(data_unique, columns, exp_design)
@@ -139,13 +122,13 @@ plot_pca <- function(data, x = 1, y = 2, n = 500) {
 #' imputed <- impute(norm, fun = 'MinProb', q = 0.01)
 #'
 #' diff <- test_diff(imputed, 'Ctrl', 'control')
-#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
-#' plot_corr(signif)
+#' plot_corr(dep)
 #' @export
-plot_corr <- function(data, significant = TRUE, lower = -1, upper = 1, pal = "PRGn", pal_rev = FALSE) {
+plot_corr <- function(dep, significant = TRUE, lower = -1, upper = 1, pal = "PRGn", pal_rev = FALSE) {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(data, "SummarizedExperiment"),
+  assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
                           is.logical(significant),
                           is.numeric(lower),
                           is.numeric(upper),
@@ -176,18 +159,18 @@ plot_corr <- function(data, significant = TRUE, lower = -1, upper = 1, pal = "PR
   if(significant) {
 
     # Check for significant column
-    if(!"significant" %in% colnames(rowData(data))) {
+    if(!"significant" %in% colnames(rowData(dep))) {
       stop(paste0("'significant' column is not present in '",
-                  deparse(substitute(data)),
+                  deparse(substitute(dep)),
                   "'.\nRun add_rejections() to obtain the required column."),
            call. = FALSE)
     }
 
-    data <- data[rowData(data)$significant, ]
+    dep <- dep[rowData(dep)$significant, ]
   }
 
   # Calculate correlation matrix
-  corr_mat <- cor(assay(data))
+  corr_mat <- cor(assay(dep))
 
   # Plot heatmap
   ht1 = Heatmap(corr_mat,

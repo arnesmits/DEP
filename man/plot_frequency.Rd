@@ -4,10 +4,10 @@
 \alias{plot_frequency}
 \title{Plot protein overlap between samples}
 \usage{
-plot_frequency(data)
+plot_frequency(se)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{se}{SummarizedExperiment,
 Data object for which to plot observation frequency.}
 }
 \value{

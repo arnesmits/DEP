@@ -4,10 +4,10 @@
 \alias{get_stoichiometry}
 \title{Relative stoichiometry}
 \usage{
-get_stoichiometry(data, ibaq, contrast, bait, level = 1)
+get_stoichiometry(dep, ibaq, contrast, bait, level = 1)
 }
 \arguments{
-\item{data}{SummarizedExperiment,
+\item{dep}{SummarizedExperiment,
 Proteomics dataset in which differential enriched proteins
 are annotated by \code{\link{add_rejections}}.}
 
