@@ -52,6 +52,10 @@ test_that("plot_detect returns a grob object", {
 
 test_that("plot_missval throws error without valid input", {
   expect_error(plot_missval("test_filter"))
+
+  test_filter_noNA <-
+    test_filter[!apply(assay(test_filter), 1, function(x) any(is.na(x))),]
+  expect_error(plot_missval(test_filter_noNA))
 })
 
 test_that("plot_missval returns a HeatmapList object", {
