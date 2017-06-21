@@ -287,7 +287,7 @@ Finally, significant proteins are defined by user-defined cutoffs using _add_rej
 
 ``` {r add_reject}
 # Denote significant proteins based on user defined cutoffs
-data_signif <- add_rejections(data_diff, alpha = 0.05, lfc = log2(1.5))
+dep <- add_rejections(data_diff, alpha = 0.05, lfc = log2(1.5))
 ```
 
 ## Visualization of the results
@@ -302,7 +302,7 @@ This can be very useful to observe batch effects, such as clear differences betw
 
 ``` {r pca, fig.height = 4, fig.width = 5}
 # Plot the first and second principal components
-plot_pca(data_signif, x = 1, y = 2, n = 500)
+plot_pca(dep, x = 1, y = 2, n = 500)
 ```
 
 ### Correlation matrix
@@ -311,7 +311,7 @@ A correlation matrix can be plotted as a heatmap, to visualize the Pearson corre
 
 ``` {r corr, fig.height = 4, fig.width = 6}
 # Plot the Pearson correlation matrix
-plot_corr(data_signif, significant = TRUE, lower = 0, upper = 1, pal = "Reds")
+plot_corr(dep, significant = TRUE, lower = 0, upper = 1, pal = "Reds")
 ```
 
 ### Heatmap of all significant proteins
@@ -322,7 +322,7 @@ Additionally, the clustering of samples (columns) can indicate closer related sa
 
 ``` {r heatmap, fig.height = 6, fig.width = 4}
 # Plot a heatmap of all significant proteins with the data centered per protein
-plot_heatmap(data_signif, type = "centered", k = 6, col_limit = 4, labelsize = 2)
+plot_heatmap(dep, type = "centered", k = 6, col_limit = 4, labelsize = 2)
 ```
 
 The heatmap shows a clustering of replicates and indicates that 4Ubi and 6Ubi enrich a similar repertoire of proteins. The k-means clustering of proteins (general clusters of rows) nicely separates protein classes with different binding behaviors.  
@@ -333,7 +333,7 @@ Alternatively, a heatmap can be plotted using the contrasts, ie. the direct samp
 
 ``` {r heatmap2, fig.height = 6, fig.width = 4}
 # Plot a heatmap of all significant proteins (rows) and the tested contrasts (columns)
-plot_heatmap(data_signif, type = "contrast", k = 6, col_limit = 10, labelsize = 2)
+plot_heatmap(dep, type = "contrast", k = 6, col_limit = 10, labelsize = 2)
 ```
 
 ### Volcano plots of specific contrasts
@@ -342,7 +342,7 @@ Volcano plots can be used to visualize a specific contrast (comparison between t
 
 ``` {r volcano, fig.height = 5, fig.width = 5}
 # Plot a volcano plot for the contrast "Ubi6 vs Ctrl""
-plot_volcano(data_signif, contrast = "Ubi6_vs_Ctrl", labelsize = 2, add_names = TRUE)
+plot_volcano(dep, contrast = "Ubi6_vs_Ctrl", labelsize = 2, add_names = TRUE)
 ```
 
 ### Barplots of a protein of interest
@@ -351,10 +351,10 @@ It can also be useful to plot the data of a single protein, for example if this 
 
 ``` {r bar, fig.height = 3.5, fig.width = 3.5}
 # Plot a barplot for the protein USP15 with the data centered
-plot_single(data_signif, protein = "USP15", type = "centered")
+plot_single(dep, protein = "USP15", type = "centered")
 
 # Plot a barplot for the protein USP15
-plot_single(data_signif, protein = "USP15", type = "contrast")
+plot_single(dep, protein = "USP15", type = "contrast")
 ```
 
 ## Results table
@@ -363,7 +363,7 @@ To extract a table containing the essential results, the _get_results_ function 
 
 ``` {r results_table}
 # Generate a results table
-data_results <- get_results(data_signif)
+data_results <- get_results(dep)
 
 # Number of significant proteins
 data_results %>% filter(significant) %>% nrow()
@@ -435,10 +435,10 @@ Subsequently, a volcano plot is generated to inspect the used cutoffs.
 data_diff <- test_diff(data_imp, control = "WT", type = "control")
 
 # Call significant proteins based on user defined cutoffs
-data_signif <- add_rejections(data_diff, alpha = 0.05, lfc = 4.5)
+dep <- add_rejections(data_diff, alpha = 0.05, lfc = 4.5)
 
 # Visualize the results
-plot_volcano(data_signif, contrast = "GFP_vs_WT")
+plot_volcano(dep, contrast = "GFP_vs_WT")
 
 ```
 
@@ -462,7 +462,7 @@ The contrast for which to get stoichiometry values and the bait protein to which
 
 ``` {r GFPip_stoi_2}
 # Calculate stoichiometry
-stoi <- get_stoichiometry(data_signif, ibaq, 
+stoi <- get_stoichiometry(dep, ibaq, 
     contrast = "GFP_vs_WT", bait = "Suz12")
 
 # Check the stoichiometry values for the ten most abundant proteins
@@ -516,8 +516,8 @@ The _results_ object contains the essential results and the _sign_ object contai
 # Colnames of the results object
 colnames(data_results$results)
 
-# the sign object
-data_results$signif
+# the dep object
+data_results$dep
 ```
 
 The results table can be explored by selecting the _$results_ object
@@ -534,7 +534,7 @@ The full data (_sign_ object) can be used for the plotting functions as describe
 
 ``` {r LFQ_results4, fig.height = 6, fig.width = 3}
 # Extract the sign object
-full_data <- data_results$signif
+full_data <- data_results$dep
 
 # Use the full data to generate a volcano plot
 plot_heatmap(full_data, "contrast", labelsize = 2)
@@ -559,7 +559,7 @@ data_results <- LFQ(data, expdesign, fun = "MinProb",
       filter = c("Reverse", "Contaminant"), alpha = 0.05, lfc = 4.5)
 
 # Plot volcano from LFQ results
-plot_volcano(data_results$signif, "GFP_vs_WT")
+plot_volcano(data_results$dep, "GFP_vs_WT")
 
 # The iBAQ wrapper function performs the stoichiometry analysis
 stoi <- iBAQ(data_results, peptides, "GFP_vs_WT", "Suz12")

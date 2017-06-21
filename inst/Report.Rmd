@@ -18,7 +18,7 @@ This report presents an overview of the DEP analysis.
 
 ## Summary
 
-Original file contains _`r nrow(data)`_ proteins groups, of which _`r nrow(signif)`_ proteins were reproducibly quantified.    
+Original file contains _`r nrow(data)`_ proteins groups, of which _`r nrow(dep)`_ proteins were reproducibly quantified.    
 
 In total _`r ncol(data)`_ samples were detected.
 
@@ -26,11 +26,11 @@ In total _`r ncol(data)`_ samples were detected.
    
 
 
-#### `r nrow(signif[rowData(signif)$significant, ])` proteins differ significantly between samples.
+#### `r nrow(dep[rowData(dep)$significant, ])` proteins differ significantly between samples.
 
 Parameters used:  
 
-* tested contrasts = <span style="color:blue">`r gsub("_p.adj", "", colnames(rowData(signif))[grep("p.adj", colnames(rowData(signif)))])`</span>  
+* tested contrasts = <span style="color:blue">`r gsub("_p.adj", "", colnames(rowData(dep))[grep("p.adj", colnames(rowData(dep)))])`</span>  
 * adjusted p <= <span style="color:blue">`r param$alpha`</span>  
 * |logFC| >= <span style="color:blue">`r param$lfc`</span>  
 
@@ -95,7 +95,7 @@ plot_detect(norm)
 Intensity distributions before and after imputation.
 
 ```{r imputation, echo=FALSE, fig.width = 5, fig.height = 5}
-plot_imputation(norm, signif)
+plot_imputation(norm, dep)
 ```
 
 \pagebreak
@@ -106,33 +106,33 @@ plot_imputation(norm, signif)
 
 ```{r, echo=FALSE}
 num = 400
-if (nrow(signif) < 400) num = nrow(signif)
+if (nrow(dep) < 400) num = nrow(dep)
 ```
 
 ```{r, echo=FALSE, fig.width = 5.5, fig.height= 4}
-plot_pca(signif, n = num)
+plot_pca(dep, n = num)
 ```
 
 ### Correlation matrix
 
 ```{r, echo=FALSE, fig.width = 5.5, fig.height= 4}
-plot_corr(signif)
+plot_corr(dep)
 ```
 
 ### Heatmaps
 ```{r,echo=FALSE}
-len = nrow(signif[rowData(signif)$significant, ]) / 7
+len = nrow(dep[rowData(dep)$significant, ]) / 7
 if (len < 2) { len = 2 }
 ```
 
 ```{r,echo=FALSE}
-df <- assay(signif[rowData(signif)$significant, ]) - rowMeans(assay(signif[rowData(signif)$significant, ]))
+df <- assay(dep[rowData(dep)$significant, ]) - rowMeans(assay(dep[rowData(dep)$significant, ]))
 col_lim <- quantile(df, probs= 0.95) - quantile(df, probs= 0.05)
 if (len < col_lim) { col_lim = 2 }
 ```
 
 ```{r heatmap_1, echo=FALSE, fig.width = 5, fig.height = len}
-plot_heatmap(signif, "contrast", k = 6, col_limit = (2 * col_lim))
+plot_heatmap(dep, "contrast", k = 6, col_limit = (2 * col_lim))
 ```
 
 ```{r,echo=FALSE}
@@ -142,7 +142,7 @@ if (width > 10) { width = 10 }
 ```
 
 ```{r heatmap_2, echo=FALSE, fig.width = width, fig.height = len}
-plot_heatmap(signif, "centered", k = 6, col_limit = col_lim)
+plot_heatmap(dep, "centered", k = 6, col_limit = col_lim)
 ```
 
 

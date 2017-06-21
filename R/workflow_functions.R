@@ -7,7 +7,7 @@
 #' \href{http://www.nature.com/nprot/journal/v10/n10/full/nprot.2015.101.html}{IsobarQuant}
 #' is used as direct input.
 #'
-#' @param data Data.frame,
+#' @param proteins Data.frame,
 #' The data object.
 #' @param expdesign Data.frame,
 #' The experimental design object.
@@ -30,9 +30,18 @@
 #' sets the false discovery rate threshold.
 #' @param lfc Numeric,
 #' sets the log fold change threshold.
-#' @return A list of two data.frames:
-#' 1) \code{results} object containing the significant proteins,
-#' 2) \code{data} object containing the full dataset.
+#' @return A list of 8 objects:
+#' \item{se}{SummarizedExperiment object containing the original data}
+#' \item{filt}{SummarizedExperiment object containing the filtered data}
+#' \item{norm}{SummarizedExperiment object containing the normalized data}
+#' \item{imputed}{SummarizedExperiment object containing the imputed data}
+#' \item{diff}{SummarizedExperiment object
+#' containing FDR estimates of differential expression}
+#' \item{dep}{SummarizedExperiment object
+#' annotated with logical columns indicating significant proteins}
+#' \item{results}{data.frame containing containing
+#' all results variables from the performed analysis}
+#' \item{param}{data.frame containing the test parameters}
 #' @examples
 #' \dontrun{
 #'
@@ -40,13 +49,13 @@
 #'
 #' }
 #' @export
-TMT <- function(data, expdesign, fun, control, type, test = NULL,
+TMT <- function(proteins, expdesign, fun, control, type, test = NULL,
                 name = "gene_name", ids = "protein_id",
                 alpha = 0.05, lfc = 1) {
     # Show error if inputs are not the required classes
     if(is.integer(alpha)) alpha <- as.numeric(alpha)
     if(is.integer(lfc)) lfc <- as.numeric(lfc)
-    assertthat::assert_that(is.data.frame(data),
+    assertthat::assert_that(is.data.frame(proteins),
                             is.data.frame(expdesign),
                             is.character(fun),
                             is.character(control),
@@ -57,14 +66,14 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
                             is.numeric(lfc))
 
     # Show error if inputs do not contain required columns
-    if(length(grep(paste("^", name, "$", sep = ""), colnames(data))) < 1) {
+    if(length(grep(paste("^", name, "$", sep = ""), colnames(proteins))) < 1) {
         stop(paste0("'", name, "' is not a column in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(proteins)), "'."),
              call. = FALSE)
     }
-    if(length(grep(paste("^", ids, "$", sep = ""), colnames(data))) < 1) {
+    if(length(grep(paste("^", ids, "$", sep = ""), colnames(proteins))) < 1) {
         stop(paste0("'", ids, "' is not a column in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(proteins)), "'."),
              call. = FALSE)
     }
     if(any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
@@ -78,17 +87,17 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
     }
 
     # If input is a tibble, convert to data.frame
-    if(tibble::is.tibble(data)) data <- as.data.frame(data)
+    if(tibble::is.tibble(proteins)) proteins <- as.data.frame(proteins)
     if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
 
-    # Filter the data for Reverse hits (indicated by '###' in the gene_name)
-    data <- data[-grep("###", data$gene_name), ]
+    # Filter the proteins for Reverse hits (indicated by '###' in the gene_name)
+    proteins <- proteins[-grep("###", proteins$gene_name), ]
     # Make unique names and turn the data into a SummarizedExperiment
-    cols <- grep("signal_sum", colnames(data))  # The reporter signal columns
-    data <- make_unique(data, name, ids, delim = "[|]") %>%
-      make_se(., cols, expdesign)
+    cols <- grep("signal_sum", colnames(proteins))  # The reporter signal columns
+    proteins_unique <- make_unique(proteins, name, ids, delim = "[|]")
+    se <- make_se(proteins_unique, cols, expdesign)
     # Filter on missing values
-    filt <- filter_missval(data)
+    filt <- filter_missval(proteins_unique)
     # Variance stabilization
     norm <- normalize_vsn(filt)
     # Impute missing values
@@ -97,13 +106,13 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
     # of a linear model and defined contrasts
     diff <- test_diff(imputed, control, type)
     # Denote differential expressed proteins
-    signif <- add_rejections(diff, alpha, lfc)
+    dep <- add_rejections(diff, alpha, lfc)
     # Generate a results table
-    results <- get_results(signif)
+    results <- get_results(dep)
 
     param <- data.frame(alpha, lfc)
-    return(list(se = data, filt = filt, norm = norm, imputed = imputed,
-                diff = diff, signif = signif, results = results, param = param))
+    return(list(se = se, filt = filt, norm = norm, imputed = imputed,
+                diff = diff, dep = dep, results = results, param = param))
 }
 
 #' LFQ workflow
@@ -115,7 +124,7 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
 #' \href{http://www.nature.com/nbt/journal/v26/n12/full/nbt.1511.html}{MaxQuant}
 #' is used as direct input.
 #'
-#' @param data Data.frame,
+#' @param proteins Data.frame,
 #' The data object.
 #' @param expdesign Data.frame,
 #' The experimental design object.
@@ -140,9 +149,19 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
 #' sets the false discovery rate threshold.
 #' @param lfc Numeric,
 #' sets the log fold change threshold.
-#' @return A list of two data.frames:
-#' 1) \code{results} object containing the significant proteins,
-#' 2) \code{data} object containing the full dataset.
+#' @return A list of 9 objects:
+#' \item{data}{data.frame containing the original data}
+#' \item{se}{SummarizedExperiment object containing the original data}
+#' \item{filt}{SummarizedExperiment object containing the filtered data}
+#' \item{norm}{SummarizedExperiment object containing the normalized data}
+#' \item{imputed}{SummarizedExperiment object containing the imputed data}
+#' \item{diff}{SummarizedExperiment object
+#' containing FDR estimates of differential expression}
+#' \item{dep}{SummarizedExperiment object
+#' annotated with logical columns indicating significant proteins}
+#' \item{results}{data.frame containing containing
+#' all results variables from the performed analysis}
+#' \item{param}{data.frame containing the test parameters}
 #' @examples
 #'
 #' data <- UbiLength
@@ -150,14 +169,14 @@ TMT <- function(data, expdesign, fun, control, type, test = NULL,
 #' results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
 #'
 #' @export
-LFQ <- function(data, expdesign, fun, control, type, test = NULL,
+LFQ <- function(proteins, expdesign, fun, control, type, test = NULL,
                 filter = c("Reverse", "Potential.contaminant"),
                 name = "Gene.names", ids = "Protein.IDs",
                 alpha = 0.05, lfc = 1) {
     # Show error if inputs are not the required classes
     if(is.integer(alpha)) alpha <- as.numeric(alpha)
     if(is.integer(lfc)) lfc <- as.numeric(lfc)
-    assertthat::assert_that(is.data.frame(data),
+    assertthat::assert_that(is.data.frame(proteins),
                             is.data.frame(expdesign),
                             is.character(fun),
                             is.character(control),
@@ -169,20 +188,20 @@ LFQ <- function(data, expdesign, fun, control, type, test = NULL,
                             is.numeric(lfc))
 
     # Show error if inputs do not contain required columns
-    if(length(grep(paste("^", name, "$", sep = ""), colnames(data))) < 1) {
+    if(length(grep(paste("^", name, "$", sep = ""), colnames(proteins))) < 1) {
         stop(paste0("'", name, "' is not a column in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(proteins)), "'."),
              call. = FALSE)
     }
-    if(length(grep(paste("^", ids, "$", sep = ""), colnames(data))) < 1) {
+    if(length(grep(paste("^", ids, "$", sep = ""), colnames(proteins))) < 1) {
         stop(paste0("'", ids, "' is not a column in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(proteins)), "'."),
              call. = FALSE)
     }
     if(length(grep(paste("^", filter, "$", sep = "", collapse = "|"),
-                    colnames(data))) < 1) {
+                    colnames(proteins))) < 1) {
         stop(paste0("Not all filter columns are present in '",
-                    deparse(substitute(data)), "'."),
+                    deparse(substitute(proteins)), "'."),
              call. = FALSE)
     }
     if(any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
@@ -196,27 +215,27 @@ LFQ <- function(data, expdesign, fun, control, type, test = NULL,
     }
 
     # If input is a tibble, convert to data.frame
-    if(tibble::is.tibble(data)) data <- as.data.frame(data)
+    if(tibble::is.tibble(proteins)) proteins <- as.data.frame(proteins)
     if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
 
     # Filter out the positive proteins (indicated by '+')
     # in the pre-defined columns
     cols_filt <- grep(paste("^", filter, "$", sep = "", collapse = "|"),
-                      colnames(data))  # The columns to filter on
+                      colnames(proteins))  # The columns to filter on
     if (!is.null(cols_filt)) {
         if (length(cols_filt) == 1) {
-          rows <- which(data[, cols_filt] == "+")
-          if(length(rows) > 0) data <- data[-rows,]
+          rows <- which(proteins[, cols_filt] == "+")
+          if(length(rows) > 0) proteins <- proteins[-rows,]
         } else {
-          rows <- which(apply(data[, cols_filt] == "+", 1, any))
-          if(length(rows) > 0) data <- data[-rows,]
+          rows <- which(apply(proteins[, cols_filt] == "+", 1, any))
+          if(length(rows) > 0) proteins <- proteins[-rows,]
         }
     }
 
-    # Make unique names and turn the data into a SummarizedExperiment
-    cols <- grep("^LFQ", colnames(data))  # The LFQ intensity columns
-    data_unique <- make_unique(data, name, ids, delim = ";")
-    se <- make_se(data_unique, cols, expdesign)
+    # Make unique names and turn the proteins into a SummarizedExperiment
+    cols <- grep("^LFQ", colnames(proteins))  # The LFQ intensity columns
+    proteins_unique <- make_unique(proteins, name, ids, delim = ";")
+    se <- make_se(proteins_unique, cols, expdesign)
     # Filter on missing values
     filt <- filter_missval(se)
     # Variance stabilization
@@ -227,13 +246,13 @@ LFQ <- function(data, expdesign, fun, control, type, test = NULL,
     # of a linear model and defined contrasts
     diff <- test_diff(imputed, control, type)
     # Denote differential expressed proteins
-    signif <- add_rejections(diff, alpha, lfc)
+    dep <- add_rejections(diff, alpha, lfc)
     # Generate a results table
-    results <- get_results(signif)
+    results <- get_results(dep)
 
     param <- data.frame(alpha, lfc)
-    return(list(data = data_unique, se = se, filt = filt, norm = norm,
-                imputed = imputed, diff = diff, signif = signif,
+    return(list(data = proteins_unique, se = se, filt = filt, norm = norm,
+                imputed = imputed, diff = diff, dep = dep,
                 results = results, param = param))
 }
 
@@ -246,6 +265,7 @@ LFQ <- function(data, expdesign, fun, control, type, test = NULL,
 #' @param results List of SummarizedExperiments obtained
 #' from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.
 #' @return A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
+#' Additionally, the results table is saved as a tab-delimited txt file.
 #' @examples
 #' \dontrun{
 #'
@@ -264,7 +284,7 @@ report <- function(results) {
     # Show error in case that the required objects
     # are not present in the list object 'results'
     if(any(!c("data", "se", "filt", "norm",
-               "imputed", "diff", "signif",
+               "imputed", "diff", "dep",
                "results", "param") %in% names(results))) {
         stop("run report() with appropriate input generated by LFQ() or TMT()",
              call. = FALSE)
@@ -274,7 +294,7 @@ report <- function(results) {
     data <- results$se
     filt <- results$filt
     norm <- results$norm
-    signif <- results$signif
+    dep <- results$dep
     param <- results$param
     table <- results$results
 
@@ -336,7 +356,7 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
     # Show error in case that the required objects
     # are not present in the list object 'results'
     if(any(!c("data", "se", "filt", "norm",
-               "imputed", "diff", "signif",
+               "imputed", "diff", "dep",
                "results", "param") %in% names(results))) {
         stop("run iBAQ() with appropriate input generated by LFQ()",
              call. = FALSE)
@@ -351,12 +371,12 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
                     deparse(substitute(peptides)), "'."),
              call. = FALSE)
     }
-    if(any(!c("name", "ID") %in% colnames(rowData(results$sign)))) {
+    if(any(!c("name", "ID") %in% colnames(rowData(results$dep)))) {
         stop(paste0("'name' and/or 'ID' columns are not present in '",
                     deparse(substitute(results)), "'."),
              call. = FALSE)
     }
-    if(length(grep("_sign|_diff", colnames(rowData(results$sign)))) < 1) {
+    if(length(grep("_sign|_diff", colnames(rowData(results$dep)))) < 1) {
         stop(paste0("'[contrast]_sign' and/or '[contrast]_diff' columns are not present in '",
                     deparse(substitute(results)), "'."),
              call. = FALSE)
@@ -369,7 +389,7 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
     ibaq <- merge_ibaq(results$data, peptides)
 
     # Calculate relative stoichiometry compared to the bait
-    stoi <- get_stoichiometry(results$sign, ibaq, contrast, bait, level)
+    stoi <- get_stoichiometry(results$dep, ibaq, contrast, bait, level)
 
     # Plot stoichiometry
     p1 <- plot_stoichiometry(stoi)

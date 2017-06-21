@@ -4,12 +4,12 @@
 \alias{LFQ}
 \title{LFQ workflow}
 \usage{
-LFQ(data, expdesign, fun, control, type, test = NULL, filter = c("Reverse",
-  "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs",
-  alpha = 0.05, lfc = 1)
+LFQ(proteins, expdesign, fun, control, type, test = NULL,
+  filter = c("Reverse", "Potential.contaminant"), name = "Gene.names",
+  ids = "Protein.IDs", alpha = 0.05, lfc = 1)
 }
 \arguments{
-\item{data}{Data.frame,
+\item{proteins}{Data.frame,
 The data object.}
 
 \item{expdesign}{Data.frame,
@@ -46,9 +46,19 @@ sets the false discovery rate threshold.}
 sets the log fold change threshold.}
 }
 \value{
-A list of two data.frames:
-1) \code{results} object containing the significant proteins,
-2) \code{data} object containing the full dataset.
+A list of 9 objects:
+\item{data}{data.frame containing the original data}
+\item{se}{SummarizedExperiment object containing the original data}
+\item{filt}{SummarizedExperiment object containing the filtered data}
+\item{norm}{SummarizedExperiment object containing the normalized data}
+\item{imputed}{SummarizedExperiment object containing the imputed data}
+\item{diff}{SummarizedExperiment object
+containing FDR estimates of differential expression}
+\item{dep}{SummarizedExperiment object
+annotated with logical columns indicating significant proteins}
+\item{results}{data.frame containing containing
+all results variables from the performed analysis}
+\item{param}{data.frame containing the test parameters}
 }
 \description{
 \code{LFQ} is a wrapper function running the entire
