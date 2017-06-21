@@ -125,7 +125,7 @@ ui <- shinyUI(
 )
 
 server <- shinyServer(function(input, output) {
-  options(shiny.maxRequestSize=60*1024^2)
+  options(shiny.maxRequestSize=200*1024^2)
 
   ### UI functions ### ----------------------------------------------------------------------------------------------------------------
 

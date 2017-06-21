@@ -95,7 +95,7 @@ ui <- shinyUI(
 )
 
 server <- shinyServer(function(input, output) {
-  options(shiny.maxRequestSize=30*1024^2)
+  options(shiny.maxRequestSize=200*1024^2)
 
   ### UI functions ### ----------------------------------------------------------------------------------------------------------------
   output$columns <- renderMenu({
