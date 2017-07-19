@@ -378,6 +378,32 @@ colnames(data_results)
 
 Of these columns, the __p.adj__ columns contain the adjusted p values for the contrast as depicted in the column name. The __ratio__ columns contain the average log2 fold changes. The __significant__ columns indicate whether the protein is differentially enriched/expressed, as defined by the chosen cutoffs. The __centered__ columns contain the average log2 enrichment values scaled by protein-wise centering.
 
+## Generate a data.frame from the resulting SummarizedExperiment object
+
+You might want to obtain an ordinary data.frame of the data.
+For this purpose, the package provides functions to convert SummarizedExperiment objects to data.frames.
+_get_df_wide_ will generate a wide table, whereas _get_df_long_ will generate a long table.
+
+``` {r get_df}
+# Generate a wide data.frame
+df_wide <- get_df_wide(dep)
+# Generate a long data.frame
+df_long <- get_df_long(dep)
+```
+
+## Save your results object for reuse
+
+To facilitate future analysis and/or visualization of your current data, saving your analyzed data is highly recommended.
+We save the final data object (__dep__) as well as intermediates of the analysis, i.e. the initial SummarizedExperiment object (__data_se__), normalized data (__data_norm__), imputed data (__data_imp__) and differentially expression analyzed data (__data_diff__).
+This allows us to easily change analysis parameters in future analysis.
+
+``` {r save_load, eval = FALSE}
+# Save analyzed data
+save(data_se, data_norm, data_imp, data_diff, dep, file = "data.RData")
+# These data can be loaded in future R sessions using this command
+load("data.RData")
+```
+
 # Stoichiometry analysis
 
 The relative stoichiometries of protein-protein interactions can be calculated, as described before ([Smits et al (2013)](http://nar.oxfordjournals.org/content/41/1/e28.full)).
