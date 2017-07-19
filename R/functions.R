@@ -114,9 +114,8 @@ make_se <- function(proteins_unique, columns, expdesign) {
   expdesign <- mutate(expdesign, condition = make.names(condition)) %>%
     unite(ID, condition, replicate, remove = FALSE)
   rownames(expdesign) <- expdesign$ID
-  colnames(raw)[lapply(expdesign$label,
-                       function(x) grep(paste0(x, "$"), colnames(raw))) %>%
-                  unlist()] <- expdesign$ID
+  colnames(raw)[match(delete_prefix(expdesign$label),
+                      delete_prefix(colnames(raw)))] <- expdesign$ID
   raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
   # Select the rowData
@@ -177,6 +176,12 @@ get_prefix <- function(words) {
   # Obtain the longest common prefix
   prefix <- as.logical(cumprod(identical))
   paste(mat[prefix, 1], collapse = "")
+}
+
+# Short internal function to delete the longest common prefix
+delete_prefix <- function(words) {
+  prefix <- get_prefix(words)
+  gsub(prefix, "", words)
 }
 
 #' Data.frame to SummarizedExperiment object
@@ -873,9 +878,9 @@ get_results <- function(dep) {
   return(table)
 }
 
-#' Generate a wide data.frame from a SummerizedExperiment
+#' Generate a wide data.frame from a SummarizedExperiment
 #'
-#' \code{get_df_wide} generate a wide data.frame from a SummerizedExperiment.
+#' \code{get_df_wide} generate a wide data.frame from a SummarizedExperiment.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics dataset.
@@ -928,9 +933,9 @@ wide <- full_join(assay_data, row_data, by = "name")
 return(wide)
 }
 
-#' Generate a long data.frame from a SummerizedExperiment
+#' Generate a long data.frame from a SummarizedExperiment
 #'
-#' \code{get_df_long} generate a wide data.frame from a SummerizedExperiment.
+#' \code{get_df_long} generate a wide data.frame from a SummarizedExperiment.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics dataset.
@@ -971,7 +976,8 @@ get_df_long <- function(se) {
 # Extract column data
 col_data <- colData(se) %>%
   data.frame() %>%
-  rownames_to_column()
+  rownames_to_column() %>%
+  select(-ID)
 # Extract row data
 row_data <- rowData(se) %>%
   data.frame()
