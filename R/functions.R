@@ -181,7 +181,7 @@ get_prefix <- function(words) {
 # Short internal function to delete the longest common prefix
 delete_prefix <- function(words) {
   prefix <- get_prefix(words)
-  gsub(prefix, "", words)
+  gsub(paste0("^", prefix), "", words)
 }
 
 #' Data.frame to SummarizedExperiment object
