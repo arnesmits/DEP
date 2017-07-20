@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{get_df_wide}
 \alias{get_df_wide}
-\title{Generate a wide data.frame from a SummerizedExperiment}
+\title{Generate a wide data.frame from a SummarizedExperiment}
 \usage{
 get_df_wide(se)
 }
@@ -16,7 +16,7 @@ containing all data in a wide format,
 where each row represents a protein.
 }
 \description{
-\code{get_df_wide} generate a wide data.frame from a SummerizedExperiment.
+\code{get_df_wide} generate a wide data.frame from a SummarizedExperiment.
 }
 \examples{
 data <- UbiLength
