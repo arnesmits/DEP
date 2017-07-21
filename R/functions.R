@@ -180,7 +180,9 @@ get_prefix <- function(words) {
 
 # Short internal function to delete the longest common prefix
 delete_prefix <- function(words) {
+  # Get prefix
   prefix <- get_prefix(words)
+  # Delete prefix from words
   gsub(paste0("^", prefix), "", words)
 }
 
@@ -194,6 +196,17 @@ delete_prefix <- function(words) {
 #' Protein table with unique names annotated in the 'name' column.
 #' @param columns Integer vector,
 #' Column numbers indicating the columns containing the assay data.
+#' @param mode "char" or "delim",
+#' The mode of parsing the column headers.
+#' "char" will parse the last number of characters as replicate number
+#' and requires the 'chars' parameter.
+#' "delim" will parse on the separator and requires the 'sep' parameter.
+#' @param chars Numeric,
+#' The number of characters to take at the end of the column headers
+#' as replicate number (only for mode == "char").
+#' @param sep Character,
+#' The separator used to parse the column header
+#' (only for mode == "delim").
 #' @return A SummarizedExperiment object
 #' with log2-transformed values.
 #' @examples
@@ -202,11 +215,17 @@ delete_prefix <- function(words) {
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
 #' columns <- grep("LFQ.", colnames(data_unique))
-#' se <- make_se_parse(data_unique, columns)
+#' se <- make_se_parse(data_unique, columns, mode = "char", chars = 1)
+#' se <- make_se_parse(data_unique, columns, mode = "delim", sep = "_")
 #' @export
-make_se_parse <- function(proteins_unique, columns) {
+make_se_parse <- function(proteins_unique, columns,
+                          mode = "char", chars = 1, sep = "_") {
   # Show error if inputs are not the required classes
-  assertthat::assert_that(is.data.frame(proteins_unique), is.integer(columns))
+  assertthat::assert_that(is.data.frame(proteins_unique),
+                          is.integer(columns),
+                          is.character(mode),
+                          is.numeric(chars),
+                          is.character(sep))
 
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(proteins_unique))) {
@@ -220,6 +239,11 @@ make_se_parse <- function(proteins_unique, columns) {
                 \nRun make_se_parse() with the appropriate columns as argument."),
          call. = FALSE)
   }
+  if(!mode %in% c("char", "delim")) {
+    stop(paste("run make_se_parse() with a valid mode;\nValid modes are ",
+               paste(c("char", "delim"),
+                     collapse = "', '"), "", sep = "'"))
+  }
 
   # If input is a tibble, convert to data.frame
   if(tibble::is.tibble(proteins_unique)) proteins_unique <- as.data.frame(proteins_unique)
@@ -229,30 +253,37 @@ make_se_parse <- function(proteins_unique, columns) {
   raw <- proteins_unique[, columns]
   raw[raw == 0] <- NA
   raw <- log2(raw)
-  colnames(raw) <- gsub(get_prefix(colnames(raw)), "",
-                        colnames(raw)) %>% make.names()
+  colnames(raw) <- delete_prefix(colnames(raw)) %>% make.names()
 
   # Select the rowData
   row_data <- proteins_unique[, -columns]
   rownames(row_data) <- row_data$name
 
   # Generate the colData
-  col_data <- data.frame(label = colnames(raw), stringsAsFactors = FALSE) %>%
-    mutate(condition = substr(label, 1, nchar(label) - 1),
-           replicate = substr(label, nchar(label), nchar(label))) %>%
-    unite(ID, condition, replicate, remove = FALSE)
+  if(mode == "char") {
+    col_data <- data.frame(label = colnames(raw), stringsAsFactors = FALSE) %>%
+      mutate(condition = substr(label, 1, nchar(label) - chars),
+             replicate = substr(label, nchar(label) + 1 - chars, nchar(label))) %>%
+      unite(ID, condition, replicate, remove = FALSE)
+  }
+  if(mode == "delim") {
+    col_data <- data.frame(label = colnames(raw), stringsAsFactors = FALSE) %>%
+      separate(label, c("condition", "replicate"), sep = sep,
+               remove = FALSE, extra = "merge") %>%
+      unite(ID, condition, replicate, remove = FALSE)
+  }
   rownames(col_data) <- col_data$ID
-  colnames(raw) <- col_data$ID[
-    lapply(col_data$label, function(x) grep(x, colnames(raw)))
-    %>% unlist()]
+  colnames(raw)[match(col_data$label, colnames(raw))] <- col_data$ID
   raw <- raw[, !is.na(colnames(raw))]
+
 
   # Generate the SummarizedExperiment object
   se <- SummarizedExperiment(assays = as.matrix(raw),
-                                  colData = col_data,
-                                  rowData = row_data)
+                             colData = col_data,
+                             rowData = row_data)
   return(se)
 }
+
 
 #' Filter on missing values
 #'
