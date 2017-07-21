@@ -44,14 +44,21 @@ test_that("get_prefix returns a character object", {
   expect_is(get_prefix(c("AB", "ABC", "ABCD")), "character")
 })
 
+test_that("get_prefix return the right prefix", {
+  expect_equal(get_prefix(c("AB", "ABC", "ABCD")), "AB")
+})
+
 test_that("make_se_parse throws error without valid input", {
   expect_error(make_se_parse("test_unique", 21:32))
   expect_error(make_se_parse(test_unique, "21:32"))
   expect_error(make_se_parse(test_unique, 1:10))
   expect_error(make_se_parse(test_unique[,-(36:37)], 21:32))
+  expect_error(make_se_parse(test_unique, 21:32, mode = "bla"))
+  expect_error(make_se_parse(test_unique, 21:32, mode = bla))
 })
 
 test_that("make_se_parse returns a SummarizedExperiment", {
-  expect_is(make_se_parse(test_unique, 21:32), "SummarizedExperiment")
+  expect_is(make_se_parse(test_unique, 21:32, mode = "char"), "SummarizedExperiment")
+  expect_is(make_se_parse(test_unique, 21:32, mode = "delim"), "SummarizedExperiment")
   expect_is(make_se_parse(tibble::as_tibble(test_unique), 21:32), "SummarizedExperiment")
 })
