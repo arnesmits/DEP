@@ -18,8 +18,8 @@ Column numbers indicating the columns containing the assay data.}
 \item{mode}{"char" or "delim",
 The mode of parsing the column headers.
 "char" will parse the last number of characters as replicate number
-and required the 'chars' parameter.
-"delim" will parse on the separator and required the 'sep' parameter.}
+and requires the 'chars' parameter.
+"delim" will parse on the separator and requires the 'sep' parameter.}
 
 \item{chars}{Numeric,
 The number of characters to take at the end of the column headers
