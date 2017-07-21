@@ -5,7 +5,8 @@
 \title{Data.frame to SummarizedExperiment object
 conversion using parsing from column names}
 \usage{
-make_se_parse(proteins_unique, columns)
+make_se_parse(proteins_unique, columns, mode = "char", chars = 1,
+  sep = "_")
 }
 \arguments{
 \item{proteins_unique}{Data.frame,
@@ -13,6 +14,20 @@ Protein table with unique names annotated in the 'name' column.}
 
 \item{columns}{Integer vector,
 Column numbers indicating the columns containing the assay data.}
+
+\item{mode}{"char" or "delim",
+The mode of parsing the column headers.
+"char" will parse the last number of characters as replicate number
+and required the 'chars' parameter.
+"delim" will parse on the separator and required the 'sep' parameter.}
+
+\item{chars}{Numeric,
+The number of characters to take at the end of the column headers
+as replicate number (only for mode == "char").}
+
+\item{sep}{Character,
+The separator used to parse the column header
+(only for mode == "delim").}
 }
 \value{
 A SummarizedExperiment object
@@ -28,5 +43,6 @@ data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 columns <- grep("LFQ.", colnames(data_unique))
-se <- make_se_parse(data_unique, columns)
+se <- make_se_parse(data_unique, columns, mode = "char", chars = 1)
+se <- make_se_parse(data_unique, columns, mode = "delim", sep = "_")
 }
