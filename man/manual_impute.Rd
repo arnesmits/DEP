@@ -8,15 +8,15 @@ manual_impute(se, scale = 0.3, shift = 1.8)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics data for which missing values will be imputed.}
+Proteomics dataset for which missing values will be imputed.}
 
 \item{scale}{Numeric,
 Sets the width of the distribution relative to the
 standard deviation of the original distribution.}
 
 \item{shift}{Numeric,
-Sets the left-shift of the distribution in standard deviation from
-the mean of the original distribution.}
+Sets the left-shift of the distribution (in standard deviations) from
+the median of the original distribution.}
 }
 \value{
 An imputed SummarizedExperiment object.

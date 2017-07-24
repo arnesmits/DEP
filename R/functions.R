@@ -5,7 +5,7 @@
 #'
 #' @param proteins Data.frame,
 #' Protein table for which unique names will be created.
-#' @param name Character,
+#' @param names Character,
 #' Name of the column containing feature names.
 #' @param ids Character,
 #' Name of the column containing feature IDs.
@@ -17,20 +17,20 @@
 #' data <- UbiLength
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #' @export
-make_unique <- function(proteins, name, ids, delim = ";") {
+make_unique <- function(proteins, names, ids, delim = ";") {
   # Show error if inputs are not the required classes
   assertthat::assert_that(is.data.frame(proteins),
-                          is.character(name),
+                          is.character(names),
                           is.character(ids),
                           is.character(delim))
 
   # Show error if inputs do not contain required columns
-  if(length(grep(paste("^", name, "$", sep = ""), colnames(proteins))) < 1) {
-    stop(paste0("'", name, "' is not a column in '",
+  if(!names %in% colnames(proteins)) {
+    stop(paste0("'", names, "' is not a column in '",
                 deparse(substitute(proteins)), "'."),
          call. = FALSE)
   }
-  if(length(grep(paste("^", ids, "$", sep = ""), colnames(proteins))) < 1) {
+  if(!ids %in% colnames(proteins)) {
     stop(paste0("'", ids, "' is not a column in '",
                 deparse(substitute(proteins)), "'."),
          call. = FALSE)
@@ -42,12 +42,13 @@ make_unique <- function(proteins, name, ids, delim = ";") {
   # Select the name and id columns,
   # take the first identifier per row and make unique names.
   # If there is no name, the ID will be taken.
-  names <- proteins %>% select(matches(paste("^", name, "$", sep = "")),
-                           matches(paste("^", ids, "$", sep = ""))) %>%
-    mutate(name = gsub(paste(delim, ".*", sep = ""), "", .[, 1]),
-           ID = gsub(paste(delim, ".*", sep = ""), "", .[, 2]),
+  unique_names <- proteins %>%
+    select(matches(paste0("^", names, "$")),
+           matches(paste0("^", ids, "$"))) %>%
+    mutate(name = gsub(paste0(delim, ".*"), "", .[, 1]),
+           ID = gsub(paste0(delim, ".*"), "", .[, 2]),
            name = make.unique(ifelse(name == "" | is.na(name), ID, name)))
-  proteins_unique <- left_join(proteins, names)
+  proteins_unique <- left_join(proteins, unique_names)
   return(proteins_unique)
 }
 
@@ -100,8 +101,10 @@ make_se <- function(proteins_unique, columns, expdesign) {
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(proteins_unique)) proteins_unique <- as.data.frame(proteins_unique)
-  if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
+  if(tibble::is.tibble(proteins_unique))
+    proteins_unique <- as.data.frame(proteins_unique)
+  if(tibble::is.tibble(expdesign))
+    expdesign <- as.data.frame(expdesign)
 
   # Select the assay data
   rownames(proteins_unique) <- proteins_unique$name
@@ -246,7 +249,8 @@ make_se_parse <- function(proteins_unique, columns,
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(proteins_unique)) proteins_unique <- as.data.frame(proteins_unique)
+  if(tibble::is.tibble(proteins_unique))
+    proteins_unique <- as.data.frame(proteins_unique)
 
   # Select the assay values
   rownames(proteins_unique) <- proteins_unique$name
@@ -341,7 +345,7 @@ filter_missval <- function(se, thr = 0) {
   # missing values per condition (defined by thr)
   keep <- bin_data %>%
     data.frame() %>%
-    rownames_to_column(.) %>%
+    rownames_to_column() %>%
     gather(ID, value, 2:ncol(.)) %>%
     left_join(., data.frame(colData(se)), by = "ID") %>%
     group_by(rowname, condition) %>%
@@ -390,10 +394,10 @@ normalize_vsn <- function(se) {
 #' by random draws from a manually defined distribution.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics data for which missing values will be imputed.
+#' Proteomics dataset for which missing values will be imputed.
 #' @param shift Numeric,
-#' Sets the left-shift of the distribution in standard deviation from
-#' the mean of the original distribution.
+#' Sets the left-shift of the distribution (in standard deviations) from
+#' the median of the original distribution.
 #' @param scale Numeric,
 #' Sets the width of the distribution relative to the
 #' standard deviation of the original distribution.
@@ -423,9 +427,10 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
   # Get descriptive parameters of the current sample distributions
   stat <- assay(se) %>%
     data.frame() %>%
-    rownames_to_column(.) %>%
+    rownames_to_column() %>%
     gather(samples, value, 2:ncol(.)) %>%
-    filter(!is.na(value))  %>% group_by(samples) %>%
+    filter(!is.na(value))  %>%
+    group_by(samples) %>%
     summarise(mean = mean(value),
               median = median(value),
               sd = sd(value),
@@ -525,7 +530,7 @@ impute <- function(se, fun, ...) {
                 "'.\nRun make_unique() and make_se() to obtain the required columns."), call. = FALSE)
   }
   if(!fun %in% c("man", MSnbase::imputeMethods())) {
-    stop(paste("run imputation() with a valid function;\nValid functions are ",
+    stop(paste("run imputate() with a valid function;\nValid functions are ",
                paste(c("man", MSnbase::imputeMethods()),
                      collapse = "', '"), "", sep = "'"))
   }
@@ -632,7 +637,7 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
 
   # Generate contrasts to be tested
   # Either make all possible combinations ("all") or
-  # only the contrast versus the control sample ("control")
+  # only the contrasts versus the control sample ("control")
   conditions <- as.character(unique(conditions))
   if(type == "all") {
     cntrst <- apply(combn(conditions, 2), 2,
@@ -688,7 +693,8 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
   # function to retrieve the results of
   # the differential expression test using 'fdrtool'
   retrieve_fun <- function(comp, fit = eB_fit){
-    res <- topTable(fit, sort.by = "t", coef = comp, number = Inf, confint = TRUE)
+    res <- topTable(fit, sort.by = "t", coef = comp,
+                    number = Inf, confint = TRUE)
     fdr_res <- fdrtool::fdrtool(res$t, plot = FALSE, verbose = FALSE)
     res$qval <- fdr_res$qval
     res$lfdr <- fdr_res$lfdr
@@ -701,35 +707,13 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
   limma_res <- map_df(cntrst, retrieve_fun)
 
   # Select the logFC, CI and qval variables
-  limma_res_small <- limma_res %>%
+  table <- limma_res %>%
     select(rowname, logFC, CI.L, CI.R, qval, comparison) %>%
-    mutate(comparison = gsub(" - ", "_vs_", comparison))
-  # Obtain a wide table with all log2 fold changes
-  table_diff <- limma_res_small %>%
-    select(rowname, logFC, comparison) %>%
-    spread(comparison, logFC)
-  colnames(table_diff)[2:ncol(table_diff)] <-
-    paste(colnames(table_diff)[2:ncol(table_diff)], "diff", sep = "_")
-  # Obtain a wide table with all CI values
-  table_CI.L <- limma_res_small %>%
-    select(rowname, CI.L, comparison) %>%
-    spread(comparison, CI.L)
-  colnames(table_CI.L)[2:ncol(table_CI.L)] <-
-    paste(colnames(table_CI.L)[2:ncol(table_CI.L)], "CI.L", sep = "_")
-  table_CI.R <- limma_res_small %>%
-    select(rowname, CI.R, comparison) %>%
-    spread(comparison, CI.R)
-  colnames(table_CI.R)[2:ncol(table_CI.R)] <-
-    paste(colnames(table_CI.R)[2:ncol(table_CI.R)], "CI.R", sep = "_")
-  # Obtain a wide table with all q-values
-  table_padj <- limma_res_small %>%
-    select(rowname, qval, comparison) %>% spread(comparison, qval)
-  colnames(table_padj)[2:ncol(table_padj)] <-
-    paste(colnames(table_padj)[2:ncol(table_padj)], "p.adj", sep = "_")
-  # Join the two tables with the rowData
-  table <- left_join(table_diff, table_CI.L, by = "rowname")
-  table <- left_join(table, table_CI.R, by = "rowname")
-  table <- left_join(table, table_padj, by = "rowname")
+    mutate(comparison = gsub(" - ", "_vs_", comparison)) %>%
+    gather(variable, value, -c(rowname,comparison)) %>%
+    mutate(variable = recode(variable, logFC = "diff", qval = "p.adj")) %>%
+    unite(temp, comparison, variable) %>%
+    spread(temp, value)
   rowData(se) <- merge(rowData(se), table, by.x = "name", by.y = "rowname")
   return(se)
 }
@@ -801,8 +785,7 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
       gsub("p.adj", "significant", colnames(row_data)[cols_p])
   }
   if(length(cols_p) > 1) {
-    sign_df <- row_data[, cols_p] %>%
-      apply(., 2, function(x) x <= alpha) &
+    sign_df <- row_data[, cols_p] %>% apply(., 2, function(x) x <= alpha) &
       row_data[, cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc)
     sign_df <- cbind(sign_df,
                      significant = apply(sign_df, 1, function(x) any(x)))
@@ -871,7 +854,7 @@ get_results <- function(dep) {
   rowData(dep)$mean <- rowMeans(assay(dep))
   centered <- assay(dep) - rowData(dep)$mean
   centered <- data.frame(centered) %>%
-    rownames_to_column(.) %>%
+    rownames_to_column() %>%
     gather(ID, val, 2:ncol(.)) %>%
     left_join(., data.frame(colData(dep)), by = "ID")
   centered <- group_by(centered, rowname, condition) %>%
@@ -886,7 +869,7 @@ get_results <- function(dep) {
     column_to_rownames("name") %>%
     select(ends_with("diff")) %>%
     signif(., digits = 3) %>%
-    rownames_to_column(.)
+    rownames_to_column()
   colnames(ratio)[2:ncol(ratio)] <-
     gsub("_diff", "_ratio", colnames(ratio)[2:ncol(ratio)])
   df <- left_join(ratio, centered, by = "rowname")
@@ -895,7 +878,7 @@ get_results <- function(dep) {
   pval <- row_data %>%
     column_to_rownames("name") %>%
     select(ends_with("p.adj"), ends_with("significant")) %>%
-    rownames_to_column(.)
+    rownames_to_column()
   pval[, grep("p.adj", colnames(pval))] <-
     format(signif(pval[, grep("p.adj", colnames(pval))]
                   , digits = 3),

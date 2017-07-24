@@ -4,13 +4,13 @@
 \alias{make_unique}
 \title{Make unique names}
 \usage{
-make_unique(proteins, name, ids, delim = ";")
+make_unique(proteins, names, ids, delim = ";")
 }
 \arguments{
 \item{proteins}{Data.frame,
 Protein table for which unique names will be created.}
 
-\item{name}{Character,
+\item{names}{Character,
 Name of the column containing feature names.}
 
 \item{ids}{Character,
