@@ -42,7 +42,7 @@ test_that("LFQ returns a list object", {
   expect_is(LFQ(test_data, UbiLength_ExpDesign, "MinProb", "Ctrl", "control", filter = c("Reverse", "Potential.contaminant"),
                 name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1), "list")
   expect_is(LFQ(test_data, UbiLength_ExpDesign, "MinProb", "Ctrl", "control", filter = c("Reverse", "Potential.contaminant"),
-                name = "Gene.names", ids = "Protein.IDs", alpha = 0.05L, lfc = 1L), "list")
+                name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1L), "list")
   expect_is(LFQ(test_data, UbiLength_ExpDesign, "MinProb", "Ctrl", "control", filter = "Reverse",
                 name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1), "list")
 })
@@ -83,7 +83,7 @@ test_that("iBAQ throws error without valid input", {
   expect_error(iBAQ(result, test_ibaq_pep, "GFP_vs_WT", "test"))
 
   result_error <- result
-  result_error$data <- result_error$data[,-(15:20)]
+  result_error$data <- result_error$data[,-(16:21)]
   expect_error(iBAQ(result_error, test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
 
   result_error2 <- result
@@ -91,7 +91,7 @@ test_that("iBAQ throws error without valid input", {
   expect_error(iBAQ(result_error2, test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
 
   result_error3 <- result
-  rowData(result_error3$dep) <- rowData(result_error3$dep)[,-c(27:28,30)]
+  rowData(result_error3$dep) <- rowData(result_error3$dep)[,-c(29,30,32)]
   expect_error(iBAQ(result_error3, test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
 })
 

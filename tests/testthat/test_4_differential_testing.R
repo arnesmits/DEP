@@ -28,8 +28,8 @@ test_that("test_diff returns a SummarizedExperiment object", {
 
 test_that("test_diff returns an object with diff and p.adj columns", {
   result <- SummarizedExperiment::rowData(test_diff(test_impute, "Ctrl", "control"))
-  expect_equal(grep("_diff$", colnames(result)), 26:28)
-  expect_equal(grep("_p.adj$", colnames(result)), 35:37)
+  expect_equal(grep("_diff$", colnames(result)), c(28,32,36))
+  expect_equal(grep("_p.adj$", colnames(result)), c(29,33,37))
 })
 
 test_that("add_rejections throws error without valid input", {
