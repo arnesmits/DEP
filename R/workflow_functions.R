@@ -376,7 +376,7 @@ iBAQ <- function(results, peptides, contrast, bait, level = 1) {
                     deparse(substitute(results)), "'."),
              call. = FALSE)
     }
-    if(length(grep("_sign|_diff", colnames(rowData(results$dep)))) < 1) {
+    if(length(grep("_significant|_diff", colnames(rowData(results$dep)))) < 1) {
         stop(paste0("'[contrast]_sign' and/or '[contrast]_diff' columns are not present in '",
                     deparse(substitute(results)), "'."),
              call. = FALSE)

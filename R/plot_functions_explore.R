@@ -42,7 +42,7 @@ plot_pca <- function(dep, x = 1, y = 2, n = 500) {
                           is.integer(n))
 
   # Check for valid x and y values
-  if(x > ncol(dep) & x > ncol(dep)) {
+  if(x > ncol(dep) | y > ncol(dep)) {
     stop(paste0("'x' and/or 'y' arguments are not valid.\n",
                 "Run plot_pca() with 'x' and 'y' <= ",
                 ncol(dep),
@@ -50,7 +50,7 @@ plot_pca <- function(dep, x = 1, y = 2, n = 500) {
          call. = FALSE)
   }
 
-  # Check for valid n value
+  # Check for valid 'n' value
   if(n > nrow(dep)) {
     stop(paste0("'n' argument is not valid.\n",
                 "Run plot_pca() with 'n' <= ",
