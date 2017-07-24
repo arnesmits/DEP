@@ -102,13 +102,13 @@ plot_normalization <- function(raw, norm) {
     # annotated with sample info
     df1 <- assay(raw) %>%
       data.frame() %>%
-      rownames_to_column(.) %>%
+      rownames_to_column() %>%
       gather(ID, val, 2:ncol(.)) %>%
       left_join(., data.frame(colData(raw)), by = "ID") %>%
       mutate(var = "original")
     df2 <- assay(norm) %>%
       data.frame() %>%
-      rownames_to_column(.) %>%
+      rownames_to_column() %>%
       gather(ID, val, 2:ncol(.)) %>%
       left_join(., data.frame(colData(norm)), by = "ID") %>%
       mutate(var = "normalized")
@@ -172,13 +172,13 @@ plot_imputation <- function(raw, imp) {
     # annotated with sample info
     df1 <- assay(raw) %>%
       data.frame() %>%
-      rownames_to_column(.) %>%
+      rownames_to_column() %>%
       gather(ID, val, 2:ncol(.)) %>%
       left_join(., data.frame(colData(raw)), by = "ID") %>%
       mutate(var = "original")
     df2 <- assay(imp) %>%
       data.frame() %>%
-      rownames_to_column(.) %>%
+      rownames_to_column() %>%
       gather(ID, val, 2:ncol(.)) %>%
       left_join(., data.frame(colData(imp)), by = "ID") %>%
       mutate(var = "imputed")
@@ -231,7 +231,7 @@ plot_detect <- function(se) {
     # Get a long data.frame of the assay data annotated with sample info
     df <- assay(se) %>%
       data.frame() %>%
-      rownames_to_column(.) %>%
+      rownames_to_column() %>%
       gather(ID, val, 2:ncol(.)) %>%
       left_join(., data.frame(colData(se)), by = "ID")
 
