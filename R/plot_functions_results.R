@@ -62,7 +62,7 @@ plot_single <- function(dep, protein, type) {
   if(length(which(rowData(dep)$name == protein)) == 0) {
     possibilities <-
       rowData(dep)$name[grep(substr(protein, 1, nchar(protein) - 1),
-                              rowData(dep)$name)]
+                             rowData(dep)$name)]
     if(length(possibilities) > 0) {
       possibilities_msg <- paste0("Do you mean: '",
                                   paste0(possibilities, collapse = "', '"),
@@ -82,60 +82,52 @@ plot_single <- function(dep, protein, type) {
     # Obtain protein-centered enrichment values
     rowData(dep)$mean <- rowMeans(assay(dep))
     df <- assay(dep) - rowData(dep)$mean
-    df <- data.frame(df) %>% rownames_to_column(.)
+    df <- data.frame(df) %>% rownames_to_column()
     # Select values for a single protein in long format and add sample annotation
-    df <- filter(df, rowname == protein) %>%
+    df_reps <- filter(df, rowname == protein) %>%
       gather(ID, val, 2:ncol(.)) %>%
       left_join(., data.frame(colData(dep)), by = "ID")
-    df$replicate <- as.factor(df$replicate)
+    df_reps$replicate <- as.factor(df_reps$replicate)
+    df_mean <- df_reps %>%
+      group_by(condition) %>%
+      summarize(mean = mean(val), sd = sd(val), n = n()) %>%
+      mutate(error = qnorm(0.975) * sd / sqrt(n),
+             CI.L = mean - error,
+             CI.R = mean + error)
     # Plot the centered enrichment values for the replicates as well as the mean
-    p1 <- ggplot(df, aes(condition, val, col = replicate)) +
+    p1 <- ggplot(df_mean, aes(condition, mean)) +
       geom_hline(yintercept = 0) +
-      stat_summary(fun.y = "mean", colour = "darkgrey", size = 0,
-                   geom = "bar", fill = "darkgrey") +
-      geom_point(shape = 17, size = 4) +
-      labs(title = unique(df$rowname),
+      geom_col(colour = "black", fill = "grey") +
+      geom_point(data = df_reps, aes(condition, val, col = replicate),
+                 shape = 18, size = 5, position = position_dodge(width=0.3)) +
+      geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
+      labs(title = protein,
            x = "Baits",
-           y = "Enrichment (log2)",
+           y = "Enrichment (log2; 95% CI)",
            col = "rep") +
       theme_DEP2()
   }
   if(type == "contrast") {
     # Select values for a single protein
-    protein <- rowData(dep) %>%
+    df <- rowData(dep) %>%
       data.frame() %>%
-      filter(name == protein)
-    # Obtain average enrichments of conditions versus the control condition
-    diff <- protein %>%
+      filter(name == protein) %>%
       column_to_rownames(var = "name") %>%
-      select(ends_with("_diff")) %>%
-      rownames_to_column(.) %>%
-      gather(condition, LFC, 2:ncol(.)) %>%
-      mutate(condition = gsub("_diff", "", condition) %>%
-               gsub("_vs_", " - ", .))
-    CI.L <- protein %>%
-      column_to_rownames(var = "name") %>%
-      select(ends_with("_CI.L")) %>%
-      gather(condition, CI.L)%>%
-      mutate(condition = gsub("_CI.L", "", condition) %>%
-               gsub("_vs_", " - ", .))
-    CI.R <- protein %>%
-      column_to_rownames(var = "name") %>%
-      select(ends_with("_CI.R")) %>%
-      gather(condition, CI.R) %>%
-      mutate(condition = gsub("_CI.R", "", condition) %>%
-               gsub("_vs_", " - ", .))
-    df <- left_join(diff, CI.L, by = "condition")
-    df <- left_join(df, CI.R, by = "condition")
-
+      select(ends_with("_diff"),
+             ends_with("_CI.L"),
+             ends_with("_CI.R")) %>%
+      gather(var, val) %>%
+      mutate(condition = gsub("_diff|_CI.L|_CI.R", "", var),
+             var = gsub(".*_", "", var)) %>%
+      spread(var, val)
     # Plot the average enrichments of conditions versus the control condition
-    p1 <- ggplot(df, aes(condition, LFC)) +
+    p1 <- ggplot(df, aes(condition, diff)) +
       geom_hline(yintercept = 0) +
-      geom_bar(stat = "unique", size = 0, fill = "grey") +
+      geom_col(colour = "black", fill = "grey") +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
-      labs(title = unique(df$rowname),
+      labs(title = protein,
            x = "",
-           y = "Enrichment +/- 95% CI (log2)") +
+           y = "Enrichment (log2; 95% CI)") +
       theme_DEP2()
   }
   p1
@@ -290,7 +282,7 @@ plot_heatmap <- function(dep, type, k = 6, col_limit = 6, labelsize = 10) {
                                             legend_direction = "horizontal",
                                             legend_width = unit(5, "cm"),
                                             title_position = "lefttop"),
-                name = "Enrichment (Log2)",
+                name = "Enrichment (log2)",
                 row_names_gp = gpar(fontsize = labelsize),
                 column_names_gp = gpar(fontsize = 16))
   draw(ht1, heatmap_legend_side = "top")
@@ -411,7 +403,7 @@ plot_volcano <- function(dep, contrast, labelsize = 3, add_names = TRUE) {
                                          label = c(name1, name2),
                                          size = 5,
                                          fontface = "bold")) +
-      labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") +
+      labs(x = "Fold change (log2)", y = "Adjusted p-value (-log10)") +
       theme_DEP1() +
       theme(legend.position = "none")
   } else {
@@ -426,7 +418,7 @@ plot_volcano <- function(dep, contrast, labelsize = 3, add_names = TRUE) {
                                          label = c(name1, name2),
                                          size = 5,
                                          fontface = "bold")) +
-      labs(x = "Log2 Fold Change", y = "-log10 adjusted P value") +
+      labs(x = "Fold change (log2)", y = "Adjusted p-value (-log10)") +
       theme_DEP1() +
       theme(legend.position = "none")
   }
