@@ -8,7 +8,7 @@
         "value", "rowname", "miss_val",
         "samples", "logFC", "qval", "comparison",
         "val", "name", "significant", "contrasts",
-        "CI.L", "CI.R",
+        "CI.L", "CI.R", "variable", "temp",
 
         # iBAQ.R globalVariables
         "Unique..Groups.", "Protein.group.IDs",
@@ -19,6 +19,7 @@
         "cs", "cs_frac", "cluster", "index",
         "iBAQ_value", "Peptides", "lfc", "ibaq",
         "LFC", "ymin", "ymax", "x", "y", "z",
+        "qnorm", "error", "var",
 
         # plot_functions2.R globalVariables
         "n_con", "conditions", "category"
