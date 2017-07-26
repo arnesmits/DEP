@@ -48,68 +48,69 @@ merge_ibaq <- function(protein_unique, peptides) {
     # Filter for peptides not unique to a single protein group
     # and sort their protein group IDs
     shared_pep <- peptides %>% filter(Unique..Groups. == "no")
+    # Function to split, sort and collapse IDs
+    split_sort_collapse <- function(x) {
+      vapply(x, function(y) {
+        feat <- unlist(strsplit(y, ";"))
+        sorted <- paste(sort(feat), collapse = ";")
+      }, character(1))
+    }
+
+    # Split, sort and collapse protein group IDs and keep unique combinations
     sorted_pep <- shared_pep %>%
       select(Protein.group.IDs) %>%
-      mutate(Protein.group.IDs = lapply(Protein.group.IDs,
-                                        function(x) strsplit(x, ";")[[1]] %>%
-                                          as.numeric() %>%
-                                          sort() %>%
-                                          paste(., collapse = ";")))
+      mutate(Protein.group.IDs = split_sort_collapse(Protein.group.IDs)) %>%
+      unique()
+
     # Expand the protein groups from a single column to a matrix
-    # and filter for unique combinations
-    max <- lapply(sorted_pep$Protein.group.IDs,
-                  function(x) strsplit(x, ";")[[1]] %>%
-                    length()) %>%
-      unlist() %>%
-      max()
-    shared <- sorted_pep %>%
-      separate(., Protein.group.IDs,
-               paste0("X", 1:max),
-               sep = ";", fill = "right")
-    shared_filt <- shared %>%
-      mutate(paste = apply(shared, 1,
-                        function(x) paste(x[!is.na(x)], collapse = ":"))) %>%
-      filter(!duplicated(paste)) %>% select(-paste)
+    max <- vapply(sorted_pep$Protein.group.IDs,
+                  function(x) length(unlist(strsplit(x, ";"))),
+                  numeric(1)) %>% max()
+    shared <- separate(sorted_pep,
+                       Protein.group.IDs,
+                       paste0("X", 1:max),
+                       sep = ";", fill = "right")
 
     # Combine all protein group IDs that have overlapping peptides
     # set first IDs group
-    x <- list(shared_filt[1, !is.na(shared_filt[1, ])])
-    for (i in 2:nrow(shared_filt)) {
+    x <- list(shared[1, !is.na(shared[1, ])])
+    for (i in 2:nrow(shared)) {
       # get IDs of new row and check whether they match
       #with any of the previous IDs
-        ids <- shared_filt[i, !is.na(shared_filt[i, ])]
-        if (any(ids %in% unlist(x))) {
-          # Get the IDs that match
-            match <- ids[ids %in% unlist(x)]
-            if (length(match) == 1) {
-              # Grep the rows of the single match
-                  rows <- grep(paste("\\b", match, "\\b", sep = ""), x)
-                }
-            if (length(match) > 1) {
-              # Grep the rows of all matches
-                  rows <- apply(match, 2, function(y) {
-                    grep(paste("\\b", y, "\\b", sep = ""), x) }) %>%
-                    unlist() %>% unique()
-                }
-            if (length(rows) == 1) {
-              # Combine the single matched ID group with the current IDs
-                  x[[rows]] <- unique(unlist(c(unlist(x[[rows]]), ids)))
-                }
-            if (length(rows) > 1) {
-              # Combine all matched ID groups and the current IDs in
-              # the first matched ID group and remove the others
-                x[[rows[1]]] <- unique(unlist(
-                  c(unlist(lapply(rows, function(y) x[[y]])), ids)))
-                for (j in 2:length(rows)) {
-                  x[[rows[j] - j + 2]] <- NULL
-                }
-            }
+      ids <- shared[i, !is.na(shared[i, ])]
+      if (any(ids %in% unlist(x))) {
+        # Get the IDs that match
+        match <- ids[ids %in% unlist(x)]
+        if (length(match) == 1) {
+          # Grep the rows of the single match
+          rows <- grep(paste("\\b", match, "\\b", sep = ""), x)
         }
-        if (!any(ids %in% unlist(x))) {
-          # In case there is no match with previous IDs groups,
-          # make a new IDs group
-            x[[(length(x) + 1)]] <- ids
+        if (length(match) > 1) {
+          # Grep the rows of all matches
+          rows <- vapply(match,
+                         function(y) {
+                           grep(paste("\\b", y, "\\b", sep = ""), x) },
+                         integer(1)) %>% unique()
         }
+        if (length(rows) == 1) {
+          # Combine the single matched ID group with the current IDs
+          x[[rows]] <- unique(unlist(c(unlist(x[[rows]]), ids)))
+        }
+        if (length(rows) > 1) {
+          # Combine all matched ID groups and the current IDs in
+          # the first matched ID group and remove the others
+          x[[rows[1]]] <- unique(unlist(
+            c(unlist(lapply(rows, function(y) x[[y]])), ids)))
+          for (j in 2:length(rows)) {
+            x[[rows[j] - j + 2]] <- NULL
+          }
+        }
+      }
+      if (!any(ids %in% unlist(x))) {
+        # In case there is no match with previous IDs groups,
+        # make a new IDs group
+        x[[(length(x) + 1)]] <- ids
+      }
     }
 
     # Function to convert the heterogenous list to a list of data.frames
@@ -329,7 +330,7 @@ get_stoichiometry <- function(dep, ibaq, contrast, bait, level = 1) {
 
     # Calculate the relative stoichiometries versus bait protein
     df <- wide %>%
-      mutate_each(funs(./num$.), 2:ncol(.)) %>%
+      mutate_at(2:ncol(.), funs(./num$.)) %>%
       gather(ID, iBAQ, 2:ncol(.)) %>%
       left_join(., ibaq_anno, by = "ID")
 
@@ -427,10 +428,10 @@ plot_stoichiometry <- function(protein_stoichiometry, thr = 0.01, max_y = NULL) 
 
     # Plot the barplot with errorbars
     ggplot(df, aes(x = name, y = stoichiometry)) +
-      geom_bar(stat = "identity") +
-      geom_errorbar(aes(ymax = ymax, ymin = ymin), width = 0.2) +
+      geom_col(colour = "black", fill = "grey") +
+      geom_errorbar(aes(ymax = ymax, ymin = ymin), width = 0.3) +
       labs(title = unique(df$condition), x = "",
-           y = paste("Stoichiometry (vs ", bait, ")", sep = "")) +
+           y = paste0("Stoichiometry (vs ", bait, ")")) +
       ylim(0, max) +
       theme_DEP2()
 }
