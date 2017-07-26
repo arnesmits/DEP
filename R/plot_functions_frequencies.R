@@ -39,7 +39,7 @@ plot_numbers <- function(se) {
     geom_bar(stat = "identity") +
     geom_hline(yintercept = unique(stat$n)) +
     labs(title = "Proteins per sample", x = "",
-         y = "Number of ProteinGroups") +
+         y = "Number of proteins") +
     theme_DEP2()
 }
 
@@ -86,7 +86,7 @@ plot_frequency <- function(se) {
     scale_fill_grey(start = 0.8, end = 0.2) +
     labs(title = "Protein identifications overlap",
          x = "Identified in number of samples",
-         y = "Number of ProteinGroups") +
+         y = "Number of proteins") +
     theme_DEP1() +
     theme(legend.position="none")
 }
@@ -136,7 +136,7 @@ plot_coverage <- function(se) {
     scale_fill_grey(start = 0.8, end = 0.2) +
     labs(title = "Protein coverage",
          x = "",
-         y = "Number of ProteinGroups",
+         y = "Number of proteins",
          fill = "samples") +
     theme_DEP1()
 }

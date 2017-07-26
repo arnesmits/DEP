@@ -119,7 +119,7 @@ plot_normalization <- function(raw, norm) {
       geom_boxplot(notch = TRUE, na.rm = TRUE) +
       coord_flip() +
       facet_wrap(~var, ncol = 1) +
-      labs(x = "", y = "Log2 Intensity") +
+      labs(x = "", y = "Intensity (log2)") +
       theme_DEP1()
 }
 
@@ -189,7 +189,7 @@ plot_imputation <- function(raw, imp) {
     ggplot(df, aes(val, col = condition)) +
       geom_density(na.rm = TRUE) +
       facet_wrap(~var, ncol = 1) +
-      labs(x = "Log2 Intensity", y = "Density") +
+      labs(x = "Intensity (log2)", y = "Density") +
       theme_DEP1()
 }
 
@@ -251,13 +251,13 @@ plot_detect <- function(se) {
     # proteins with and without missing values
     p1 <- ggplot(stat, aes(mean, col = missval)) +
       geom_density(na.rm = TRUE) +
-      labs(x = "Log2 Intensity", y = "Density") +
-      guides(col = guide_legend(title = "missing values")) +
+      labs(x = "Intensity (log2)", y = "Density") +
+      guides(col = guide_legend(title = "Missing values")) +
       theme_DEP1()
     p2 <- ggplot(cumsum, aes(mean, cs_frac, col = missval)) +
       geom_line() +
-      labs(x = "Log2 Intensity", y = "Cumulative fraction") +
-      guides(col = guide_legend(title = "missing values")) +
+      labs(x = "Intensity (log2)", y = "Cumulative fraction") +
+      guides(col = guide_legend(title = "Missing values")) +
       theme_DEP1()
     gridExtra::grid.arrange(p1, p2, ncol = 1)
 }
@@ -305,7 +305,10 @@ plot_missval <- function(se) {
                   column_names_side = "top",
                   show_row_names = FALSE,
                   show_column_names = TRUE,
-                  name = "Missingness Pattern",
-                  column_names_gp = gpar(fontsize = 16))
+                  name = "Missing values pattern",
+                  column_names_gp = gpar(fontsize = 16),
+                  heatmap_legend_param = list(at = c(0, 1),
+                                              labels = c("Missing value",
+                                                         "Valid value")))
     draw(ht2, heatmap_legend_side = "top")
 }
