@@ -678,8 +678,8 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
 
   }
   # Print tested contrasts
-  cat("Tested contrasts: \n")
-  print(gsub(" - ", "_vs_", cntrst))
+  message("\n Tested contrasts:")
+  message(gsub(" - ", "_vs_", cntrst))
 
   # Test for differential expression by empirical Bayes moderation
   # of a linear model on the predefined contrasts

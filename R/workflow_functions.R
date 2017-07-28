@@ -298,6 +298,7 @@ report <- function(results) {
     param <- results$param
     table <- results$results
 
+    message("Render reports")
     # Render the Rmarkdown report
     wd <- paste(getwd(), "/Report", sep = "")
     dir.create(wd)
@@ -305,14 +306,16 @@ report <- function(results) {
     rmarkdown::render(file, output_format = "all",
                       output_dir = wd, quiet = TRUE)
 
+    message("Save tab-delimited table")
     # Save the results table in a tab-delimited txt file
     write.table(table, paste(wd, "results.txt", sep = "/"),
                 row.names = FALSE, sep = "\t")
 
+    message("Save RData object")
     # Save the results object for later use
     save(results, file = paste(wd, "results.RData", sep = "/"))
 
-    cat(paste0("Report and results.txt file saved in: '", wd, "'"))
+    message(paste0("Files saved in: '", wd, "'"))
 }
 
 #' iBAQ workflow
@@ -321,7 +324,7 @@ report <- function(results) {
 #' for stoichiometry analysis using
 #' intensity-based absolute quantification (iBAQ)-based proteomics data.
 #'
-#' @param results #' List of SummarizedExperiments
+#' @param results List of SummarizedExperiments
 #' obtained from the \code{\link{LFQ}} wrapper function.
 #' @param peptides Data.frame,
 #' Peptide table from MaxQuant ('peptides.txt').

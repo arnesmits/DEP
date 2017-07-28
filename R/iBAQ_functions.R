@@ -87,10 +87,10 @@ merge_ibaq <- function(protein_unique, peptides) {
         }
         if (length(match) > 1) {
           # Grep the rows of all matches
-          rows <- vapply(match,
+          rows <- lapply(match,
                          function(y) {
-                           grep(paste("\\b", y, "\\b", sep = ""), x) },
-                         integer(1)) %>% unique()
+                           grep(paste("\\b", y, "\\b", sep = ""), x) }) %>%
+            unlist() %>% unique()
         }
         if (length(rows) == 1) {
           # Combine the single matched ID group with the current IDs

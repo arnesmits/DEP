@@ -119,14 +119,6 @@ plot_pca(dep, n = num)
 plot_corr(dep)
 ```
 
-### Frequency plot of significant proteins and overlap of conditions
-
-```{r, echo=FALSE, fig.width = 6, fig.height= 4}
-plot_cond(dep)
-```
-
-\pagebreak
-
 ### Heatmaps
 
 ```{r,echo=FALSE}
