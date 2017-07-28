@@ -357,6 +357,17 @@ plot_single(dep, protein = "USP15", type = "centered")
 plot_single(dep, protein = "USP15", type = "contrast")
 ```
 
+### Frequency plot of significant proteins and overlap of conditions
+
+Proteins can be differentially enriched/expressed in multiple comparisons.
+To visualize the distribution of significant conditions per protein and the 
+overlap between conditions, the _plot_cond_ function can be used.
+
+``` {r overlap, fig.height = 4, fig.width = 6}
+# Plot a frequency plot of significant proteins for the different conditions
+plot_cond(dep)
+```
+
 ## Results table
 
 To extract a table containing the essential results, the _get_results_ function can be used.

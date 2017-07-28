@@ -53,6 +53,22 @@ test_that("plot_cond_overlap throws error without valid input", {
   expect_error(plot_cond_overlap(test_sign_error2))
 })
 
-test_that("plot_cond_freq returns a grob object", {
+test_that("plot_cond_overlap returns a grob object", {
   expect_is(plot_cond_overlap(test_sign), "grob")
+})
+
+test_that("plot_cond throws error without valid input", {
+  expect_error(plot_cond("test_sign"))
+
+  test_sign_error <- test_sign
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(41)]
+  expect_error(plot_cond(test_sign_error))
+
+  test_sign_error2 <- test_sign
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(38:40)]
+  expect_error(plot_cond(test_sign_error2))
+})
+
+test_that("plot_cond returns a grob object", {
+  expect_is(plot_cond(test_sign), "grob")
 })

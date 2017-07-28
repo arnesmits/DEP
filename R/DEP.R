@@ -95,6 +95,9 @@
 #'   Barplot of the number of significant conditions per protein.
 #'   \item \code{\link{plot_cond_overlap}}:
 #'   Barplot of the number of proteins for overlapping conditions.
+#'   \item \code{\link{plot_cond}}:
+#'   Barplot of the frequency of significant conditions per protein
+#'   and the overlap in proteins between conditions.
 #' }
 #'
 #' @section iBAQ functions:
