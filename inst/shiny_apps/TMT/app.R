@@ -1,4 +1,5 @@
 library(dplyr)
+library(tibble)
 library(SummarizedExperiment)
 library(DEP)
 library(shiny)

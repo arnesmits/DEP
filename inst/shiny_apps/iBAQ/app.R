@@ -1,5 +1,6 @@
 library(dplyr)
 library(tidyr)
+library(tibble)
 library(SummarizedExperiment)
 library(DEP)
 library(shiny)

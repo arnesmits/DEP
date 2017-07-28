@@ -1,4 +1,5 @@
 library(dplyr)
+library(tibble)
 library(SummarizedExperiment)
 library(DEP)
 library(shiny)
@@ -392,8 +393,8 @@ server <- shinyServer(function(input, output) {
     ### Download objects and functions ### ---------------------------------------------------------------------------------
     datasetInput <- reactive({
       switch(input$dataset,
-             "results" = results(sign()),
-             "significant_proteins" = results(sign()) %>% filter(significant) %>% select(-significant),
+             "results" = get_results(sign()),
+             "significant_proteins" = get_results(sign()) %>% filter(significant) %>% select(-significant),
              "displayed_subset" = res() %>% filter(significant) %>% select(-significant),
              "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
     })
