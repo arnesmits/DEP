@@ -615,7 +615,7 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
   }
   # Show error if inputs are not valid
   if(!type %in% c("all", "control", "manual")) {
-    stop("run test_diff() with a valid type.\nValid types are: 'all', 'control'", call. = FALSE)
+    stop("run test_diff() with a valid type.\nValid types are: 'all', 'control', and 'manual'", call. = FALSE)
   }
   if(!control %in% unique(colData(se)$condition)) {
     stop("run test_diff() with a valid control",
@@ -678,8 +678,8 @@ test_diff <- function(se, control, type, test = NULL, incl_repl = FALSE) {
 
   }
   # Print tested contrasts
-  message("\n Tested contrasts:")
-  message(gsub(" - ", "_vs_", cntrst))
+  message("\nTested contrasts:")
+  message(paste(gsub(" - ", "_vs_", cntrst), collapse = ", "))
 
   # Test for differential expression by empirical Bayes moderation
   # of a linear model on the predefined contrasts

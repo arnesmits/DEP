@@ -262,7 +262,7 @@ LFQ <- function(proteins, expdesign, fun, control, type, test = NULL,
 #' by \code{\link{TMT}} and \code{\link{LFQ}} wrapper functions.
 #' Additionally, the results table is saved as a tab-delimited file.
 #'
-#' @param results List of SummarizedExperiments obtained
+#' @param results List of SummarizedExperiment objects obtained
 #' from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.
 #' @return A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
 #' Additionally, the results table is saved as a tab-delimited txt file.
@@ -324,7 +324,7 @@ report <- function(results) {
 #' for stoichiometry analysis using
 #' intensity-based absolute quantification (iBAQ)-based proteomics data.
 #'
-#' @param results List of SummarizedExperiments
+#' @param results List of SummarizedExperiment objects
 #' obtained from the \code{\link{LFQ}} wrapper function.
 #' @param peptides Data.frame,
 #' Peptide table from MaxQuant ('peptides.txt').

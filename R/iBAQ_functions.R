@@ -568,6 +568,13 @@ plot_ibaq <- function(dep, contrast, labelsize = 3) {
                                aes(label = name),
                                size = labelsize,
                                point.padding = unit(0.3, "lines")) +
-      labs(title = contrast, x = "Log2 Fold Change", y = "log10 iBAQ") +
+      geom_text(data = data.frame(), aes(x = c(Inf, -Inf),
+                                         y = c(-Inf, -Inf),
+                                         hjust = c(1, 0),
+                                         vjust = c(-1, -1),
+                                         label = c(ip, control),
+                                         fontface = "bold"),
+                size = 5) +
+      labs(title = contrast, x = "Fold change (log2)", y = "iBAQ intensity (log10)") +
       theme_DEP1()
 }
