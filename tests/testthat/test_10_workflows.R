@@ -66,7 +66,7 @@ test_that("report throws error without valid input", {
 test_that("report output ", {
   res <- LFQ(test_data, UbiLength_ExpDesign, "MinProb", "Ctrl", "control", filter = c("Reverse", "Potential.contaminant"),
              name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1)
-  expect_output(report(res), "Report and results.txt file saved in:")
+  expect_message(report(res), c("Render reports\n"))
 })
 
 test_that("iBAQ throws error without valid input", {

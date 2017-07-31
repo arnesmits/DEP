@@ -7,7 +7,7 @@
 report(results)
 }
 \arguments{
-\item{results}{List of SummarizedExperiments obtained
+\item{results}{List of SummarizedExperiment objects obtained
 from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.}
 }
 \value{

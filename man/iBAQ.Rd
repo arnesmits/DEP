@@ -7,7 +7,7 @@
 iBAQ(results, peptides, contrast, bait, level = 1)
 }
 \arguments{
-\item{results}{List of SummarizedExperiments
+\item{results}{List of SummarizedExperiment objects
 obtained from the \code{\link{LFQ}} wrapper function.}
 
 \item{peptides}{Data.frame,
