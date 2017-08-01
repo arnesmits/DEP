@@ -4,7 +4,7 @@
 #' for interactive differential enrichment/expression analysis
 #' of proteomics data.
 #'
-#' @param app 'LFQ', 'TMT' or 'iBAQ', The name of the app.
+#' @param app 'LFQ' or 'TMT', The name of the app.
 #' @return Launches a browser with the shiny app
 #' @examples
 #' \dontrun{
@@ -12,8 +12,6 @@
 #' run_app('LFQ')
 #'
 #' run_app('TMT')
-#'
-#' run_app('iBAQ')
 #'
 #' }
 #' @export

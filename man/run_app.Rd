@@ -7,7 +7,7 @@
 run_app(app)
 }
 \arguments{
-\item{app}{'LFQ', 'TMT' or 'iBAQ', The name of the app.}
+\item{app}{'LFQ' or 'TMT', The name of the app.}
 }
 \value{
 Launches a browser with the shiny app
@@ -23,8 +23,6 @@ of proteomics data.
 run_app('LFQ')
 
 run_app('TMT')
-
-run_app('iBAQ')
 
 }
 }

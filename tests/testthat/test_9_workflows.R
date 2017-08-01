@@ -69,37 +69,3 @@ test_that("report output ", {
   expect_message(report(res), c("Render reports\n"))
 })
 
-test_that("iBAQ throws error without valid input", {
-  result <- LFQ(test_ibaq[,-(31:32)], GFPip_ExpDesign, "MinProb", "WT", "control", filter = c("Reverse", "Contaminant"),
-                name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1)
-  expect_error(iBAQ("result", test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
-  expect_error(iBAQ(result, "test_ibaq_pep", "GFP_vs_WT", "Rbbp4"))
-  expect_error(iBAQ(result, test_ibaq_pep, GFP_vs_WT, "Rbbp4"))
-  expect_error(iBAQ(result, test_ibaq_pep, "GFP_vs_WT", Rbbp4))
-  expect_error(iBAQ(result[-(1)], test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
-  expect_error(iBAQ(result, test_ibaq_pep[,-(6)], "GFP_vs_WT", "Rbbp4"))
-  expect_error(iBAQ(result, test_ibaq_pep[,-(14)], "GFP_vs_WT", "Rbbp4"))
-  expect_error(iBAQ(result, test_ibaq_pep, "test", "Rbbp4"))
-  expect_error(iBAQ(result, test_ibaq_pep, "GFP_vs_WT", "test"))
-
-  result_error <- result
-  result_error$data <- result_error$data[,-(16:21)]
-  expect_error(iBAQ(result_error, test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
-
-  result_error2 <- result
-  rowData(result_error2$dep) <- rowData(result_error2$dep)[,-(1)]
-  expect_error(iBAQ(result_error2, test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
-
-  result_error3 <- result
-  rowData(result_error3$dep) <- rowData(result_error3$dep)[,-c(29,30,32)]
-  expect_error(iBAQ(result_error3, test_ibaq_pep, "GFP_vs_WT", "Rbbp4"))
-})
-
-test_that("iBAQ returns a data.frame", {
-  result <- LFQ(test_ibaq[,-(31:32)], GFPip_ExpDesign, "MinProb", "WT", "control", filter = c("Reverse", "Contaminant"),
-                name = "Gene.names", ids = "Protein.IDs", alpha = 0.05, lfc = 1)
-  expect_is(iBAQ(result, test_ibaq_pep, "GFP_vs_WT", "Rbbp4", level = 1), "data.frame")
-  expect_is(iBAQ(result, test_ibaq_pep, "GFP_vs_WT", "Rbbp4", level = 1L), "data.frame")
-  expect_is(iBAQ(result, tibble::as_tibble(test_ibaq_pep), "GFP_vs_WT", "Rbbp4", level = 1), "data.frame")
-})
-

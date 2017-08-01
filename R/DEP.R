@@ -35,8 +35,6 @@
 #'   Tandem-mass-tags (TMT) workflow wrapper.
 #'   \item \code{\link{report}}:
 #'   Create a rmarkdown report wrapper.
-#'   \item \code{\link{iBAQ}}:
-#'   iBAQ-based stoichiometry workflow wrapper.
 #' }
 #'
 #' @section Main functions:
@@ -69,9 +67,6 @@
 #'   Volcano plot for a specified contrast.
 #'   \item \code{\link{plot_heatmap}}:
 #'   Heatmap of all significant proteins.
-#'   \item \code{\link{plot_ibaq}}:
-#'   Scatter plot of iBAQ intensities
-#'   versus log fold changes for a specified contrast.
 #'   \item \code{\link{plot_normalization}}:
 #'   Boxplots to inspect normalization.
 #'   \item \code{\link{plot_detect}}:
@@ -98,16 +93,6 @@
 #'   \item \code{\link{plot_cond}}:
 #'   Barplot of the frequency of significant conditions per protein
 #'   and the overlap in proteins between conditions.
-#' }
-#'
-#' @section iBAQ functions:
-#' \itemize{
-#'   \item \code{\link{merge_ibaq}}:
-#'   Merge iBAQ intensities of protein groups with shared peptides.
-#'   \item \code{\link{get_stoichiometry}}:
-#'   Calculate relative stoichiometry of all significant proteins.
-#'   \item \code{\link{plot_stoichiometry}}:
-#'   Barplot of relative stoichiometries.
 #' }
 #'
 #' @section Additional functions:
