@@ -20,9 +20,6 @@ It also includes tools to check intermediate steps in the workflow,
 such as normalization and missing values imputation.
 Finally, visualization tools are provided to explore the results,
 including heatmap, volcano plot and barplot representations.
-Besides differential analysis, the package includes a set of functions
-to calculate relative stoichiometry, as originally described in
-\href{http://nar.oxfordjournals.org/content/41/1/e28.full}{Smits et al 2013}.
 For scientists with limited experience in R, the package also entails
 wrapper functions that entail the complete analysis workflow and generate
 a report. Even easier to use are the interactive Shiny apps that

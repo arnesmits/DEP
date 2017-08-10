@@ -117,8 +117,8 @@ make_se <- function(proteins_unique, columns, expdesign) {
   expdesign <- mutate(expdesign, condition = make.names(condition)) %>%
     unite(ID, condition, replicate, remove = FALSE)
   rownames(expdesign) <- expdesign$ID
-  colnames(raw)[match(delete_prefix(expdesign$label),
-                      delete_prefix(colnames(raw)))] <- expdesign$ID
+  colnames(raw)[match(make.names(delete_prefix(expdesign$label)),
+                      make.names(delete_prefix(colnames(raw))))] <- expdesign$ID
   raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
   # Select the rowData

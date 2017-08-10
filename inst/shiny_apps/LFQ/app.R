@@ -62,16 +62,6 @@ ui <- shinyUI(
   				      plotOutput("volcano", height = 600),
   				      downloadButton('downloadVolcano', 'Save volcano')
   				    )
-  				  ),
-  				  tabPanel(title = "iBAQ vs LFC plot",
-  				           fluidRow(
-  				             box(uiOutput("ibaq_cntrst"), width = 6),
-  				             box(numericInput("ibaq_fontsize", "Font size", min = 0, max = 8, value = 2), width = 6)
-  				           ),
-  				           fluidRow(
-  				             plotOutput("ibaq_plot", height = 600),
-  				             downloadButton('downloadIBAQ', 'Save iBAQ plot')
-  				           )
   				  )
 				  ),
   				tabBox(title = "QC Plots", width = 12,
@@ -309,12 +299,6 @@ server <- shinyServer(function(input, output) {
       }
     })
 
-    ibaq_input <- reactive({
-      if(!is.null(input$ibaq_cntrst) & length(grep("^iBAQ.", colnames(rowData(selected())))) > 1) {
-        plot_ibaq(selected(), input$ibaq_cntrst, input$ibaq_fontsize)
-      }
-    })
-
     norm_input <- reactive({
       plot_normalization(filt(), norm())
     })
@@ -354,10 +338,6 @@ server <- shinyServer(function(input, output) {
 
     output$volcano <- renderPlot({
       volcano_input()
-    })
-
-    output$ibaq_plot <- renderPlot({
-      ibaq_input()
     })
 
     output$norm <- renderPlot({
@@ -427,15 +407,6 @@ server <- shinyServer(function(input, output) {
       content = function(file) {
         pdf(file)
         print(volcano_input())
-        dev.off()
-      }
-    )
-
-    output$downloadIBAQ <- downloadHandler(
-      filename = function() { paste("iBAQ_vs_LFC_", input$contrast, ".pdf", sep = "") },
-      content = function(file) {
-        pdf(file)
-        print(ibaq_input())
         dev.off()
       }
     )
