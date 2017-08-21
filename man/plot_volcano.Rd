@@ -42,8 +42,7 @@ imputed <- impute(norm, fun = 'MinProb', q = 0.01)
 diff <- test_diff(imputed, 'Ctrl', 'control')
 dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
-plot_volcano(dep, 'Ubi6_vs_Ctrl', labelsize = 5, add_names = TRUE)
+plot_volcano(dep, 'Ubi6_vs_Ctrl', label_size = 5, add_names = TRUE)
 plot_volcano(dep, 'Ubi6_vs_Ctrl', add_names = FALSE)
-plot_volcano(dep, 'Ubi4_vs_Ctrl', labelsize = 5, add_names = TRUE)
-plot_volcano(dep, 'Ubi4_vs_Ctrl', add_names = FALSE)
+plot_volcano(dep, 'Ubi4_vs_Ctrl', label_size = 5, add_names = TRUE)
 }

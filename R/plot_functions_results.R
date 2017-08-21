@@ -329,10 +329,9 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
 #' diff <- test_diff(imputed, 'Ctrl', 'control')
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
-#' plot_volcano(dep, 'Ubi6_vs_Ctrl', labelsize = 5, add_names = TRUE)
+#' plot_volcano(dep, 'Ubi6_vs_Ctrl', label_size = 5, add_names = TRUE)
 #' plot_volcano(dep, 'Ubi6_vs_Ctrl', add_names = FALSE)
-#' plot_volcano(dep, 'Ubi4_vs_Ctrl', labelsize = 5, add_names = TRUE)
-#' plot_volcano(dep, 'Ubi4_vs_Ctrl', add_names = FALSE)
+#' plot_volcano(dep, 'Ubi4_vs_Ctrl', label_size = 5, add_names = TRUE)
 #' @export
 plot_volcano <- function(dep, contrast, label_size = 3, add_names = TRUE) {
   # Show error if inputs are not the required classes
