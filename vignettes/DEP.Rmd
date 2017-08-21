@@ -39,7 +39,6 @@ as well as [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for Windows 
 Start R and install the DEP package:
 ```{r install, eval = FALSE}
 
-setInternet2(TRUE) # only for windows
 source("https://bioconductor.org/biocLite.R")
 biocLite("DEP")
 
@@ -106,7 +105,7 @@ The associated gene names are informative, however these are not always unique.
 
 ``` {r unique}
 # Are there any duplicated gene names?
-data$Gene.names %>% duplicated(.) %>% any(.)
+data$Gene.names %>% duplicated() %>% any()
 
 # Make a table of duplicated gene names
 data %>% group_by(Gene.names) %>% summarize(frequency = n()) %>% 
@@ -122,7 +121,7 @@ Additionally, some proteins do not have an annotated gene name and for those we 
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 # Are there any duplicated names?
-data$name %>% duplicated(.) %>% any(.)
+data$name %>% duplicated() %>% any()
 ```
 
 ## Generate a SummarizedExperiment object
@@ -308,7 +307,7 @@ A correlation matrix can be plotted as a heatmap, to visualize the Pearson corre
 
 ``` {r corr, fig.height = 4, fig.width = 6}
 # Plot the Pearson correlation matrix
-plot_corr(dep, significant = TRUE, lower = 0, upper = 1, pal = "Reds")
+plot_cor(dep, significant = TRUE, lower = 0, upper = 1, pal = "Reds")
 ```
 
 ### Heatmap of all significant proteins
@@ -319,7 +318,8 @@ Additionally, the clustering of samples (columns) can indicate closer related sa
 
 ``` {r heatmap, fig.height = 6, fig.width = 4}
 # Plot a heatmap of all significant proteins with the data centered per protein
-plot_heatmap(dep, type = "centered", k = 6, col_limit = 4, labelsize = 2)
+plot_heatmap(dep, type = "centered", kmeans = TRUE, 
+             k = 6, col_limit = 4, row_font_size = 2)
 ```
 
 The heatmap shows a clustering of replicates and indicates that 4Ubi and 6Ubi enrich a similar repertoire of proteins. The k-means clustering of proteins (general clusters of rows) nicely separates protein classes with different binding behaviors.  
@@ -330,7 +330,8 @@ Alternatively, a heatmap can be plotted using the contrasts, ie. the direct samp
 
 ``` {r heatmap2, fig.height = 6, fig.width = 4}
 # Plot a heatmap of all significant proteins (rows) and the tested contrasts (columns)
-plot_heatmap(dep, type = "contrast", k = 6, col_limit = 10, labelsize = 2)
+plot_heatmap(dep, type = "contrast", kmeans = TRUE, 
+             k = 6, col_limit = 10, row_font_size = 2)
 ```
 
 ### Volcano plots of specific contrasts
@@ -339,7 +340,7 @@ Volcano plots can be used to visualize a specific contrast (comparison between t
 
 ``` {r volcano, fig.height = 5, fig.width = 5}
 # Plot a volcano plot for the contrast "Ubi6 vs Ctrl""
-plot_volcano(dep, contrast = "Ubi6_vs_Ctrl", labelsize = 2, add_names = TRUE)
+plot_volcano(dep, contrast = "Ubi6_vs_Ctrl", label_size = 2, add_names = TRUE)
 ```
 
 ### Barplots of a protein of interest
@@ -472,12 +473,12 @@ The full data (_sign_ object) can be used for the plotting functions as describe
 full_data <- data_results$dep
 
 # Use the full data to generate a volcano plot
-plot_volcano(full_data, "Ubi4_vs_Ctrl", labelsize = 2, add_names = TRUE)
+plot_volcano(full_data, "Ubi4_vs_Ctrl", label_size = 2, add_names = TRUE)
 ```
 
 ``` {r LFQ_results5, fig.height = 6, fig.width = 3}
 # Use the full data to generate a heatmap
-plot_heatmap(full_data, "contrast", labelsize = 2)
+plot_heatmap(full_data, "contrast", row_font_size = 2)
 ```
 
 ## TMT-based DEP analysis
