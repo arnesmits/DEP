@@ -116,7 +116,7 @@ plot_pca(dep, n = num)
 ### Correlation matrix
 
 ```{r, echo=FALSE, fig.width = 5.5, fig.height= 4}
-plot_corr(dep)
+plot_cor(dep)
 ```
 
 ### Heatmaps

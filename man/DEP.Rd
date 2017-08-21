@@ -94,7 +94,7 @@ are provided by the package.
   Barplot of the protein coverage in conditions.
   \item \code{\link{plot_pca}}:
   PCA plot of top variable proteins.
-  \item \code{\link{plot_corr}}:
+  \item \code{\link{plot_cor}}:
   Correlation matrix.
   \item \code{\link{plot_cond_freq}}:
   Barplot of the number of significant conditions per protein.
