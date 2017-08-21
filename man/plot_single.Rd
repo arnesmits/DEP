@@ -4,17 +4,17 @@
 \alias{plot_single}
 \title{Plot values for a protein of interest}
 \usage{
-plot_single(dep, protein, type)
+plot_single(dep, protein, type = c("contrast", "centered"))
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
 Data object which has been generated
 by \code{\link{test_diff}} and \code{\link{add_rejections}}.}
 
-\item{protein}{Character,
+\item{protein}{Character(1),
 Protein name.}
 
-\item{type}{'centered' or 'contrast',
+\item{type}{'contrast' or 'centered',
 The type of data scaling used for plotting.}
 }
 \value{

@@ -11,10 +11,10 @@ add_rejections(diff, alpha = 0.05, lfc = 1)
 Proteomics dataset on which differential enrichment analysis
 has been performed by \code{\link{test_diff}}.}
 
-\item{alpha}{Numeric,
+\item{alpha}{Numeric(1),
 Sets the threshold for the adjusted P value.}
 
-\item{lfc}{Numeric,
+\item{lfc}{Numeric(1),
 Sets the threshold for the log2 fold change.}
 }
 \value{

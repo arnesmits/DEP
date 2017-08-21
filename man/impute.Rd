@@ -4,7 +4,8 @@
 \alias{impute}
 \title{Impute missing values}
 \usage{
-impute(se, fun, ...)
+impute(se, fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb",
+  "min", "zero", "mixed", "nbavg"), ...)
 }
 \arguments{
 \item{se}{SummarizedExperiment,

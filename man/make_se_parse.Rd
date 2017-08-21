@@ -5,8 +5,8 @@
 \title{Data.frame to SummarizedExperiment object
 conversion using parsing from column names}
 \usage{
-make_se_parse(proteins_unique, columns, mode = "char", chars = 1,
-  sep = "_")
+make_se_parse(proteins_unique, columns, mode = c("char", "delim"),
+  chars = 1, sep = "_")
 }
 \arguments{
 \item{proteins_unique}{Data.frame,
@@ -21,11 +21,11 @@ The mode of parsing the column headers.
 and requires the 'chars' parameter.
 "delim" will parse on the separator and requires the 'sep' parameter.}
 
-\item{chars}{Numeric,
+\item{chars}{Numeric(1),
 The number of characters to take at the end of the column headers
 as replicate number (only for mode == "char").}
 
-\item{sep}{Character,
+\item{sep}{Character(1),
 The separator used to parse the column header
 (only for mode == "delim").}
 }

@@ -10,14 +10,14 @@ make_unique(proteins, names, ids, delim = ";")
 \item{proteins}{Data.frame,
 Protein table for which unique names will be created.}
 
-\item{names}{Character,
+\item{names}{Character(1),
 Name of the column containing feature names.}
 
-\item{ids}{Character,
+\item{ids}{Character(1),
 Name of the column containing feature IDs.}
 
-\item{delim}{Character,
-Delimiter separating the feature names within on protein group.}
+\item{delim}{Character(1),
+Delimiter separating the feature names within one protein group.}
 }
 \value{
 A data.frame with the additional variables

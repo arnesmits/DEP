@@ -4,7 +4,8 @@
 \alias{test_diff}
 \title{Differential enrichment test}
 \usage{
-test_diff(se, control, type, test = NULL, incl_repl = FALSE)
+test_diff(se, control, type = c("all", "control", "manual"), test = NULL,
+  incl_repl = FALSE)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
@@ -15,7 +16,7 @@ Additionally, the colData should contain sample annotation including
 The appropriate columns and objects can be generated
 using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
 
-\item{control}{Character,
+\item{control}{Character(1),
 The condition to which contrasts are generated
 (a control condition would be most appropriate).}
 
@@ -30,7 +31,7 @@ The contrasts that will be tested if type = "manual".
 These should be formatted as "SampleA_vs_SampleB" or
 c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 
-\item{incl_repl}{Logical,
+\item{incl_repl}{Logical(1),
 Whether or not to add a blocking factor
 for the replicates in the design matrix.}
 }
