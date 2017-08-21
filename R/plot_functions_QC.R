@@ -86,15 +86,15 @@ plot_normalization <- function(raw, norm) {
 
     # Show error if inputs do not contain required columns
     if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(raw)))) {
-        stop(paste0("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
-                    deparse(substitute(raw)),
-                    "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
+        stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
+             deparse(substitute(raw)),
+             "'\nRun make_se() or make_se_parse() to obtain the required columns",
             call. = FALSE)
     }
     if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(norm)))) {
-        stop(paste0("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
-                    deparse(substitute(norm)),
-                    "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
+        stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
+             deparse(substitute(norm)),
+             "'\nRun make_se() or make_se_parse() to obtain the required columns",
             call. = FALSE)
     }
 
@@ -156,16 +156,16 @@ plot_imputation <- function(raw, imp) {
 
     # Show error if inputs do not contain required columns
     if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(raw)))) {
-        stop(paste0("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
-                    deparse(substitute(raw)),
-                    "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
-            call. = FALSE)
+      stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
+           deparse(substitute(raw)),
+           "'\nRun make_se() or make_se_parse() to obtain the required columns",
+           call. = FALSE)
     }
     if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(imp)))) {
-        stop(paste0("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
-                    deparse(substitute(imp)),
-                    "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
-            call. = FALSE)
+      stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
+           deparse(substitute(imp)),
+           "'\nRun make_se() or make_se_parse() to obtain the required columns",
+           call. = FALSE)
     }
 
     # Get a long data.frame of the assay data (original and imputed)
@@ -220,12 +220,11 @@ plot_detect <- function(se) {
     # Show error if inputs are not the required classes
     assertthat::assert_that(inherits(se, "SummarizedExperiment"))
 
-    # Show error if inputs do not contain required columns
     if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(se)))) {
-        stop(paste0("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
-                    deparse(substitute(se)),
-                    "'.\nRun make_se() or make_se_parse() to obtain the required columns."),
-            call. = FALSE)
+      stop("'label', 'ID', 'condition' and/or 'replicate' columns are not present in '",
+           deparse(substitute(se)),
+           "'\nRun make_se() or make_se_parse() to obtain the required columns",
+           call. = FALSE)
     }
 
     # Get a long data.frame of the assay data annotated with sample info
@@ -289,9 +288,7 @@ plot_missval <- function(se) {
 
     # Show error if there are no missing values
     if(!any(is.na(assay(se)))) {
-      stop(paste0("No missing values in '",
-                  deparse(substitute(se)),
-                  "'"),
+      stop("No missing values in '", deparse(substitute(se)), "'",
            call. = FALSE)
     }
 

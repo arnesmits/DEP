@@ -174,17 +174,17 @@ plot_cond_freq <- function(dep) {
 
   # Check for significance columns
   if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
-    stop(paste0("'[contrast]_significant' columns are not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required columns."),
+    stop("'[contrast]_significant' columns are not present in '",
+         deparse(substitute(dep)),
+         "'\nRun add_rejections() to obtain the required columns",
          call. = FALSE)
   }
 
   # Check for significant column
   if(!"significant" %in% colnames(rowData(dep))) {
-    stop(paste0("'significant' column is not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required column."),
+    stop("'significant' column is not present in '",
+         deparse(substitute(dep)),
+         "'\nRun add_rejections() to obtain the required column",
          call. = FALSE)
   }
 
@@ -248,17 +248,17 @@ plot_cond_overlap <- function(dep) {
 
   # Check for significance columns
   if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
-    stop(paste0("'[contrast]_significant' columns are not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required columns."),
+    stop("'[contrast]_significant' columns are not present in '",
+         deparse(substitute(dep)),
+         "'\nRun add_rejections() to obtain the required columns",
          call. = FALSE)
   }
 
   # Check for significant column
   if(!"significant" %in% colnames(rowData(dep))) {
-    stop(paste0("'significant' column is not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required column."),
+    stop("'significant' column is not present in '",
+         deparse(substitute(dep)),
+         "'\nRun add_rejections() to obtain the required column",
          call. = FALSE)
   }
 
@@ -351,17 +351,17 @@ plot_cond <- function(dep) {
 
   # Check for significance columns
   if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
-    stop(paste0("'[contrast]_significant' columns are not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required columns."),
+    stop("'[contrast]_significant' columns are not present in '",
+         deparse(substitute(dep)),
+         "'\nRun add_rejections() to obtain the required columns",
          call. = FALSE)
   }
 
   # Check for significant column
   if(!"significant" %in% colnames(rowData(dep))) {
-    stop(paste0("'significant' column is not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required column."),
+    stop("'significant' column is not present in '",
+         deparse(substitute(dep)),
+         "'\nRun add_rejections() to obtain the required column",
          call. = FALSE)
   }
 
