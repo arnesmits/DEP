@@ -133,7 +133,7 @@
 #'
 #' @import ggplot2 dplyr SummarizedExperiment limma
 #' @import ComplexHeatmap grid assertthat
-#' @import shinydashboard BiocStyle
+#' @import shinydashboard
 #' @importFrom shiny runApp
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom tidyr unite gather spread separate
