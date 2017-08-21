@@ -58,5 +58,5 @@ diff <- test_diff(imputed, 'Ctrl', 'control')
 dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
 plot_pca(dep)
-plot_pca(dep, indicate = "")
+plot_pca(dep, indicate = "condition")
 }

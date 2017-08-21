@@ -27,6 +27,9 @@ Sets the color panel (from \code{\link[RColorBrewer]{brewer.pal}}).}
 \item{pal_rev}{Logical(1),
 Whether or not to invert the color palette.}
 
+\item{font_size}{Integer(1),
+Sets the size of the labels.}
+
 \item{...}{Additional arguments for Heatmap function as depicted in
 \code{\link[ComplexHeatmap]{Heatmap}}}
 }
@@ -53,5 +56,5 @@ imputed <- impute(norm, fun = 'MinProb', q = 0.01)
 diff <- test_diff(imputed, 'Ctrl', 'control')
 dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
-plot_corr(dep)
+plot_cor(dep)
 }
