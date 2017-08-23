@@ -11,24 +11,26 @@
 #' The data object.
 #' @param expdesign Data.frame,
 #' The experimental design object.
-#' @param fun Character,
-#' Function used for data imputation based on \code{\link[MSnbase]{impute}}.
-#' @param control Character,
+#' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
+#' "MinProb", "min", "zero", "mixed" or "nbavg",
+#' Function used for data imputation based on \code{\link{manual_impute}}
+#' and \code{\link[MSnbase]{impute}}.
+#' @param control Character(1),
 #' The sample name to which the contrasts are generated
 #' (the control sample would be most appropriate).
-#' @param type 'all' or 'control',
+#' @param type 'all', 'control' or 'manual',
 #' The type of contrasts that will be generated.
 #' @param test Character,
 #' The contrasts that will be tested if type = "manual".
 #' These should be formatted as "SampleA_vs_SampleB" or
 #' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
-#' @param name Character,
+#' @param name Character(1),
 #' Name of the column representing gene names.
-#' @param ids 'Character,
+#' @param ids 'Character(1),
 #' Name of the column representing protein IDs.
-#' @param alpha Numeric,
+#' @param alpha Numeric(1),
 #' sets the false discovery rate threshold.
-#' @param lfc Numeric,
+#' @param lfc Numeric(1),
 #' sets the log fold change threshold.
 #' @return A list of 8 objects:
 #' \item{se}{SummarizedExperiment object containing the original data}
@@ -49,7 +51,10 @@
 #'
 #' }
 #' @export
-TMT <- function(proteins, expdesign, fun, control, type, test = NULL,
+TMT <- function(proteins, expdesign,
+                fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet",
+                        "MinProb", "min", "zero", "mixed", "nbavg"),
+                control, type = c("all", "control", "manual"), test = NULL,
                 name = "gene_name", ids = "protein_id",
                 alpha = 0.05, lfc = 1) {
     # Show error if inputs are not the required classes
@@ -59,36 +64,48 @@ TMT <- function(proteins, expdesign, fun, control, type, test = NULL,
                             is.data.frame(expdesign),
                             is.character(fun),
                             is.character(control),
+                            length(control) == 1,
                             is.character(type),
                             is.character(name),
+                            length(name) == 1,
                             is.character(ids),
+                            length(ids) == 1,
                             is.numeric(alpha),
-                            is.numeric(lfc))
+                            length(alpha) == 1,
+                            is.numeric(lfc),
+                            length(lfc) == 1)
 
     # Show error if inputs do not contain required columns
+    type <- match.arg(type)
+    fun <- match.arg(fun)
+
     if(length(grep(paste("^", name, "$", sep = ""), colnames(proteins))) < 1) {
-        stop(paste0("'", name, "' is not a column in '",
-                    deparse(substitute(proteins)), "'."),
+        stop("'", name, "' is not a column in '",
+             deparse(substitute(proteins)), "'.",
              call. = FALSE)
     }
     if(length(grep(paste("^", ids, "$", sep = ""), colnames(proteins))) < 1) {
-        stop(paste0("'", ids, "' is not a column in '",
-                    deparse(substitute(proteins)), "'."),
+        stop("'", ids, "' is not a column in '",
+             deparse(substitute(proteins)), "'.",
              call. = FALSE)
     }
     if(any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
-        stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.",
+        stop("'label', 'condition' and/or 'replicate' columns are ",
+             "not present in the experimental design",
              call. = FALSE)
     }
     # Show error if inputs are not valid
     if(!type %in% c("all", "control")) {
-        stop("run TMT() with a valid type.\nValid types are: 'all', 'control'.",
+        stop("run TMT() with a valid type",
+             "\nValid types are: 'all', 'control' and 'manual'.",
              call. = FALSE)
     }
 
     # If input is a tibble, convert to data.frame
-    if(tibble::is.tibble(proteins)) proteins <- as.data.frame(proteins)
-    if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
+    if(tibble::is.tibble(proteins))
+      proteins <- as.data.frame(proteins)
+    if(tibble::is.tibble(expdesign))
+      expdesign <- as.data.frame(expdesign)
 
     # Filter the proteins for Reverse hits (indicated by '###' in the gene_name)
     proteins <- proteins[-grep("###", proteins$gene_name), ]
@@ -128,12 +145,14 @@ TMT <- function(proteins, expdesign, fun, control, type, test = NULL,
 #' The data object.
 #' @param expdesign Data.frame,
 #' The experimental design object.
-#' @param fun Character,
-#' Function used for data imputation based on \code{\link[MSnbase]{impute}}.
-#' @param control Character,
+#' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
+#' "MinProb", "min", "zero", "mixed" or "nbavg",
+#' Function used for data imputation based on \code{\link{manual_impute}}
+#' and \code{\link[MSnbase]{impute}}.
+#' @param control Character(1),
 #' The sample name to which the contrasts are generated
 #' (the control sample would be most appropriate).
-#' @param type 'all' or 'control',
+#' @param type 'all', 'control' or 'manual',
 #' The type of contrasts that will be generated.
 #' @param test Character,
 #' The contrasts that will be tested if type = "manual".
@@ -141,13 +160,13 @@ TMT <- function(proteins, expdesign, fun, control, type, test = NULL,
 #' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
 #' @param filter Character,
 #' Name(s) of the column(s) to be filtered on.
-#' @param name Character,
+#' @param name Character(1),
 #' Name of the column representing gene names.
-#' @param ids 'Character,
+#' @param ids 'Character(1),
 #' Name of the column representing protein IDs.
-#' @param alpha Numeric,
+#' @param alpha Numeric(1),
 #' sets the false discovery rate threshold.
-#' @param lfc Numeric,
+#' @param lfc Numeric(1),
 #' sets the log fold change threshold.
 #' @return A list of 9 objects:
 #' \item{data}{data.frame containing the original data}
@@ -169,7 +188,10 @@ TMT <- function(proteins, expdesign, fun, control, type, test = NULL,
 #' results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
 #'
 #' @export
-LFQ <- function(proteins, expdesign, fun, control, type, test = NULL,
+LFQ <- function(proteins, expdesign,
+                fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet",
+                        "MinProb", "min", "zero", "mixed", "nbavg"),
+                control, type = c("all", "control", "manual"), test = NULL,
                 filter = c("Reverse", "Potential.contaminant"),
                 name = "Gene.names", ids = "Protein.IDs",
                 alpha = 0.05, lfc = 1) {
@@ -180,37 +202,44 @@ LFQ <- function(proteins, expdesign, fun, control, type, test = NULL,
                             is.data.frame(expdesign),
                             is.character(fun),
                             is.character(control),
+                            length(control) == 1,
                             is.character(type),
                             is.character(filter),
                             is.character(name),
+                            length(name) == 1,
                             is.character(ids),
+                            length(ids) == 1,
                             is.numeric(alpha),
-                            is.numeric(lfc))
+                            length(alpha) == 1,
+                            is.numeric(lfc),
+                            length(lfc) == 1)
 
     # Show error if inputs do not contain required columns
     if(length(grep(paste("^", name, "$", sep = ""), colnames(proteins))) < 1) {
-        stop(paste0("'", name, "' is not a column in '",
-                    deparse(substitute(proteins)), "'."),
+        stop("'", name, "' is not a column in '",
+             deparse(substitute(proteins)), "'.",
              call. = FALSE)
     }
     if(length(grep(paste("^", ids, "$", sep = ""), colnames(proteins))) < 1) {
-        stop(paste0("'", ids, "' is not a column in '",
-                    deparse(substitute(proteins)), "'."),
+        stop("'", ids, "' is not a column in '",
+             deparse(substitute(proteins)), "'.",
              call. = FALSE)
     }
     if(length(grep(paste("^", filter, "$", sep = "", collapse = "|"),
                     colnames(proteins))) < 1) {
-        stop(paste0("Not all filter columns are present in '",
-                    deparse(substitute(proteins)), "'."),
+        stop("Not all filter columns are present in '",
+             deparse(substitute(proteins)), "'.",
              call. = FALSE)
     }
     if(any(!c("label", "condition", "replicate") %in% colnames(expdesign))) {
-        stop("'label', 'condition' and/or 'replicate' columns are not present in the experimental design.",
+        stop("'label', 'condition' and/or 'replicate' columns are ",
+             "not present in the experimental design",
              call. = FALSE)
     }
     # Show error if inputs are not valid
     if (!type %in% c("all", "control")) {
-        stop("run LFQ() with a valid type.\nValid types are: 'all', 'control'.",
+        stop("run LFQ() with a valid type",
+             "\nValid types are: 'all', 'control' and 'manual'.",
              call. = FALSE)
     }
 
@@ -308,8 +337,8 @@ report <- function(results) {
 
     message("Save tab-delimited table")
     # Save the results table in a tab-delimited txt file
-    write.table(table, paste(wd, "results.txt", sep = "/"),
-                row.names = FALSE, sep = "\t")
+    utils::write.table(table, paste(wd, "results.txt", sep = "/"),
+                       row.names = FALSE, sep = "\t")
 
     message("Save RData object")
     # Save the results object for later use

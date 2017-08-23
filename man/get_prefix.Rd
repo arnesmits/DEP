@@ -18,9 +18,11 @@ A character vector containing the prefix.
 of the supplied words.
 }
 \examples{
+# Load example
 data <- UbiLength
 columns <- grep("LFQ.", colnames(data))
 
+# Get prefix
 names <- colnames(data[, columns])
 get_prefix(names)
 }

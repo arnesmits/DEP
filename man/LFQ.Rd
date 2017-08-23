@@ -4,9 +4,11 @@
 \alias{LFQ}
 \title{LFQ workflow}
 \usage{
-LFQ(proteins, expdesign, fun, control, type, test = NULL,
-  filter = c("Reverse", "Potential.contaminant"), name = "Gene.names",
-  ids = "Protein.IDs", alpha = 0.05, lfc = 1)
+LFQ(proteins, expdesign, fun = c("man", "bpca", "knn", "QRILC", "MLE",
+  "MinDet", "MinProb", "min", "zero", "mixed", "nbavg"), control,
+  type = c("all", "control", "manual"), test = NULL, filter = c("Reverse",
+  "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs",
+  alpha = 0.05, lfc = 1)
 }
 \arguments{
 \item{proteins}{Data.frame,
@@ -15,14 +17,16 @@ The data object.}
 \item{expdesign}{Data.frame,
 The experimental design object.}
 
-\item{fun}{Character,
-Function used for data imputation based on \code{\link[MSnbase]{impute}}.}
+\item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
+"MinProb", "min", "zero", "mixed" or "nbavg",
+Function used for data imputation based on \code{\link{manual_impute}}
+and \code{\link[MSnbase]{impute}}.}
 
-\item{control}{Character,
+\item{control}{Character(1),
 The sample name to which the contrasts are generated
 (the control sample would be most appropriate).}
 
-\item{type}{'all' or 'control',
+\item{type}{'all', 'control' or 'manual',
 The type of contrasts that will be generated.}
 
 \item{test}{Character,
@@ -33,16 +37,16 @@ c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 \item{filter}{Character,
 Name(s) of the column(s) to be filtered on.}
 
-\item{name}{Character,
+\item{name}{Character(1),
 Name of the column representing gene names.}
 
-\item{ids}{'Character,
+\item{ids}{'Character(1),
 Name of the column representing protein IDs.}
 
-\item{alpha}{Numeric,
+\item{alpha}{Numeric(1),
 sets the false discovery rate threshold.}
 
-\item{lfc}{Numeric,
+\item{lfc}{Numeric(1),
 sets the log fold change threshold.}
 }
 \value{

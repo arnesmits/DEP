@@ -32,8 +32,8 @@ norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 diff <- test_diff(imputed, "Ctrl", "control")
-signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
-long <- get_df_long(signif)
+long <- get_df_long(dep)
 colnames(long)
 }

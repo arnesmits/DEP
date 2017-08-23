@@ -38,10 +38,12 @@ with log2-transformed values.
 based on a single data.frame.
 }
 \examples{
+# Load example
 data <- UbiLength
 data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
+# Make SummarizedExperiment
 columns <- grep("LFQ.", colnames(data_unique))
 se <- make_se_parse(data_unique, columns, mode = "char", chars = 1)
 se <- make_se_parse(data_unique, columns, mode = "delim", sep = "_")

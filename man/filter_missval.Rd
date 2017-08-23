@@ -23,14 +23,17 @@ A filtered SummarizedExperiment object.
 \code{filter_missval} filters a proteomics dataset based on missing values.
 }
 \examples{
+# Load example
 data <- UbiLength
 data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
+# Make SummarizedExperiment
 columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
+# Filter
 stringent_filter <- filter_missval(se, thr = 0)
 less_stringent_filter <- filter_missval(se, thr = 1)
 }

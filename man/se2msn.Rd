@@ -17,13 +17,16 @@ A MSnSet object.
 \code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
 }
 \examples{
+# Load example
 data <- UbiLength
 data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
+# Make SummarizedExperiment
 columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
+# Convert to MSnSet
 data_msn <- se2msn(se)
 }

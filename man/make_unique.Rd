@@ -17,7 +17,7 @@ Name of the column containing feature names.}
 Name of the column containing feature IDs.}
 
 \item{delim}{Character(1),
-Delimiter separating the feature names within one protein group.}
+Sets the delimiter separating the feature names within one protein group.}
 }
 \value{
 A data.frame with the additional variables
@@ -28,6 +28,10 @@ A data.frame with the additional variables
 for a proteomics dataset based on "name" and "id" columns.
 }
 \examples{
+# Load example
 data <- UbiLength
+
+# Check colnames and pick the appropriate columns
+colnames(data)
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 }
