@@ -9,10 +9,7 @@ impute(se, fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb",
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics data with unique names and identifiers
-annotated in 'name' and 'ID' columns.
-The appropriate columns and objects can be generated
-using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
+Proteomics dataset for which missing values will be imputed.}
 
 \item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 "MinProb", "min", "zero", "mixed" or "nbavg",

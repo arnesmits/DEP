@@ -19,14 +19,19 @@ A heatmap indicating whether values are missing (0) or not (1)
 with missing values to discover whether values are missing by random or not.
 }
 \examples{
+# Load example
 data <- UbiLength
-data <- data[data$Reverse != '+' & data$Potential.contaminant != '+',]
-data_unique <- make_unique(data, 'Gene.names', 'Protein.IDs', delim = ';')
+data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
+data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
-columns <- grep('LFQ.', colnames(data_unique))
+# Make SummarizedExperiment
+columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
+# Filter, normalize and impute missing values
 filt <- filter_missval(se, thr = 0)
+
+# Plot missing values heatmap
 plot_missval(filt)
 }

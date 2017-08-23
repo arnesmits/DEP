@@ -19,21 +19,26 @@ where each row represents a single measurement.
 \code{get_df_long} generate a wide data.frame from a SummarizedExperiment.
 }
 \examples{
+# Load example
 data <- UbiLength
 data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
+# Make SummarizedExperiment
 columns <- grep("LFQ.", colnames(data_unique))
 exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
+# Filter, normalize and impute missing values
 filt <- filter_missval(se, thr = 0)
 norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
+# Test for differentially expressed proteins
 diff <- test_diff(imputed, "Ctrl", "control")
 dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
+# Get a long data.frame
 long <- get_df_long(dep)
 colnames(long)
 }

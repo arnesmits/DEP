@@ -42,5 +42,5 @@ imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 # Test for differentially expressed proteins
 diff <- test_diff(imputed, "Ctrl", "control")
-signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 }
