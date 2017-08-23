@@ -24,7 +24,7 @@
 #'   \item \code{\link{run_app}}: Shiny apps for interactive analysis.
 #' }
 #'
-#' @section Wrapper functions:
+#' @section Workflow functions:
 #' \itemize{
 #'   \item \code{\link{LFQ}}:
 #'   Label-free quantification (LFQ) workflow wrapper.
@@ -32,6 +32,20 @@
 #'   Tandem-mass-tags (TMT) workflow wrapper.
 #'   \item \code{\link{report}}:
 #'   Create a rmarkdown report wrapper.
+#' }
+#'
+#' @section Wrapper functions:
+#' \itemize{
+#'   \item \code{\link{import_MaxQuant}}:
+#'   Import data from MaxQuant into a SummarizedExperiment object.
+#'   \item \code{\link{import_IsobarQuant}}:
+#'   Import data from IsobarQuant  into a SummarizedExperiment object.
+#'   \item \code{\link{process}}:
+#'   Perform filtering, normalization and imputation on protein data.
+#'   \item \code{\link{analyze_dep}}:
+#'   Differential protein expression analysis.
+#'   \item \code{\link{plot_all}}:
+#'   Visualize the results in different types of plots.
 #' }
 #'
 #' @section Main functions:
@@ -118,13 +132,6 @@
 #'   (UbIA-MS dataset) (Zhang, Smits, van Tilburg et al. Mol. Cell 2017).
 #'   \item \code{\link{DiUbi_ExpDesign}}:
 #'   Experimental design of the DiUbi dataset.
-#'   \item \code{\link{GFPip}}:
-#'   EED protein interactors (IP-MS dataset)
-#'   (Kloet et al. Nat. Struct. Mol. Biol. 2016).
-#'   \item \code{\link{GFPip_ExpDesign}}:
-#'   Experimental design of the GFPip dataset.
-#'   \item \code{\link{GFPip_pep}}:
-#'   Peptides table of the GFPip dataset.
 #' }
 #'
 #' @docType package
@@ -141,7 +148,6 @@
 #' @importFrom purrr map_df
 #' @importFrom readr parse_factor
 #' @importFrom stats median model.matrix rnorm sd cor prcomp
-#' @importFrom utils combn write.table
 #' @importFrom broom tidy
 #'
 #'

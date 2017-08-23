@@ -11,13 +11,26 @@ ui <- shinyUI(
     dashboardSidebar(
       sidebarMenu(
         menuItem("Files", selected = TRUE,
-                 fileInput('file1', 'ProteinGroups.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv')),
-                 fileInput('file2', 'ExperimentalDesign.txt',accept=c('text/csv', 'text/comma-separated-values,text/plain', '.csv'))
+                 fileInput('file1',
+                           'ProteinGroups.txt',
+                           accept = c('text/csv',
+                                      'text/comma-separated-values,text/plain',
+                                      '.csv')),
+                 fileInput('file2',
+                           'ExperimentalDesign.txt',
+                           accept = c('text/csv',
+                                      'text/comma-separated-values,text/plain',
+                                      '.csv'))
         ),
         menuItemOutput("columns"),
         menuItem("Imputation options",
-                 radioButtons("imputation", "Imputation type", choices = c("man", MSnbase::imputeMethods())[1:9], selected = "MinProb"),
-                 p(a("Detailed information link", href = "https://www.rdocumentation.org/packages/MSnbase/versions/1.20.7/topics/impute-methods", target="_blank"))
+                 radioButtons("imputation",
+                              "Imputation type",
+                              choices = c("man", MSnbase::imputeMethods())[1:9],
+                              selected = "MinProb"),
+                 p(a("Detailed information link",
+                     href = "https://www.rdocumentation.org/packages/MSnbase/versions/1.20.7/topics/impute-methods",
+                     target="_blank"))
         ),
         actionButton("analyze", "Analyze"),
         tags$hr(),
@@ -28,24 +41,52 @@ ui <- shinyUI(
     dashboardBody(
       helpText("Please cite: "),
       fluidRow(
-        box(numericInput("p", "adj. P value", min = 0.0001, max = 0.1, value = 0.05), width = 2),
-        box(numericInput("lfc", "Log2 fold change", min = 0, max = 10, value = 1), width = 2),
-        infoBoxOutput("signBox"),
-        box(radioButtons("pres", "Data presentation", c("contrast", "centered"), selected = "contrast"), width = 2),
-        box(radioButtons("contrasts", "Contrasts", c("control", "all"), selected = "control"), width = 2)
+        box(numericInput("p",
+                         "adj. P value",
+                         min = 0.0001, max = 0.1, value = 0.05),
+            width = 2),
+        box(numericInput("lfc",
+                         "Log2 fold change",
+                         min = 0, max = 10, value = 1),
+            width = 2),
+        infoBoxOutput("significantBox"),
+        box(radioButtons("pres",
+                         "Data presentation",
+                         c("contrast", "centered"),
+                         selected = "contrast"),
+            width = 2),
+        box(radioButtons("contrasts",
+                         "Contrasts",
+                         c("control", "all"),
+                         selected = "control"),
+            width = 2)
       ),
       fluidRow(
         column(width = 7,
-               box(title = "Top Table", box(uiOutput("select"), width = 6), box(uiOutput("exclude"), width = 6), DT::dataTableOutput("table"), width = 12)
+               box(title = "Top Table",
+                   box(uiOutput("select"), width = 6),
+                   box(uiOutput("exclude"), width = 6),
+                   DT::dataTableOutput("table"), width = 12)
         ),
         column(width = 5,
                tabBox(title = "Result Plots", width = 12,
-                      tabPanel(title = "Selected Protein", plotOutput("selected_plot"), downloadButton('downloadPlot', 'Save plot')),
+                      tabPanel(title = "Selected Protein",
+                               plotOutput("selected_plot"),
+                               downloadButton('downloadPlot', 'Save plot')),
                       tabPanel(title = "Heatmap",
                                fluidRow(
-                                 box(numericInput("k", "Kmeans clusters", min = 0, max = 15, value = 7), width = 4),
-                                 box(numericInput("limit", "Color limit (log2)", min = 0, max = 16, value = 6), width = 4),
-                                 box(numericInput("size", "Heatmap size (4-30)", min = 4, max = 30, value = 10), width = 4)
+                                 box(numericInput("k",
+                                                  "Kmeans clusters",
+                                                  min = 0, max = 15, value = 7),
+                                     width = 4),
+                                 box(numericInput("limit",
+                                                  "Color limit (log2)",
+                                                  min = 0, max = 16, value = 6),
+                                     width = 4),
+                                 box(numericInput("size",
+                                                  "Heatmap size (4-30)",
+                                                  min = 4, max = 30, value = 10),
+                                     width = 4)
                                ),
                                fluidRow(
                                  uiOutput("plot"),
@@ -54,8 +95,14 @@ ui <- shinyUI(
                       tabPanel(title = "Volcano plot",
                                fluidRow(
                                  box(uiOutput("volcano_cntrst"), width = 6),
-                                 box(numericInput("fontsize", "Font size", min = 0, max = 8, value = 4), width = 3),
-                                 box(checkboxInput("check_names", "Display names", value = TRUE), width = 3)
+                                 box(numericInput("fontsize",
+                                                  "Font size",
+                                                  min = 0, max = 8, value = 4),
+                                     width = 3),
+                                 box(checkboxInput("check_names",
+                                                   "Display names",
+                                                   value = TRUE),
+                                     width = 3)
                                ),
                                fluidRow(
                                  plotOutput("volcano", height = 600),
@@ -101,9 +148,19 @@ server <- shinyServer(function(input, output) {
   ### UI functions ### ----------------------------------------------------------------------------------------------------------------
   output$columns <- renderMenu({
     menuItem("Columns",
-             selectizeInput("name", "Name column", choices=colnames(data()), selected = "gene_name"),
-             selectizeInput("id", "ID column", choices=colnames(data()), selected = "protein_id"),
-             if (!is.null(expdesign())) { selectizeInput("control", "Control", choices=make.names(expdesign()$condition)) }
+             selectizeInput("name",
+                            "Name column",
+                            choices=colnames(data()),
+                            selected = "gene_name"),
+             selectizeInput("id",
+                            "ID column",
+                            choices=colnames(data()),
+                            selected = "protein_id"),
+             if (!is.null(expdesign())) {
+               selectizeInput("control",
+                              "Control",
+                              choices=make.names(expdesign()$condition))
+             }
     )
   })
 
@@ -112,40 +169,42 @@ server <- shinyServer(function(input, output) {
     inFile <- input$file1
     if (is.null(inFile))
       return(NULL)
-    read.csv(inFile$datapath, header=T, sep="\t", stringsAsFactors = F) %>% mutate(id = row_number())
+    read.csv(inFile$datapath, header = TRUE,
+             sep="\t", stringsAsFactors = FALSE) %>%
+      mutate(id = row_number())
   })
   expdesign <- reactive({
     inFile <- input$file2
     if (is.null(inFile))
       return(NULL)
-    read.csv(inFile$datapath, header=T, sep="\t", stringsAsFactors = F) %>% mutate(id = row_number())
+    read.csv(inFile$datapath, header = TRUE,
+             sep = "\t", stringsAsFactors = FALSE) %>%
+      mutate(id = row_number())
   })
 
   filt <- reactive({
     data <- data()
     rows <- grep("###", data[,grep(input$name, colnames(data))])
     cols <- grep("^signal_sum", colnames(data))
-    data[-rows,] %>% make_unique(., input$name, input$id, delim = "[|]") %>% make_se(., cols, expdesign()) %>% filter_missval(., 0)
+    data[-rows,] %>%
+      make_unique(., input$name, input$id, delim = "[|]") %>%
+      make_se(., cols, expdesign()) %>% filter_missval(., 0)
   })
 
   norm <- reactive({
-    data <- filt()
-    normalize_vsn(data)
+    normalize_vsn(filt())
   })
 
   imp <- reactive({
-    norm <- norm()
-    DEP::impute(norm, input$imputation)
+    DEP::impute(norm(), input$imputation)
   })
 
   df <- reactive({
-    imp <- imp()
-    test_diff(imp, input$control, input$contrasts)
+    test_diff(imp(), input$control, input$contrasts)
   })
 
-  sign <- reactive({
-    df <- df()
-    add_rejections(df, input$p, input$lfc)
+  dep <- reactive({
+    add_rejections(df(), input$p, input$lfc)
   })
 
   ### All object and functions upon 'Analyze' input  ### ---------------------------------------------------------------------------
@@ -154,74 +213,65 @@ server <- shinyServer(function(input, output) {
 
     ### Interactive UI functions ### ----------------------------------------------------------------------------------------------
     output$downloadTable <- renderUI({
-      selectizeInput("dataset", "Choose a dataset to save" , c("results","significant_proteins","displayed_subset","full_dataset"))
+      selectizeInput("dataset",
+                     "Choose a dataset to save" ,
+                     c("results", "significant_proteins",
+                       "displayed_subset", "full_dataset"))
     })
 
     output$downloadButton <- renderUI({
       downloadButton('downloadData', 'Save')
     })
 
-    output$signBox <- renderInfoBox({
-      infoBox("Significant proteins", paste(sign() %>% .[rowData(.)$significant, ] %>% nrow(), " out of", sign() %>% nrow(), sep = " "), icon = icon("thumbs-up", lib = "glyphicon"), color = "green", width = 4)
+    output$significantBox <- renderInfoBox({
+      infoBox("Significant proteins",
+              paste(dep() %>%
+                      .[rowData(.)$significant, ] %>%
+                      nrow(), " out of", dep() %>%
+                      nrow(), sep = " "),
+              icon = icon("thumbs-up", lib = "glyphicon"),
+              color = "green", width = 4)
     })
 
     output$select <- renderUI({
-      row_data <- rowData(sign())
+      row_data <- rowData(dep())
       cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
       names <- gsub("_significant", "", names)
-      selectizeInput("select", "Select direct comparisons", choices=names, multiple = TRUE)
+      selectizeInput("select",
+                     "Select direct comparisons",
+                     choices=names,
+                     multiple = TRUE)
     })
 
     output$exclude <- renderUI({
-      row_data <- rowData(sign())
+      row_data <- rowData(dep())
       cols <- grep("_significant",colnames(row_data))
       names <- colnames(row_data)[cols]
       names <- gsub("_significant", "", names)
-      selectizeInput("exclude", "Exclude direct comparisons", choices=names, multiple = TRUE)
+      selectizeInput("exclude",
+                     "Exclude direct comparisons",
+                     choices=names,
+                     multiple = TRUE)
     })
 
     output$volcano_cntrst <- renderUI({
       if (!is.null(selected())) {
         df <- rowData(selected())
         cols <- grep("_significant$",colnames(df))
-        selectizeInput("volcano_cntrst", "Contrast", choices = gsub("_significant", "", colnames(df)[cols]))
+        selectizeInput("volcano_cntrst",
+                       "Contrast",
+                       choices = gsub("_significant", "", colnames(df)[cols]))
       }
     })
 
     ### Reactive functions ### ----------------------------------------------------------------------------------------------
     excluded <- reactive({
-      if(is.null(input$exclude)) {
-        excluded <- sign()
-      } else {
-        if(length(input$exclude) == 1) {
-          df <- rowData(sign())
-          col <- grep(paste(input$exclude, "_significant", sep = ""), colnames(df))
-          excluded <- sign()[!df[,col],]
-        } else {
-          df <- rowData(sign())
-          cols <- grep(paste(input$exclude, "_significant", sep = "", collapse = "|"), colnames(df))
-          excluded <- sign()[apply(!df[,cols], 1, all)]
-        }
-      }
-      excluded
+      DEP:::exclude_deps(dep(), input$exclude)
     })
 
     selected <- reactive({
-      if(is.null(input$select)) {
-        selected <- excluded()
-      } else {
-        if(length(input$select) == 1) {
-          df <- rowData(excluded())
-          col <- grep(paste(input$select, "_significant", sep = ""), colnames(df))
-          selected <- excluded()[df[,col],]
-        } else {
-          df <- rowData(excluded())
-          cols <- grep(paste(input$select, "_significant", sep = "", collapse = "|"), colnames(df))
-          selected <- excluded()[apply(df[,cols], 1, all)]
-        }
-      }
-      selected
+      DEP:::select_deps(excluded(), input$select)
     })
 
     res <- reactive({
@@ -229,24 +279,7 @@ server <- shinyServer(function(input, output) {
     })
 
     table <- reactive({
-      res <- res() %>% filter(significant) %>% select(-significant)
-      if(input$pres == "centered") {
-        cols <- grep("_ratio", colnames(res))
-        table <- res[,-cols]
-        colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("significant", colnames(table))] <-
-          gsub("[.]", " - ", colnames(table)[grep("significant", colnames(table))])
-        colnames(table) <- gsub("_centered", "", colnames(table)) %>% gsub("[_]", " ", .)
-      }
-      if(input$pres == "contrast") {
-        cols <- grep("_centered", colnames(res))
-        table <- res[,-cols]
-        colnames(table)[1:2] <- c("Protein Name", "Protein ID")
-        colnames(table)[grep("significant", colnames(table))] <-
-          gsub("[.]", " - ", colnames(table)[grep("significant", colnames(table))])
-        colnames(table) <- gsub("_ratio", "", colnames(table)) %>% gsub("[_]", " ", .)
-      }
-      table
+      DEP:::get_table(res(), input$pres)
     })
 
     selected_plot_input <- reactive ({
@@ -258,13 +291,15 @@ server <- shinyServer(function(input, output) {
 
     heatmap_input <- reactive({
       withProgress(message = 'Plotting', value = 0.66, {
-        plot_heatmap(selected(), input$pres, input$k, input$limit)
+        plot_heatmap(selected(), input$pres, kmeans = TRUE,
+                     input$k, input$limit)
       })
     })
 
     volcano_input <- reactive({
       if(!is.null(input$volcano_cntrst)) {
-        plot_volcano(selected(), input$volcano_cntrst, input$fontsize, input$check_names)
+        plot_volcano(selected(), input$volcano_cntrst,
+                     input$fontsize, input$check_names)
       }
     })
 
@@ -295,7 +330,8 @@ server <- shinyServer(function(input, output) {
     ### Output functions ### ----------------------------------------------------------------------------------------------
     output$table <- DT::renderDataTable({
       table()
-    }, options = list(pageLength = 25, scrollX = T), selection = list(mode = 'single', selected = c(1)))
+    }, options = list(pageLength = 25, scrollX = T),
+    selection = list(mode = 'single', selected = c(1)))
 
     output$selected_plot <- renderPlot({
       selected_plot_input()
@@ -342,19 +378,32 @@ server <- shinyServer(function(input, output) {
     ### Download objects and functions ### ---------------------------------------------------------------------------------
     datasetInput <- reactive({
       switch(input$dataset,
-             "results" = get_results(sign()),
-             "significant_proteins" = get_results(sign()) %>% filter(significant) %>% select(-significant),
-             "displayed_subset" = res() %>% filter(significant) %>% select(-significant),
-             "full_dataset" = left_join(rownames_to_column(assay(sign()) %>% data.frame()), data.frame(rowData(sign())), by = c("rowname" = "name")))
+             "results" = get_results(dep()),
+             "significant_proteins" = get_results(dep()) %>%
+               filter(significant) %>%
+               select(-significant),
+             "displayed_subset" = res() %>%
+               filter(significant) %>%
+               select(-significant),
+             "full_dataset" = get_df_wide(dep()))
     })
 
     output$downloadData <- downloadHandler(
-      filename = function() { paste(input$dataset, ".txt", sep = "") },
-      content = function(file) { write.table(datasetInput(), file, col.names = T, row.names = F, sep ="\t") }
+      filename = function() {
+        paste(input$dataset, ".txt", sep = "")
+      },
+      content = function(file) {
+        write.table(datasetInput(),
+                    file,
+                    col.names = TRUE,
+                    row.names = FALSE,
+                    sep ="\t") }
     )
 
     output$downloadPlot <- downloadHandler(
-      filename = function() { paste("Barplot_", table()[input$table_rows_selected,1], ".pdf", sep = "") },
+      filename = function() {
+        paste0("Barplot_", table()[input$table_rows_selected,1], ".pdf")
+      },
       content = function(file) {
         pdf(file)
         print(selected_plot_input())
@@ -372,7 +421,9 @@ server <- shinyServer(function(input, output) {
     )
 
     output$downloadVolcano <- downloadHandler(
-      filename = function() { paste("Volcano_", input$contrast, ".pdf", sep = "") },
+      filename = function() {
+        paste0("Volcano_", input$contrast, ".pdf")
+      },
       content = function(file) {
         pdf(file)
         print(volcano_input())
