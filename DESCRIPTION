@@ -24,32 +24,10 @@ License: Artistic-2.0
 Depends: R (>= 3.4)
 Encoding: UTF-8
 LazyData: true
-Imports: ggplot2,
-    dplyr,
-    purrr,
-    readr,
-    tibble,
-    tidyr,
-    broom,
-    Biobase,
-    SummarizedExperiment,
-    MSnbase,
-    limma,
-    vsn,
-    fdrtool,
-    ggrepel,
-    ComplexHeatmap,
-    RColorBrewer,
-    circlize,
-    shiny,
-    shinydashboard,
-    DT,
-    rmarkdown,
-    assertthat,
-    gridExtra,
-    grid,
-    stats,
-    utils
+Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr, broom, Biobase, 
+    SummarizedExperiment, MSnbase, limma, vsn, fdrtool, ggrepel, 
+    ComplexHeatmap, RColorBrewer, circlize, shiny, shinydashboard, 
+    DT, rmarkdown, assertthat, gridExtra, grid, stats
 RoxygenNote: 6.0.1
 Suggests: testthat,
     knitr,
