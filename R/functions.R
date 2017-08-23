@@ -31,13 +31,14 @@ make_unique <- function(proteins, names, ids, delim = ";") {
                           is.character(delim),
                           length(delim) == 1)
 
+  col_names <- colnames(proteins)
   # Show error if inputs do not contain required columns
-  if(!names %in% colnames(proteins)) {
+  if(!names %in% col_names) {
     stop("'", names, "' is not a column in '",
          deparse(substitute(proteins)), "'",
          call. = FALSE)
   }
-  if(!ids %in% colnames(proteins)) {
+  if(!ids %in% col_names) {
     stop("'", ids, "' is not a column in '",
          deparse(substitute(proteins)), "'",
          call. = FALSE)
@@ -48,7 +49,7 @@ make_unique <- function(proteins, names, ids, delim = ";") {
     proteins <- as.data.frame(proteins)
 
   # Select the name and id columns, and check for NAs
-  columns <- match(c(names, ids), colnames(proteins))
+  columns <- match(c(names, ids), col_names)
   double_NAs <- apply(proteins[,columns], 1, function(x) all(is.na(x)))
   if(any(double_NAs)) {
     stop("NAs in both the 'names' and 'ids' columns")
@@ -173,7 +174,6 @@ get_prefix <- function(words) {
   if(length(words) <= 1) {
     stop("'words' should contain more than one element")
   }
-
   # Show error if 'words' contains NA
   if(any(is.na(words))) {
     stop("'words' contains NAs")
@@ -354,10 +354,11 @@ filter_missval <- function(se, thr = 0) {
          "'\nRun make_se() or make_se_parse() to obtain the required columns",
          call. = FALSE)
   }
-  if(thr < 0 | thr > max(colData(se)$replicate)) {
+  max_repl <- max(colData(se)$replicate)
+  if(thr < 0 | thr > max_repl) {
     stop("invalid filter threshold applied",
          "\nRun filter_missval() with a threshold ranging from 0 to ",
-         max(colData(se)$replicate))
+         max_repl)
   }
 
   # Make assay values binary (1 = valid value)
@@ -458,8 +459,16 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
                           is.numeric(shift),
                           length(shift) == 1)
 
+  se_assay <- assay(se)
+
+  # Show error if there are no missing values
+  if(!any(is.na(se_assay))) {
+    stop("No missing values in '", deparse(substitute(se)), "'",
+         call. = FALSE)
+  }
+
   # Get descriptive parameters of the current sample distributions
-  stat <- assay(se) %>%
+  stat <- se_assay %>%
     data.frame() %>%
     rownames_to_column() %>%
     gather(samples, value, -rowname) %>%
@@ -469,9 +478,9 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
               median = median(value),
               sd = sd(value),
               n = n(),
-              infin = nrow(assay(se)) - n)
+              infin = nrow(se_assay) - n)
   # Impute missing values by random draws from a distribution
-  # which is left-shifted by parameters 'shift' * sd and scaled by parameter 'scale' * sd.
+  # which is left-shifted by parameter 'shift' * sd and scaled by parameter 'scale' * sd.
   for (a in seq_len(nrow(stat))) {
     assay(se)[is.na(assay(se)[, stat$samples[a]]), stat$samples[a]] <-
       rnorm(stat$infin[a],
@@ -524,10 +533,7 @@ se2msn <- function(se) {
 #' \code{impute} imputes missing values in a proteomics dataset.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics data with unique names and identifiers
-#' annotated in 'name' and 'ID' columns.
-#' The appropriate columns and objects can be generated
-#' using \code{\link{make_se}} or \code{\link{make_se_parse}}.
+#' Proteomics dataset for which missing values will be imputed.
 #' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
@@ -653,28 +659,30 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
   # Show error if inputs do not contain required columns
   type <- match.arg(type)
 
+  col_data <- colData(se)
+
   if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
          call. = FALSE)
   }
-  if(any(!c("label", "condition", "replicate") %in% colnames(colData(se)))) {
+  if(any(!c("label", "condition", "replicate") %in% colnames(col_data))) {
     stop("'label', 'condition' and/or 'replicate' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_se() or make_se_parse() to obtain the required columns",
          call. = FALSE)
   }
   # Show error if inputs are not valid
-  if(!control %in% unique(colData(se)$condition)) {
+  if(!control %in% unique(col_data$condition)) {
     stop("run test_diff() with a valid control.\nValid controls are: '",
-         paste0(unique(colData(se)$condition), collapse = "', '"), "'",
+         paste0(unique(col_data$condition), collapse = "', '"), "'",
          call. = FALSE)
   }
 
   # Make an appropriate design matrix
-  conditions <- factor(colData(se)$condition)
-  replicate <- factor(colData(se)$replicate)
+  conditions <- factor(col_data$condition)
+  replicate <- factor(col_data$replicate)
   if(incl_repl) {
     design <- model.matrix(~ 0 + conditions + replicate)
     colnames(design) <- gsub("conditions", "", colnames(design))
@@ -793,7 +801,7 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
 #'
 #' # Test for differentially expressed proteins
 #' diff <- test_diff(imputed, "Ctrl", "control")
-#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #' @export
 add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
   # Show error if inputs are not the required classes
@@ -805,14 +813,15 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
                           is.numeric(lfc),
                           length(lfc) == 1)
 
+  row_data <- rowData(diff)
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(diff)))) {
+  if(any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(diff)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
          call. = FALSE)
   }
-  if(length(grep("_p.adj|_diff", colnames(rowData(diff)))) < 1) {
+  if(length(grep("_p.adj|_diff", colnames(row_data))) < 1) {
     stop("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in '",
          deparse(substitute(diff)),
          "'\nRun test_diff() to obtain the required columns",
@@ -820,7 +829,6 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
   }
 
   # get all columns with adjusted p-values and log2 fold changes
-  row_data <- rowData(diff)
   cols_p <- grep("_p.adj", colnames(row_data))
   cols_diff <- grep("_diff", colnames(row_data))
 
@@ -858,22 +866,27 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' @return A data.frame object
 #' containing all results variables from the performed analysis.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter, normalize and impute missing values
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
+#' # Test for differentially expressed proteins
 #' diff <- test_diff(imputed, "Ctrl", "control")
-#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
-#' results <- get_results(signif)
+#' # Get results
+#' results <- get_results(dep)
 #' colnames(results)
 #'
 #' significant_proteins <- results[results$significant,]
@@ -884,25 +897,24 @@ get_results <- function(dep) {
   # Show error if inputs are not the required classes
   assert_that(inherits(dep, "SummarizedExperiment"))
 
+  row_data <- rowData(dep)
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(dep)))) {
+  if(any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
          call. = FALSE)
   }
-  if(length(grep("_p.adj|_diff", colnames(rowData(dep)))) < 1) {
+  if(length(grep("_p.adj|_diff", colnames(row_data))) < 1) {
     stop("'[contrast]_diff' and/or '[contrast]_p.adj' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun test_diff() to obtain the required columns",
          call. = FALSE)
   }
 
-  row_data <- data.frame(rowData(dep))
-
   # Obtain average protein-centered enrichment values per condition
-  rowData(dep)$mean <- rowMeans(assay(dep))
-  centered <- assay(dep) - rowData(dep)$mean
+  row_data$mean <- rowMeans(assay(dep))
+  centered <- assay(dep) - row_data$mean
   centered <- data.frame(centered) %>%
     rownames_to_column() %>%
     gather(ID, val, -rowname) %>%
@@ -915,7 +927,7 @@ get_results <- function(dep) {
     paste(colnames(centered)[2:ncol(centered)], "_centered", sep = "")
 
   # Obtain average enrichments of conditions versus the control condition
-  ratio <- row_data %>%
+  ratio <- as.data.frame(row_data) %>%
     column_to_rownames("name") %>%
     select(ends_with("diff")) %>%
     signif(., digits = 3) %>%
@@ -925,7 +937,7 @@ get_results <- function(dep) {
   df <- left_join(ratio, centered, by = "rowname")
 
   # Select the adjusted p-values and significance columns
-  pval <- row_data %>%
+  pval <- as.data.frame(row_data) %>%
     column_to_rownames("name") %>%
     select(ends_with("p.adj"), ends_with("significant")) %>%
     rownames_to_column()
@@ -935,7 +947,7 @@ get_results <- function(dep) {
            scientific = TRUE)
 
   # Join into a results table
-  ids <- row_data %>% select(name, ID)
+  ids <- as.data.frame(row_data) %>% select(name, ID)
   table <- left_join(ids, pval, by = c("name" = "rowname"))
   table <- left_join(table, df, by = c("name" = "rowname")) %>%
     arrange(desc(significant))
@@ -952,22 +964,27 @@ get_results <- function(dep) {
 #' containing all data in a wide format,
 #' where each row represents a protein.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter, normalize and impute missing values
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
+#' # Test for differentially expressed proteins
 #' diff <- test_diff(imputed, "Ctrl", "control")
-#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
-#' wide <- get_df_wide(signif)
+#' # Get a wide data.frame
+#' wide <- get_df_wide(dep)
 #' colnames(wide)
 #' @export
 get_df_wide <- function(se) {
@@ -1007,21 +1024,26 @@ get_df_wide <- function(se) {
 #' containing all data in a wide format,
 #' where each row represents a single measurement.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter, normalize and impute missing values
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
+#' # Test for differentially expressed proteins
 #' diff <- test_diff(imputed, "Ctrl", "control")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
+#' # Get a long data.frame
 #' long <- get_df_long(dep)
 #' colnames(long)
 #' @export
