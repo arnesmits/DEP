@@ -75,17 +75,17 @@ plot_single <- function(dep, protein, type = c("contrast", "centered")) {
          call. = FALSE)
   }
 
-  # Plot either the average protein-centered enrichment values
-  #per condition ('centered') or the average enrichments of conditions
+  # Plot either the average protein-centered fold change values
+  #per condition ('centered') or the average fold change of conditions
   #versus the control condition ('contrast') for a single protein
   if(type == "centered") {
-    # Obtain protein-centered enrichment values
+    # Obtain protein-centered fold change values
     rowData(dep)$mean <- rowMeans(assay(dep))
     df <- assay(dep) - rowData(dep)$mean
     df <- data.frame(df) %>% rownames_to_column()
     # Select values for a single protein in long format and add sample annotation
     df_reps <- filter(df, rowname == protein) %>%
-      gather(ID, val, 2:ncol(.)) %>%
+      gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(dep)), by = "ID")
     df_reps$replicate <- as.factor(df_reps$replicate)
     df_mean <- df_reps %>%
@@ -94,7 +94,7 @@ plot_single <- function(dep, protein, type = c("contrast", "centered")) {
       mutate(error = qnorm(0.975) * sd / sqrt(n),
              CI.L = mean - error,
              CI.R = mean + error)
-    # Plot the centered enrichment values for the replicates as well as the mean
+    # Plot the centered fold change values for the replicates as well as the mean
     p1 <- ggplot(df_mean, aes(condition, mean)) +
       geom_hline(yintercept = 0) +
       geom_col(colour = "black", fill = "grey") +
@@ -103,7 +103,7 @@ plot_single <- function(dep, protein, type = c("contrast", "centered")) {
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
       labs(title = protein,
            x = "Baits",
-           y = "Enrichment (log2; 95% CI)",
+           y = "Fold change (log2; 95% CI)",
            col = "rep") +
       theme_DEP2()
   }
@@ -120,14 +120,14 @@ plot_single <- function(dep, protein, type = c("contrast", "centered")) {
       mutate(condition = gsub("_diff|_CI.L|_CI.R", "", var),
              var = gsub(".*_", "", var)) %>%
       spread(var, val)
-    # Plot the average enrichments of conditions versus the control condition
+    # Plot the average fold change of conditions versus the control condition
     p1 <- ggplot(df, aes(condition, diff)) +
       geom_hline(yintercept = 0) +
       geom_col(colour = "black", fill = "grey") +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
       labs(title = protein,
            x = "",
-           y = "Enrichment (log2; 95% CI)") +
+           y = "Fold change (log2; 95% CI)") +
       theme_DEP2()
   }
   p1
@@ -219,11 +219,11 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
   # Filter for significant proteins only
   dep <- dep[rowData(dep)$significant, ]
 
-  # Plot a heatmap of the average protein-centered enrichment values
-  # per condition ('centered') or the average enrichments of conditions
+  # Plot a heatmap of the average protein-centered fold change values
+  # per condition ('centered') or the average fold change of conditions
   # versus the control condition ('contrast')
   if (type == "centered") {
-    # Obtain protein-centered enrichment values
+    # Obtain protein-centered fold change values
     rowData(dep)$mean <- rowMeans(assay(dep))
     df <- assay(dep) - rowData(dep)$mean
 
@@ -231,7 +231,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
       # Perform k-means clustering
       set.seed(1)
       df_kmeans <- kmeans(df, k)
-      # Order the k-means clusters according to the maximum enrichment
+      # Order the k-means clusters according to the maximum fold change
       # in all samples averaged over the proteins in the cluster
       order <- df %>%
         data.frame() %>%
@@ -247,7 +247,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
     }
   }
   if (type == "contrast") {
-    # Obtain average enrichments of conditions versus the control condition
+    # Obtain average fold change of conditions versus the control condition
     df <- rowData(dep) %>%
       data.frame() %>%
       column_to_rownames(var = "name") %>%
@@ -260,9 +260,9 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
       # Perform k-means clustering
       set.seed(1)
       df_kmeans <- kmeans(df, k)
-      # Order the k-means clusters according to their average enrichment
+      # Order the k-means clusters according to their average fold change
       order <- cbind(df, cluster = df_kmeans$cluster) %>%
-        gather(condition, diff, 1:(ncol(.) - 1)) %>%
+        gather(condition, diff, -cluster) %>%
         group_by(cluster) %>%
         summarize(row = mean(diff)) %>%
         arrange(desc(row)) %>%
@@ -292,7 +292,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
                                             legend_direction = "horizontal",
                                             legend_width = unit(5, "cm"),
                                             title_position = "lefttop"),
-                name = "Enrichment (log2)",
+                name = "Fold change (log2)",
                 row_names_gp = gpar(fontsize = row_font_size),
                 column_names_gp = gpar(fontsize = col_font_size),
                 ...)

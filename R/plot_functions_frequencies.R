@@ -27,7 +27,7 @@ plot_numbers <- function(se) {
   df <- assay(se) %>%
     data.frame() %>%
     rownames_to_column() %>%
-    gather(ID, bin, 2:ncol(.)) %>%
+    gather(ID, bin, -rowname) %>%
     mutate(bin = ifelse(is.na(bin), 0, 1))
   # Summarize the number of proteins identified
   # per sample and generate a barplot
@@ -72,7 +72,7 @@ plot_frequency <- function(se) {
   df <- assay(se) %>%
     data.frame() %>%
     rownames_to_column() %>%
-    gather(ID, bin, 2:ncol(.)) %>%
+    gather(ID, bin, -rowname) %>%
     mutate(bin = ifelse(is.na(bin), 0, 1))
   # Identify the number of experiments a protein was observed
   stat <- df %>%
@@ -120,7 +120,7 @@ plot_coverage <- function(se) {
   df <- assay(se) %>%
     data.frame() %>%
     rownames_to_column() %>%
-    gather(ID, bin, 2:ncol(.)) %>%
+    gather(ID, bin, -rowname) %>%
     mutate(bin = ifelse(is.na(bin), 0, 1))
   # Identify the number of experiments a protein was observed
   stat <- df %>%
@@ -196,7 +196,7 @@ plot_cond_freq <- function(dep) {
   cols <- grep("_significant", colnames(row_data))
   df <- row_data %>%
     select(name, ID, cols) %>%
-    gather(condition, significant, 3:ncol(.)) %>%
+    gather(condition, significant, -c(name, ID)) %>%
     mutate(val = ifelse(significant, 1, 0))
   stat <- df %>%
     group_by(name) %>%

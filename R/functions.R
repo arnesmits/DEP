@@ -10,11 +10,15 @@
 #' @param ids Character(1),
 #' Name of the column containing feature IDs.
 #' @param delim Character(1),
-#' Delimiter separating the feature names within one protein group.
+#' Sets the delimiter separating the feature names within one protein group.
 #' @return A data.frame with the additional variables
 #' "name" and "ID" containing unique names and identifiers, respectively.
 #' @examples
+#' # Load example
 #' data <- UbiLength
+#'
+#' # Check colnames and pick the appropriate columns
+#' colnames(data)
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #' @export
 make_unique <- function(proteins, names, ids, delim = ";") {
@@ -40,7 +44,8 @@ make_unique <- function(proteins, names, ids, delim = ";") {
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(proteins)) proteins <- as.data.frame(proteins)
+  if(tibble::is.tibble(proteins))
+    proteins <- as.data.frame(proteins)
 
   # Select the name and id columns, and check for NAs
   columns <- match(c(names, ids), colnames(proteins))
@@ -77,10 +82,12 @@ make_unique <- function(proteins, names, ids, delim = ";") {
 #' @return A SummarizedExperiment object
 #' with log2-transformed values.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
@@ -150,9 +157,11 @@ make_se <- function(proteins_unique, columns, expdesign) {
 #' A list of words.
 #' @return A character vector containing the prefix.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' columns <- grep("LFQ.", colnames(data))
 #'
+#' # Get prefix
 #' names <- colnames(data[, columns])
 #' get_prefix(names)
 #' @export
@@ -220,10 +229,12 @@ delete_prefix <- function(words) {
 #' @return A SummarizedExperiment object
 #' with log2-transformed values.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' se <- make_se_parse(data_unique, columns, mode = "char", chars = 1)
 #' se <- make_se_parse(data_unique, columns, mode = "delim", sep = "_")
@@ -309,14 +320,17 @@ make_se_parse <- function(proteins_unique, columns,
 #' Sets the threshold for the allowed number of missing values per condition.
 #' @return A filtered SummarizedExperiment object.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter
 #' stringent_filter <- filter_missval(se, thr = 0)
 #' less_stringent_filter <- filter_missval(se, thr = 1)
 #' @export
@@ -357,7 +371,7 @@ filter_missval <- function(se, thr = 0) {
   keep <- bin_data %>%
     data.frame() %>%
     rownames_to_column() %>%
-    gather(ID, value, 2:ncol(.)) %>%
+    gather(ID, value, -rowname) %>%
     left_join(., data.frame(colData(se)), by = "ID") %>%
     group_by(rowname, condition) %>%
     summarize(miss_val = n() - sum(value)) %>%
@@ -377,14 +391,17 @@ filter_missval <- function(se, thr = 0) {
 #' (as obtained from \code{\link{make_se}}.
 #' @return A normalized SummarizedExperiment object.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter and normalize
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' @export
@@ -414,17 +431,21 @@ normalize_vsn <- function(se) {
 #' standard deviation of the original distribution.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter and normalize
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #'
+#' # Impute missing values manually
 #' imputed_manual <- impute(norm, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
 manual_impute <- function(se, scale = 0.3, shift = 1.8) {
@@ -441,7 +462,7 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
   stat <- assay(se) %>%
     data.frame() %>%
     rownames_to_column() %>%
-    gather(samples, value, 2:ncol(.)) %>%
+    gather(samples, value, -rowname) %>%
     filter(!is.na(value))  %>%
     group_by(samples) %>%
     summarise(mean = mean(value),
@@ -468,14 +489,17 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
 #' Object which will be turned into a MSnSet object.
 #' @return A MSnSet object.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Convert to MSnSet
 #' data_msn <- se2msn(se)
 #' @export
 se2msn <- function(se) {
@@ -512,17 +536,21 @@ se2msn <- function(se) {
 #' \code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter and normalize
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #'
+#' # Impute missing values using different functions
 #' imputed_MinProb <- impute(norm, fun = "MinProb", q = 0.05)
 #' imputed_QRILC <- impute(norm, fun = "QRILC")
 #'
@@ -592,18 +620,22 @@ impute <- function(se, fun = c("man", "bpca", "knn", "QRILC", "MLE",
 #' @return A SummarizedExperiment object
 #' containing FDR estimates of differential expression.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter, normalize and impute missing values
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
+#' # Test for differentially expressed proteins
 #' diff <- test_diff(imputed, "Ctrl", "control")
 #' diff <- test_diff(imputed, "Ctrl", "manual",
 #'     test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
@@ -652,12 +684,12 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
   }
 
   # Generate contrasts to be tested
-  # Either make all possible combinations ("all") or
-  # only the contrasts versus the control sample ("control")
+  # Either make all possible combinations ("all"),
+  # only the contrasts versus the control sample ("control") or
+  # use manual input
   conditions <- as.character(unique(conditions))
   if(type == "all") {
-    cntrst <- apply(combn(conditions, 2), 2,
-                    function(x) paste(x, collapse = " - "))
+    cntrst <- apply(utils::combn(conditions, 2), 2, paste, collapse = " - ")
     # Make sure that contrast containing
     # the control sample have the control as denominator
     flip <- grep(paste("^", control, sep = ""), cntrst)
@@ -690,8 +722,8 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
 
   }
   # Print tested contrasts
-  message("\nTested contrasts:")
-  message(paste(gsub(" - ", "_vs_", cntrst), collapse = ", "))
+  message("Tested contrasts: ",
+          paste(gsub(" - ", "_vs_", cntrst), collapse = ", "))
 
   # Test for differential expression by empirical Bayes moderation
   # of a linear model on the predefined contrasts
@@ -715,7 +747,7 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
     return(res)
   }
 
-  # Retrieve the differential expression test restuls
+  # Retrieve the differential expression test results
   limma_res <- map_df(cntrst, retrieve_fun)
 
   # Select the logFC, CI and qval variables
@@ -744,18 +776,22 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
 #' @return A SummarizedExperiment object
 #' annotated with logical columns indicating significant proteins.
 #' @examples
+#' # Load example
 #' data <- UbiLength
 #' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
 #' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 #'
+#' # Make SummarizedExperiment
 #' columns <- grep("LFQ.", colnames(data_unique))
 #' exp_design <- UbiLength_ExpDesign
 #' se <- make_se(data_unique, columns, exp_design)
 #'
+#' # Filter, normalize and impute missing values
 #' filt <- filter_missval(se, thr = 0)
 #' norm <- normalize_vsn(filt)
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
+#' # Test for differentially expressed proteins
 #' diff <- test_diff(imputed, "Ctrl", "control")
 #' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #' @export
@@ -869,7 +905,7 @@ get_results <- function(dep) {
   centered <- assay(dep) - rowData(dep)$mean
   centered <- data.frame(centered) %>%
     rownames_to_column() %>%
-    gather(ID, val, 2:ncol(.)) %>%
+    gather(ID, val, -rowname) %>%
     left_join(., data.frame(colData(dep)), by = "ID")
   centered <- group_by(centered, rowname, condition) %>%
     summarize(val = mean(val)) %>%
@@ -984,9 +1020,9 @@ get_df_wide <- function(se) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' diff <- test_diff(imputed, "Ctrl", "control")
-#' signif <- add_rejections(diff, alpha = 0.05, lfc = 1)
+#' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
-#' long <- get_df_long(signif)
+#' long <- get_df_long(dep)
 #' colnames(long)
 #' @export
 get_df_long <- function(se) {
@@ -1017,7 +1053,7 @@ colnames(assay_data)[1] <- "name"
 
 # Transform assay_data in long format
 long_assay <- assay_data %>%
-  gather("rowname", "intensity", 2:ncol(.))
+  gather("rowname", "intensity", -name)
 
 # Merge row and assay data into a wide data.frame
 long <- long_assay %>%

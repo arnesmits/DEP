@@ -103,13 +103,13 @@ plot_normalization <- function(raw, norm) {
     df1 <- assay(raw) %>%
       data.frame() %>%
       rownames_to_column() %>%
-      gather(ID, val, 2:ncol(.)) %>%
+      gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(raw)), by = "ID") %>%
       mutate(var = "original")
     df2 <- assay(norm) %>%
       data.frame() %>%
       rownames_to_column() %>%
-      gather(ID, val, 2:ncol(.)) %>%
+      gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(norm)), by = "ID") %>%
       mutate(var = "normalized")
     df <- rbind(df1, df2)
@@ -173,13 +173,13 @@ plot_imputation <- function(raw, imp) {
     df1 <- assay(raw) %>%
       data.frame() %>%
       rownames_to_column() %>%
-      gather(ID, val, 2:ncol(.)) %>%
+      gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(raw)), by = "ID") %>%
       mutate(var = "original")
     df2 <- assay(imp) %>%
       data.frame() %>%
       rownames_to_column() %>%
-      gather(ID, val, 2:ncol(.)) %>%
+      gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(imp)), by = "ID") %>%
       mutate(var = "imputed")
     df <- rbind(df1, df2)
@@ -231,7 +231,7 @@ plot_detect <- function(se) {
     df <- assay(se) %>%
       data.frame() %>%
       rownames_to_column() %>%
-      gather(ID, val, 2:ncol(.)) %>%
+      gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(se)), by = "ID")
 
     # Get a summarized table with mean protein intensities and
