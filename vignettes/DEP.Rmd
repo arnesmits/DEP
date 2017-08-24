@@ -170,7 +170,7 @@ The log2-transformed assay data and the specified rowData and colData columns ar
 The dataset contains proteins which are not quantified in all replicates.
 Some proteins are even only quantified in a single replicate.
 
-``` {r plot_data_noFilt, fig.width = 5, fig.height = 4}
+``` {r plot_data_noFilt, fig.width = 4, fig.height = 4}
 # Plot a barplot of the protein identification overlap between samples
 plot_frequency(data_se)
 ```
@@ -183,7 +183,7 @@ This is done by setting the threshold for the allowed number of missing values p
 ``` {r filter_missval}
 # Filter for proteins that are identified in all replicates of at least one condition
 data_filt <- filter_missval(data_se, thr = 0)
-
+```
 # Less stringent filtering:
 # Filter for proteins that are identified in 2 out of 3 replicates of at least one condition
 data_filt2 <- filter_missval(data_se, thr = 1)
@@ -194,6 +194,9 @@ After filtering, the number of identified proteins per sample can be plotted as 
 ``` {r plot_data, fig.width = 4, fig.height = 4}
 # Plot a barplot of the number of identified proteins per samples
 plot_numbers(data_filt)
+```
+
+``` {r plot_data2, fig.width = 3, fig.height = 4}
 # Plot a barplot of the protein identification overlap between samples
 plot_coverage(data_filt)
 ```
@@ -209,7 +212,7 @@ data_norm <- normalize_vsn(data_filt)
 
 The normalization can be inspected by checking the distributions of the samples before and after normalization.
 
-``` {r plot_norm, fig.width = 5, fig.height = 6}
+``` {r plot_norm, fig.width = 4, fig.height = 5}
 # Visualize normalization by boxplots for all samples before and after normalization
 plot_normalization(data_filt, data_norm)
 ```
@@ -314,7 +317,7 @@ plot_pca(dep, x = 1, y = 2, n = 500, point_size = 4)
 
 A correlation matrix can be plotted as a heatmap, to visualize the Pearson correlations between the different samples.
 
-``` {r corr, fig.height = 3, fig.width = 5}
+``` {r corr, fig.height = 3, fig.width = 4}
 # Plot the Pearson correlation matrix
 plot_cor(dep, significant = TRUE, lower = 0, upper = 1, pal = "Reds")
 ```
@@ -466,14 +469,15 @@ results_table <- data_results$results
 results_table %>% filter(significant) %>% nrow()
 ```
 
-The full data (_dep_ object) can be used for the plotting functions as described in the chapter ["Visualization of the results"](#visualization-of-the-results), for example a volcano plot.
+The full data (_dep_ object) can be used for the plotting functions as described in the chapter ["Visualization of the results"](#visualization-of-the-results), for example a heatmap.
 
 ``` {r LFQ_results4, fig.height = 5, fig.width = 5}
 # Extract the sign object
 full_data <- data_results$dep
 
-# Use the full data to generate a volcano plot
-plot_volcano(full_data, "Ubi4_vs_Ctrl", label_size = 2, add_names = TRUE)
+# Use the full data to generate a heatmap
+plot_heatmap(full_data, type = "centered", kmeans = TRUE, 
+             k = 6, col_limit = 4, show_row_names = FALSE)
 ```
 
 ## TMT-based DEP analysis

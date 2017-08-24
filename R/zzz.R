@@ -8,7 +8,7 @@
         "value", "rowname", "miss_val",
         "samples", "logFC", "qval", "comparison",
         "val", "name", "significant", "contrasts",
-        "CI.L", "CI.R", "variable", "temp",
+        "CI.L", "CI.R", "P.Value", "variable", "temp",
 
         # iBAQ.R globalVariables
         "Unique..Groups.", "Protein.group.IDs",
