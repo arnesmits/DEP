@@ -102,6 +102,9 @@ ui <- shinyUI(
                                  box(checkboxInput("check_names",
                                                    "Display names",
                                                    value = TRUE),
+                                     checkboxInput("p_adj",
+                                                   "Adjusted p values",
+                                                   value = FALSE),
                                      width = 3)
                                ),
                                fluidRow(
@@ -299,7 +302,7 @@ server <- shinyServer(function(input, output) {
     volcano_input <- reactive({
       if(!is.null(input$volcano_cntrst)) {
         plot_volcano(selected(), input$volcano_cntrst,
-                     input$fontsize, input$check_names)
+                     input$fontsize, input$check_names, input$p_adj)
       }
     })
 
