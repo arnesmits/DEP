@@ -97,6 +97,8 @@
 #'   PCA plot of top variable proteins.
 #'   \item \code{\link{plot_cor}}:
 #'   Correlation matrix.
+#'   \item \code{\link{plot_p_hist}}:
+#'   P value histogram.
 #'   \item \code{\link{plot_cond_freq}}:
 #'   Barplot of the number of significant conditions per protein.
 #'   \item \code{\link{plot_cond_overlap}}:
