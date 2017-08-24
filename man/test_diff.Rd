@@ -9,12 +9,11 @@ test_diff(se, control, type = c("all", "control", "manual"), test = NULL,
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics data with unique names and identifiers
-annotated in 'name' and 'ID' columns.
-Additionally, the colData should contain sample annotation including
-'label', 'condition' and 'replicate' columns.
-The appropriate columns and objects can be generated
-using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
+Proteomics data (output from \code{\link{make_se}()} or
+\code{\link{make_se_parse}()}). It is adviced to first remove
+proteins with too many missing values using \code{\link{filter_missval}()},
+normalize the data using \code{\link{normalize_vsn}()} and
+impute remaining missing values using \code{\link{impute}()}.}
 
 \item{control}{Character(1),
 The condition to which contrasts are generated

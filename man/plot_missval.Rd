@@ -8,7 +8,7 @@ plot_missval(se)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Data object that contains missing values.}
+Data object with missing values.}
 }
 \value{
 A heatmap indicating whether values are missing (0) or not (1)

@@ -8,7 +8,8 @@ get_df_wide(se)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics dataset.}
+Proteomics data (output from \code{\link{make_se}()} or
+\code{\link{make_se_parse}()}).}
 }
 \value{
 A data.frame object

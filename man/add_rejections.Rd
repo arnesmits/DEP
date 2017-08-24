@@ -9,7 +9,7 @@ add_rejections(diff, alpha = 0.05, lfc = 1)
 \arguments{
 \item{diff}{SummarizedExperiment,
 Proteomics dataset on which differential enrichment analysis
-has been performed by \code{\link{test_diff}}.}
+has been performed (output from \code{\link{test_diff}()}).}
 
 \item{alpha}{Numeric(1),
 Sets the threshold for the adjusted P value.}

@@ -9,7 +9,10 @@ impute(se, fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb",
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics dataset for which missing values will be imputed.}
+Proteomics data (output from \code{\link{make_se}()} or
+\code{\link{make_se_parse}()}). It is adviced to first remove
+proteins with too many missing values using \code{\link{filter_missval}()}
+and normalize the data using \code{\link{normalize_vsn}()}.}
 
 \item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 "MinProb", "min", "zero", "mixed" or "nbavg",

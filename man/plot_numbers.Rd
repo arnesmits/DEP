@@ -8,7 +8,8 @@ plot_numbers(se)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Data object for which to plot protein numbers.}
+Data object for which to plot protein numbers
+(output from \code{\link{make_se}()} or \code{\link{make_se_parse}()}).}
 }
 \value{
 Barplot of the number of identified proteins per sample

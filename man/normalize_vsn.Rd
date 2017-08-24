@@ -8,8 +8,9 @@ normalize_vsn(se)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics data with log2-transformed values
-(as obtained from \code{\link{make_se}}.}
+Proteomics data (output from \code{\link{make_se}()} or
+\code{\link{make_se_parse}()}). It is adviced to first remove
+proteins with too many missing values using \code{\link{filter_missval}()}.}
 }
 \value{
 A normalized SummarizedExperiment object.

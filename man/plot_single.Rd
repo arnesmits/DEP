@@ -8,8 +8,8 @@ plot_single(dep, protein, type = c("contrast", "centered"))
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
-Data object which has been generated
-by \code{\link{test_diff}} and \code{\link{add_rejections}}.}
+Data object for which differentially enriched proteins are annotated
+(output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).}
 
 \item{protein}{Character(1),
 Protein name.}

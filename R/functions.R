@@ -73,7 +73,8 @@ make_unique <- function(proteins, names, ids, delim = ";") {
 #' based on two data.frames: the protein table and experimental design.
 #'
 #' @param proteins_unique Data.frame,
-#' Protein table with unique names annotated in the 'name' column.
+#' Protein table with unique names annotated in the 'name' column
+#' (output from \code{\link{make_unique}()}).
 #' @param columns Integer vector,
 #' Column numbers indicating the columns containing the assay data.
 #' @param expdesign Data.frame,
@@ -134,8 +135,20 @@ make_se <- function(proteins_unique, columns, expdesign) {
   expdesign <- mutate(expdesign, condition = make.names(condition)) %>%
     unite(ID, condition, replicate, remove = FALSE)
   rownames(expdesign) <- expdesign$ID
-  colnames(raw)[match(make.names(delete_prefix(expdesign$label)),
-                      make.names(delete_prefix(colnames(raw))))] <- expdesign$ID
+
+  matched <- match(make.names(delete_prefix(expdesign$label)),
+                   make.names(delete_prefix(colnames(raw))))
+  if(all(is.na(matched))) {
+    stop("None of the labels in the experimental design match ",
+         "with column names in '", deparse(substitute(proteins_unique)),
+         "'\nRun make_se() with the correct labels in the experimental design",
+         "and/or correct columns specification")
+  }
+  if(any(is.na(matched))) {
+    warning("Some labels in the experimental design do not match ",
+            "with column names in '", deparse(substitute(proteins_unique)), "'")
+  }
+  colnames(raw)[matched] <- expdesign$ID
   raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
   # Select the rowData
@@ -212,7 +225,8 @@ delete_prefix <- function(words) {
 #' based on a single data.frame.
 #'
 #' @param proteins_unique Data.frame,
-#' Protein table with unique names annotated in the 'name' column.
+#' Protein table with unique names annotated in the 'name' column
+#' (output from \code{\link{make_unique}()}).
 #' @param columns Integer vector,
 #' Column numbers indicating the columns containing the assay data.
 #' @param mode "char" or "delim",
@@ -312,10 +326,8 @@ make_se_parse <- function(proteins_unique, columns,
 #' \code{filter_missval} filters a proteomics dataset based on missing values.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics data with unique names and identifiers
-#' annotated in 'name' and 'ID' columns.
-#' The appropriate columns and objects can be generated
-#' using \code{\link{make_se}} or \code{\link{make_se_parse}}.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}).
 #' @param thr Integer(1),
 #' Sets the threshold for the allowed number of missing values per condition.
 #' @return A filtered SummarizedExperiment object.
@@ -388,8 +400,9 @@ filter_missval <- function(se, thr = 0) {
 #' using the \code{\link[vsn]{vsn-package}}.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics data with log2-transformed values
-#' (as obtained from \code{\link{make_se}}.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}). It is adviced to first remove
+#' proteins with too many missing values using \code{\link{filter_missval}()}.
 #' @return A normalized SummarizedExperiment object.
 #' @examples
 #' # Load example
@@ -423,7 +436,10 @@ normalize_vsn <- function(se) {
 #' by random draws from a manually defined distribution.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics dataset for which missing values will be imputed.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}). It is adviced to first remove
+#' proteins with too many missing values using \code{\link{filter_missval}()}
+#' and normalize the data using \code{\link{normalize_vsn}()}.
 #' @param shift Numeric(1),
 #' Sets the left-shift of the distribution (in standard deviations) from
 #' the median of the original distribution.
@@ -533,7 +549,10 @@ se2msn <- function(se) {
 #' \code{impute} imputes missing values in a proteomics dataset.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics dataset for which missing values will be imputed.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}). It is adviced to first remove
+#' proteins with too many missing values using \code{\link{filter_missval}()}
+#' and normalize the data using \code{\link{normalize_vsn}()}.
 #' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
@@ -582,6 +601,10 @@ impute <- function(se, fun = c("man", "bpca", "knn", "QRILC", "MLE",
          call. = FALSE)
   }
 
+  # Annotate whether or not there are missing values and how many
+  rowData(se)$imputed <- apply(is.na(assay(se)), 1, any)
+  rowData(se)$num_NAs <- rowSums(is.na(assay(se)))
+
   # if the "man" function is selected, use the manual impution method
   if(fun == "man") {
     se <- manual_impute(se, ...)
@@ -602,12 +625,11 @@ impute <- function(se, fun = c("man", "bpca", "knn", "QRILC", "MLE",
 #' statistics using \code{\link[limma]{limma}}.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics data with unique names and identifiers
-#' annotated in 'name' and 'ID' columns.
-#' Additionally, the colData should contain sample annotation including
-#' 'label', 'condition' and 'replicate' columns.
-#' The appropriate columns and objects can be generated
-#' using \code{\link{make_se}} or \code{\link{make_se_parse}}.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}). It is adviced to first remove
+#' proteins with too many missing values using \code{\link{filter_missval}()},
+#' normalize the data using \code{\link{normalize_vsn}()} and
+#' impute remaining missing values using \code{\link{impute}()}.
 #' @param control Character(1),
 #' The condition to which contrasts are generated
 #' (a control condition would be most appropriate).
@@ -760,10 +782,10 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
 
   # Select the logFC, CI and qval variables
   table <- limma_res %>%
-    select(rowname, logFC, CI.L, CI.R, qval, comparison) %>%
+    select(rowname, logFC, CI.L, CI.R, P.Value, qval, comparison) %>%
     mutate(comparison = gsub(" - ", "_vs_", comparison)) %>%
     gather(variable, value, -c(rowname,comparison)) %>%
-    mutate(variable = recode(variable, logFC = "diff", qval = "p.adj")) %>%
+    mutate(variable = recode(variable, logFC = "diff", P.Value = "p.val", qval = "p.adj")) %>%
     unite(temp, comparison, variable) %>%
     spread(temp, value)
   rowData(se) <- merge(rowData(se), table, by.x = "name", by.y = "rowname")
@@ -776,7 +798,7 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
 #'
 #' @param diff SummarizedExperiment,
 #' Proteomics dataset on which differential enrichment analysis
-#' has been performed by \code{\link{test_diff}}.
+#' has been performed (output from \code{\link{test_diff}()}).
 #' @param alpha Numeric(1),
 #' Sets the threshold for the adjusted P value.
 #' @param lfc Numeric(1),
@@ -861,8 +883,8 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' on which differential enrichment analysis was performed.
 #'
 #' @param dep SummarizedExperiment,
-#' Proteomics dataset on which differential enrichment proteins
-#' are annotated by \code{\link{add_rejections}}.
+#' Data object for which differentially enriched proteins are annotated
+#' (output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).
 #' @return A data.frame object
 #' containing all results variables from the performed analysis.
 #' @examples
@@ -959,7 +981,8 @@ get_results <- function(dep) {
 #' \code{get_df_wide} generate a wide data.frame from a SummarizedExperiment.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics dataset.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}).
 #' @return A data.frame object
 #' containing all data in a wide format,
 #' where each row represents a protein.
@@ -1019,7 +1042,8 @@ get_df_wide <- function(se) {
 #' \code{get_df_long} generate a wide data.frame from a SummarizedExperiment.
 #'
 #' @param se SummarizedExperiment,
-#' Proteomics dataset.
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}).
 #' @return A data.frame object
 #' containing all data in a wide format,
 #' where each row represents a single measurement.

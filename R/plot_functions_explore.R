@@ -4,7 +4,7 @@
 #'
 #' @param dep SummarizedExperiment,
 #' Data object for which differentially enriched proteins are annotated
-#' by \code{\link{test_diff}} and \code{\link{add_rejections}}.
+#' (output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).
 #' @param x Integer(1),
 #' Sets the principle component to plot on the x-axis.
 #' @param y Integer(1),
@@ -166,7 +166,7 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 #'
 #' @param dep SummarizedExperiment,
 #' Data object for which differentially enriched proteins are annotated
-#' by \code{\link{test_diff}} and \code{\link{add_rejections}}.
+#' (output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).
 #' @param significant Logical(1),
 #' Whether or not to filter for significant proteins.
 #' @param lower Integer(1),

@@ -8,8 +8,8 @@ get_results(dep)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
-Proteomics dataset on which differential enrichment proteins
-are annotated by \code{\link{add_rejections}}.}
+Data object for which differentially enriched proteins are annotated
+(output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).}
 }
 \value{
 A data.frame object

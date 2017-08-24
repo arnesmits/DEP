@@ -9,7 +9,8 @@ make_se(proteins_unique, columns, expdesign)
 }
 \arguments{
 \item{proteins_unique}{Data.frame,
-Protein table with unique names annotated in the 'name' column.}
+Protein table with unique names annotated in the 'name' column
+(output from \code{\link{make_unique}()}).}
 
 \item{columns}{Integer vector,
 Column numbers indicating the columns containing the assay data.}

@@ -10,7 +10,7 @@ plot_pca(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 \arguments{
 \item{dep}{SummarizedExperiment,
 Data object for which differentially enriched proteins are annotated
-by \code{\link{test_diff}} and \code{\link{add_rejections}}.}
+(output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).}
 
 \item{x}{Integer(1),
 Sets the principle component to plot on the x-axis.}

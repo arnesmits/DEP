@@ -8,10 +8,11 @@ plot_normalization(raw, norm)
 }
 \arguments{
 \item{raw}{SummarizedExperiment,
-Data object before normalization.}
+Data object before normalization (output from \code{\link{make_se}()}
+or \code{\link{make_se_parse}()}).}
 
 \item{norm}{SummarizedExperiment,
-Data object after normalization by \code{\link{normalize_vsn}}.}
+Data object after normalization (output from \code{\link{normalize_vsn}}).}
 }
 \value{
 Boxplots for all conditions

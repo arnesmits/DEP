@@ -8,10 +8,10 @@ plot_imputation(raw, imp)
 }
 \arguments{
 \item{raw}{SummarizedExperiment,
-Data object before imputation.}
+Data object before imputation (output from \code{\link{normalize_vsn}()}).}
 
 \item{imp}{SummarizedExperiment,
-Data object after imputation by \code{\link{impute}}.}
+Data object after imputation (output from \code{\link{impute}()}).}
 }
 \value{
 Density plots for all conditions

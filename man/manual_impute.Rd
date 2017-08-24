@@ -8,7 +8,10 @@ manual_impute(se, scale = 0.3, shift = 1.8)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
-Proteomics dataset for which missing values will be imputed.}
+Proteomics data (output from \code{\link{make_se}()} or
+\code{\link{make_se_parse}()}). It is adviced to first remove
+proteins with too many missing values using \code{\link{filter_missval}()}
+and normalize the data using \code{\link{normalize_vsn}()}.}
 
 \item{scale}{Numeric(1),
 Sets the width of the distribution relative to the
