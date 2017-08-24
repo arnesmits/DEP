@@ -40,10 +40,6 @@ test_that("plot_imputation returns a ggplot object", {
 
 test_that("plot_detect throws error without valid input", {
   expect_error(plot_detect("test_filter"))
-
-  test_filter_error <- test_filter
-  SummarizedExperiment::colData(test_filter_error) <- SummarizedExperiment::colData(test_filter_error)[,-(3)]
-  expect_error(plot_detect(test_filter_error))
 })
 
 test_that("plot_detect returns a grob object", {

@@ -29,11 +29,11 @@ test_that("plot_cond_freq throws error without valid input", {
   expect_error(plot_cond_freq("test_sign"))
 
   test_sign_error <- test_sign
-  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(41)]
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(44)]
   expect_error(plot_cond_freq(test_sign_error))
 
   test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(38:40)]
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(41:43)]
   expect_error(plot_cond_freq(test_sign_error2))
 })
 
@@ -45,11 +45,11 @@ test_that("plot_cond_overlap throws error without valid input", {
   expect_error(plot_cond_overlap("test_sign"))
 
   test_sign_error <- test_sign
-  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(41)]
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(44)]
   expect_error(plot_cond_overlap(test_sign_error))
 
   test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(38:40)]
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(41:43)]
   expect_error(plot_cond_overlap(test_sign_error2))
 })
 
@@ -61,11 +61,11 @@ test_that("plot_cond throws error without valid input", {
   expect_error(plot_cond("test_sign"))
 
   test_sign_error <- test_sign
-  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(41)]
+  SummarizedExperiment::rowData(test_sign_error) <- SummarizedExperiment::rowData(test_sign_error)[,-(44)]
   expect_error(plot_cond(test_sign_error))
 
   test_sign_error2 <- test_sign
-  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(38:40)]
+  SummarizedExperiment::rowData(test_sign_error2) <- SummarizedExperiment::rowData(test_sign_error2)[,-(41:43)]
   expect_error(plot_cond(test_sign_error2))
 })
 
