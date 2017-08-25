@@ -46,7 +46,6 @@ test_that("get_prefix throws error without valid input", {
   expect_error(get_prefix(10))
   expect_error(get_prefix("words"))
   expect_error(get_prefix(c(words, NA)))
-  expect_error(get_prefix(c(words, "A")))
 })
 
 test_that("get_prefix returns a character object", {
