@@ -194,7 +194,7 @@ get_prefix <- function(words) {
   truncated <- substr(words, 1, minlen)
 
   # Show error if one of the elements is shorter than one character
-  if(minlen <= 1) {
+  if(minlen < 1) {
     stop("At least one of the elements is too short")
   }
 
