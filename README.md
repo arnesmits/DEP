@@ -15,7 +15,9 @@ Even easier to use are the interactive Shiny apps that are provided by the packa
 Install and load the package
 
 ``` r
-source("http://www.huber.embl.de/users/smits/install_DEP.R")
+source("https://bioconductor.org/biocLite.R")
+biocLite("DEP")
+
 library("DEP")
 ```
 
