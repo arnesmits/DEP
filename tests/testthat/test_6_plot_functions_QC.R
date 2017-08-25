@@ -1,4 +1,4 @@
-context("7 - Plot functions QC")
+context("6 - Plot functions QC")
 
 test_that("meanSdPlot returns a list object", {
   expect_is(meanSdPlot(test_vsn), "list")
@@ -40,6 +40,10 @@ test_that("plot_imputation returns a ggplot object", {
 
 test_that("plot_detect throws error without valid input", {
   expect_error(plot_detect("test_filter"))
+
+  NAs <- apply(SummarizedExperiment::assay(test_filter), 1, function(x) any(is.na(x)))
+  no_NAs <- test_filter[!NAs,]
+  expect_error(plot_detect(no_NAs))
 })
 
 test_that("plot_detect returns a grob object", {
@@ -49,11 +53,34 @@ test_that("plot_detect returns a grob object", {
 test_that("plot_missval throws error without valid input", {
   expect_error(plot_missval("test_filter"))
 
-  test_filter_noNA <-
-    test_filter[!apply(assay(test_filter), 1, function(x) any(is.na(x))),]
-  expect_error(plot_missval(test_filter_noNA))
+  NAs <- apply(SummarizedExperiment::assay(test_filter), 1, function(x) any(is.na(x)))
+  no_NAs <- test_filter[!NAs,]
+  expect_error(plot_missval(no_NAs))
 })
 
 test_that("plot_missval returns a HeatmapList object", {
   expect_is(plot_missval(test_filter), "HeatmapList")
+})
+
+test_that("plot_p_hist throws error without valid input", {
+  expect_error(plot_p_hist("test_sign", FALSE, FALSE))
+  expect_error(plot_p_hist(test_sign, "FALSE", FALSE))
+  expect_error(plot_p_hist(test_sign, FALSE, "FALSE"))
+
+  expect_error(plot_p_hist(test_filter))
+
+  test_filter_error <- test_sign
+  SummarizedExperiment::rowData(test_filter_error) <- SummarizedExperiment::rowData(test_filter_error)[,-(1)]
+  expect_error(plot_p_hist(test_filter_error))
+
+  test_filter_error2 <- test_sign
+  SummarizedExperiment::rowData(test_filter_error2) <- SummarizedExperiment::rowData(test_filter_error2)[,-c(30,35,40)]
+  expect_error(plot_p_hist(test_filter_error2))
+
+})
+
+test_that("plot_p_hist returns a ggplot object", {
+  expect_is(plot_p_hist(test_sign), "ggplot")
+  expect_is(plot_p_hist(test_sign, TRUE, FALSE), "ggplot")
+  expect_is(plot_p_hist(test_sign, FALSE, TRUE), "ggplot")
 })

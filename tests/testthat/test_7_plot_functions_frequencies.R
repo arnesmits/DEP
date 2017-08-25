@@ -1,4 +1,4 @@
-context("8 - Plot functions frequencies")
+context("7 - Plot functions frequencies")
 
 test_that("plot_numbers throws error without valid input", {
   expect_error(plot_numbers("test_filter"))

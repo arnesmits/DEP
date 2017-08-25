@@ -4,6 +4,11 @@ test_that("make_unique throws error without valid input", {
   expect_error(make_unique("test_data", "Gene.names", "Protein.IDs"))
   expect_error(make_unique(test_data, "Gene.name", "Protein.IDs"))
   expect_error(make_unique(test_data, "Gene.names", "Protein.ID"))
+
+  error_test_data <- test_data
+  error_test_data$Gene.names[1:20] <- NA
+  error_test_data$Protein.IDs[11:20] <- NA
+  expect_error(make_unique(error_test_data, "Gene.names", "Protein.IDs"))
 })
 
 test_that("make_unique returns a data.frame", {
@@ -23,6 +28,10 @@ test_that("make_se throws error without valid input", {
   expect_error(make_se(test_unique, 1:10, UbiLength_ExpDesign))
   expect_error(make_se(test_unique[,-(36:37)], 21:32, UbiLength_ExpDesign))
   expect_error(make_se(test_unique, 21:32, UbiLength_ExpDesign[,-(2)]))
+
+  error_ExpDesign <- UbiLength_ExpDesign
+  error_ExpDesign$label[1:3] <- "Bla"
+  expect_error(make_se(test_unique, 21:32, error_ExpDesign))
 })
 
 test_that("make_se returns a SummarizedExperiment", {

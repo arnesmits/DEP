@@ -46,6 +46,10 @@ test_that("add_rejections throws error without valid input", {
 
 test_that("add_rejections returns a SummarizedExperiment object", {
   expect_is(add_rejections(test_lm, 0.05, 1), "SummarizedExperiment")
+
+  test_lm2 <- test_lm
+  SummarizedExperiment::rowData(test_lm2) <- SummarizedExperiment::rowData(test_lm2)[,-c(33:34,38:39)]
+  expect_is(add_rejections(test_lm2, 0.05, 1), "SummarizedExperiment")
 })
 
 test_that("add_rejections returns an object with significance columns", {

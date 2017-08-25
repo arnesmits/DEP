@@ -12,6 +12,10 @@ test_that("manual_impute throws error without valid input", {
   expect_error(manual_impute("test_vsn", 0.3, 1.8))
   expect_error(manual_impute(test_vsn, "0.3", 1.8))
   expect_error(manual_impute(test_vsn, 0.3, "1.8"))
+
+  NAs <- apply(SummarizedExperiment::assay(test_vsn), 1, function(x) any(is.na(x)))
+  no_NAs <- test_vsn[!NAs,]
+  expect_error(manual_impute(no_NAs, 0.3, 1.8))
 })
 
 test_that("manual_impute returns a MSnSet object", {
@@ -31,6 +35,10 @@ test_that("impute throws error without valid input", {
   test_vsn_error <- test_vsn
   SummarizedExperiment::rowData(test_vsn_error) <- SummarizedExperiment::rowData(test_vsn_error)[,-(24:25)]
   expect_error(impute(test_vsn_error, "MinProb"))
+
+  NAs <- apply(SummarizedExperiment::assay(test_vsn), 1, function(x) any(is.na(x)))
+  no_NAs <- test_vsn[!NAs,]
+  expect_error(impute(no_NAs, "MinProb"))
 })
 
 test_that("impute returns a MSnSet object", {

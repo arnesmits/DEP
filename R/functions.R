@@ -138,16 +138,13 @@ make_se <- function(proteins_unique, columns, expdesign) {
 
   matched <- match(make.names(delete_prefix(expdesign$label)),
                    make.names(delete_prefix(colnames(raw))))
-  if(all(is.na(matched))) {
+  if(any(is.na(matched))) {
     stop("None of the labels in the experimental design match ",
-         "with column names in '", deparse(substitute(proteins_unique)),
-         "'\nRun make_se() with the correct labels in the experimental design",
+         "with column names in 'proteins_unique'",
+         "\nRun make_se() with the correct labels in the experimental design",
          "and/or correct columns specification")
   }
-  if(any(is.na(matched))) {
-    warning("Some labels in the experimental design do not match ",
-            "with column names in '", deparse(substitute(proteins_unique)), "'")
-  }
+
   colnames(raw)[matched] <- expdesign$ID
   raw <- raw[, !is.na(colnames(raw))][rownames(expdesign)]
 
@@ -598,6 +595,12 @@ impute <- function(se, fun = c("man", "bpca", "knn", "QRILC", "MLE",
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
+         call. = FALSE)
+  }
+
+  # Show error if there are no missing values
+  if(!any(is.na(assay(se)))) {
+    stop("No missing values in '", deparse(substitute(se)), "'",
          call. = FALSE)
   }
 

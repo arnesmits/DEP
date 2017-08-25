@@ -401,10 +401,10 @@ plot_all <- function(dep, plots = c("volcano", "heatmap",
     grDevices::pdf(file = "plot_heatmaps.pdf", height = 10)
     message("Centered")
     plot_heatmap(dep, type = "centered",
-                 labelsize = ifelse(num > 400, 1, 400/num))
+                 row_font_size = ifelse(num > 400, 1, 400/num))
     message("Contrast")
     plot_heatmap(dep, type = "contrast",
-                 labelsize = ifelse(num > 400, 1, 400/num))
+                 row_font_size = ifelse(num > 400, 1, 400/num))
     grDevices::dev.off()
   }
 
@@ -436,7 +436,7 @@ plot_all <- function(dep, plots = c("volcano", "heatmap",
     # Plot comparison graphs
     message("Plot comparison graphs")
     grDevices::pdf(file = "plot_comparison_graphs.pdf")
-    print(plot_pca(dep))
+    print(plot_pca(dep, n = ifelse(nrow(dep) > 500, 500, nrow(dep))))
     plot_cor(dep)
     grDevices::dev.off()
   }

@@ -1,4 +1,4 @@
-context("6 - Plot functions results")
+context("5 - Plot functions results")
 
 test_that("plot_single throws error without valid input", {
   expect_error(plot_single("test_sign", "USP19", "centered"))
@@ -50,8 +50,8 @@ test_that("plot_heatmap throws error without valid input", {
 test_that("plot_heatmap returns a HeatmapList object", {
   expect_is(plot_heatmap(test_sign, "centered", col_limit = 4, row_font_size = 3), "HeatmapList")
   expect_is(plot_heatmap(test_sign, "contrast", col_limit = 8, row_font_size = 3), "HeatmapList")
-  expect_is(plot_heatmap(test_sign, "contrast", kmeans = FALSE, col_limit = 8, row_font_size = 3), "HeatmapList")
-  expect_is(plot_heatmap(test_ibaq_sign, kmeans = FALSE), "HeatmapList")
+  expect_is(plot_heatmap(test_sign, "centered", kmeans = TRUE, col_limit = 4, row_font_size = 3), "HeatmapList")
+  expect_is(plot_heatmap(test_sign, "contrast", kmeans = TRUE, col_limit = 8, row_font_size = 3), "HeatmapList")
 })
 
 test_that("plot_volcano throws error without valid input", {
@@ -77,4 +77,5 @@ test_that("plot_volcano throws error without valid input", {
 test_that("plot_volcano returns a ggplot object", {
   expect_is(plot_volcano(test_sign, "Ubi6_vs_Ctrl", label_size = 5, add_names = TRUE), "ggplot")
   expect_is(plot_volcano(test_sign, "Ubi6_vs_Ctrl", add_names = FALSE), "ggplot")
+  expect_is(plot_volcano(test_sign, "Ubi6_vs_Ctrl", add_names = FALSE, adjusted = TRUE), "ggplot")
 })
