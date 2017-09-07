@@ -111,17 +111,16 @@ plot_normalization <- function(raw, norm) {
     # annotated with sample info
     df1 <- assay(raw) %>%
       data.frame() %>%
-      rownames_to_column() %>%
-      gather(ID, val, -rowname) %>%
+      gather(ID, val) %>%
       left_join(., data.frame(colData(raw)), by = "ID") %>%
       mutate(var = "original")
     df2 <- assay(norm) %>%
       data.frame() %>%
-      rownames_to_column() %>%
-      gather(ID, val, -rowname) %>%
+      gather(ID, val) %>%
       left_join(., data.frame(colData(norm)), by = "ID") %>%
       mutate(var = "normalized")
     df <- rbind(df1, df2)
+    df$var <- parse_factor(df$var, levels = c("original", "normalized"))
     # Boxplots for conditions with facet_wrap
     # for the original and normalized values
     ggplot(df, aes(x = ID, y = val, fill = condition)) +

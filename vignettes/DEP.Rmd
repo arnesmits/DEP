@@ -222,6 +222,7 @@ MNAR can indicate that proteins are below the detection limit in specific sample
 For these different conditions, different imputation methods have to be used, as described in the `r Biocpkg("MSnbase") ` vignette and more specifically in the _impute_ function descriptions.  
 
 To explore the pattern of missing values in the data, a heatmap is plotted indicating whether values are missing (0) or not (1).
+Only proteins with at least one missing value are visualized.
 
 ``` {r plot_missval, fig.height = 4, fig.width = 3}
 # Plot a heatmap of proteins with missing values
@@ -239,7 +240,7 @@ plot_detect(data_filt)
 ```
 
 Indeed the proteins with missing values have on average low intensities.
-This data (MNAR and close to the detection limit) should be imputed by left-censored imputation method, such as the quantile regression-based left-censored function ("QRILC") or random draws from a left-shifted distribution ("MinProb" and "man"). In contrast, MAR data should be imputed with methods such as k-nearest neighbor ("knn") or maximum likelihood ("MLE") functions. See the `r Biocpkg("MSnbase") ` vignette and more specifically the _impute_ function description for more information.   
+This data (MNAR and close to the detection limit) should be imputed by a left-censored imputation method, such as the quantile regression-based left-censored function ("QRILC") or random draws from a left-shifted distribution ("MinProb" and "man"). In contrast, MAR data should be imputed with methods such as k-nearest neighbor ("knn") or maximum likelihood ("MLE") functions. See the `r Biocpkg("MSnbase") ` vignette and more specifically the _impute_ function description for more information.   
 
 ``` {r impute, results = "hide", message = FALSE, warning = FALSE, error = TRUE}
 # All possible imputation methods are printed in an error, if an invalid function name is given.

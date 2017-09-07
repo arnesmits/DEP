@@ -321,12 +321,15 @@ make_se_parse <- function(proteins_unique, columns,
 #' Filter on missing values
 #'
 #' \code{filter_missval} filters a proteomics dataset based on missing values.
+#' The dataset is filtered for proteins that have a maximum of
+#' 'thr' missing values in at least one condition.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics data (output from \code{\link{make_se}()} or
 #' \code{\link{make_se_parse}()}).
 #' @param thr Integer(1),
-#' Sets the threshold for the allowed number of missing values per condition.
+#' Sets the threshold for the allowed number of missing values
+#' in at least one condition.
 #' @return A filtered SummarizedExperiment object.
 #' @examples
 #' # Load example
@@ -550,8 +553,8 @@ se2msn <- function(se) {
 #' \code{\link{make_se_parse}()}). It is adviced to first remove
 #' proteins with too many missing values using \code{\link{filter_missval}()}
 #' and normalize the data using \code{\link{normalize_vsn}()}.
-#' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
-#' "MinProb", "min", "zero", "mixed" or "nbavg",
+#' @param fun "bpca", "knn", "QRILC", "MLE", "MinDet",
+#' "MinProb", "man", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
 #' and \code{\link[MSnbase]{impute}}.
 #' @param ... Additional arguments for imputation functions as depicted in
@@ -581,8 +584,8 @@ se2msn <- function(se) {
 #'
 #' imputed_manual <- impute(norm, fun = "man", shift = 1.8, scale = 0.3)
 #' @export
-impute <- function(se, fun = c("man", "bpca", "knn", "QRILC", "MLE",
-                               "MinDet", "MinProb", "min", "zero",
+impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
+                               "MinDet", "MinProb", "man", "min", "zero",
                                "mixed", "nbavg"), ...) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(se, "SummarizedExperiment"),
@@ -861,15 +864,14 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
   # applying alpha and log2FC parameters per protein
   if(length(cols_p) == 1) {
     rowData(diff)$significant <-
-      row_data[, cols_p] <= alpha & row_data[, cols_diff] >= lfc |
-      row_data[, cols_p] <= alpha & row_data[, cols_diff] <= -lfc
+      row_data[, cols_p] <= alpha & abs(row_data[, cols_diff]) >= lfc
     rowData(diff)$contrast_significant <- rowData(diff)$significant
     colnames(rowData(diff))[ncol(rowData(diff))] <-
       gsub("p.adj", "significant", colnames(row_data)[cols_p])
   }
   if(length(cols_p) > 1) {
-    sign_df <- row_data[, cols_p] %>% apply(., 2, function(x) x <= alpha) &
-      row_data[, cols_diff] %>% apply(., 2, function(x) x >= lfc | x <= -lfc)
+    sign_df <- apply(row_data[, cols_p], 2, function(x) x <= alpha) &
+      apply(row_data[, cols_diff], 2, function(x) abs(x) >= lfc)
     sign_df <- cbind(sign_df,
                      significant = apply(sign_df, 1, function(x) any(x)))
     colnames(sign_df) <- gsub("_p.adj", "_significant", colnames(sign_df))

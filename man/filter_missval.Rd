@@ -12,13 +12,16 @@ Proteomics data (output from \code{\link{make_se}()} or
 \code{\link{make_se_parse}()}).}
 
 \item{thr}{Integer(1),
-Sets the threshold for the allowed number of missing values per condition.}
+Sets the threshold for the allowed number of missing values
+in at least one condition.}
 }
 \value{
 A filtered SummarizedExperiment object.
 }
 \description{
 \code{filter_missval} filters a proteomics dataset based on missing values.
+The dataset is filtered for proteins that have a maximum of
+'thr' missing values in at least one condition.
 }
 \examples{
 # Load example

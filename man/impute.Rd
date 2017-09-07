@@ -4,7 +4,7 @@
 \alias{impute}
 \title{Impute missing values}
 \usage{
-impute(se, fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb",
+impute(se, fun = c("bpca", "knn", "QRILC", "MLE", "MinDet", "MinProb", "man",
   "min", "zero", "mixed", "nbavg"), ...)
 }
 \arguments{
@@ -14,8 +14,8 @@ Proteomics data (output from \code{\link{make_se}()} or
 proteins with too many missing values using \code{\link{filter_missval}()}
 and normalize the data using \code{\link{normalize_vsn}()}.}
 
-\item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
-"MinProb", "min", "zero", "mixed" or "nbavg",
+\item{fun}{"bpca", "knn", "QRILC", "MLE", "MinDet",
+"MinProb", "man", "min", "zero", "mixed" or "nbavg",
 Function used for data imputation based on \code{\link{manual_impute}}
 and \code{\link[MSnbase]{impute}}.}
 
