@@ -13,7 +13,9 @@ Data object for which differentially enriched proteins are annotated
 (output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).}
 
 \item{type}{'contrast' or 'centered',
-The type of data scaling used for plotting.}
+The type of data scaling used for plotting.
+Either the fold change ('contrast') or
+the centered log2-intensity ('centered').}
 
 \item{kmeans}{Logical(1),
 Whether or not to perform k-means clustering.}
