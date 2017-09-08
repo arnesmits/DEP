@@ -354,11 +354,11 @@ plot_volcano(dep, contrast = "Ubi6_vs_Ctrl", label_size = 2, add_names = TRUE)
 It can also be useful to plot the data of a single protein, for example if this protein is of special interest.
 
 ``` {r bar, fig.height = 3.5, fig.width = 3.5}
-# Plot a barplot for the protein USP15 with the data centered
-plot_single(dep, protein = "USP15", type = "centered")
-
 # Plot a barplot for the protein USP15
-plot_single(dep, protein = "USP15", type = "contrast")
+plot_single(dep, proteins = "USP15")
+
+# Plot a barplot for the protein USP15 with the data centered
+plot_single(dep, proteins = "USP15", type = "centered")
 ```
 
 ### Frequency plot of significant proteins and overlap of conditions

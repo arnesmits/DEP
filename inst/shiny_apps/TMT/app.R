@@ -334,7 +334,7 @@ server <- shinyServer(function(input, output) {
     output$table <- DT::renderDataTable({
       table()
     }, options = list(pageLength = 25, scrollX = T),
-    selection = list(mode = 'single', selected = c(1)))
+    selection = list(selected = c(1)))
 
     output$selected_plot <- renderPlot({
       selected_plot_input()

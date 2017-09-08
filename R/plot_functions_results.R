@@ -5,8 +5,8 @@
 #' @param dep SummarizedExperiment,
 #' Data object for which differentially enriched proteins are annotated
 #' (output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).
-#' @param protein Character(1),
-#' Protein name.
+#' @param proteins Character,
+#' The name of the proteins to plot.
 #' @param type 'contrast' or 'centered',
 #' The type of data scaling used for plotting.
 #' Either the fold change ('contrast') or
@@ -33,14 +33,14 @@
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot single proteins
+#' plot_single(dep, 'USP15')
 #' plot_single(dep, 'USP15', 'centered')
-#' plot_single(dep, 'USP15', 'contrast')
+#' plot_single(dep, c('USP15', 'CUL1'))
 #' @export
-plot_single <- function(dep, protein, type = c("contrast", "centered")) {
+plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
-                          is.character(protein),
-                          length(protein) == 1,
+                          is.character(proteins),
                           is.character(type))
 
   # Show error if inputs do not contain required columns
@@ -68,9 +68,16 @@ plot_single <- function(dep, protein, type = c("contrast", "centered")) {
   }
 
   # Show error if an unvalid protein name is given
-  if(length(which(row_data$name == protein)) == 0) {
-    possibilities <-
-      row_data$name[grep(substr(protein, 1, nchar(protein) - 1),row_data$name)]
+  if(all(!proteins %in% row_data$name)) {
+    if(length(proteins) == 1) {
+      rows <- grep(substr(proteins, 1, nchar(proteins) - 1),row_data$name)
+      possibilities <- row_data$name[rows]
+    } else {
+      rows <- lapply(proteins, function(x)
+        grep(substr(x, 1, nchar(x) - 1),row_data$name))
+      possibilities <- row_data$name[unlist(rows)]
+    }
+
     if(length(possibilities) > 0) {
       possibilities_msg <- paste0("Do you mean: '",
                                   paste0(possibilities, collapse = "', '"),
@@ -78,67 +85,75 @@ plot_single <- function(dep, protein, type = c("contrast", "centered")) {
     } else {
       possibilities_msg <- NULL
     }
-    stop("please run `plot_single()` with a valid protein name as argument\n",
+    stop("please run `plot_single()` with a valid protein names in the 'proteins' argument\n",
          possibilities_msg,
          call. = FALSE)
   }
+  if(any(!proteins %in% row_data$name)) {
+    proteins <- proteins[proteins %in% row_data$name]
+    warning("Only used the following protein(s): '",
+            paste0(proteins, collapse = "', '"),
+            "'")
+  }
 
-  # Plot either the average protein-centered fold change values
-  #per condition ('centered') or the average fold change of conditions
-  #versus the control condition ('contrast') for a single protein
+  # Plot either the centered log-intensity values
+  # per condition ('centered') or the average fold change of conditions
+  # versus the control condition ('contrast') for a single protein
   if(type == "centered") {
     # Obtain protein-centered fold change values
     row_data$mean <- rowMeans(assay(dep))
     df <- assay(dep) - row_data$mean
     df <- data.frame(df) %>% rownames_to_column()
     # Select values for a single protein in long format and add sample annotation
-    df_reps <- filter(df, rowname == protein) %>%
+    df_reps <- filter(df, rowname %in% proteins) %>%
       gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(dep)), by = "ID")
     df_reps$replicate <- as.factor(df_reps$replicate)
     df_mean <- df_reps %>%
-      group_by(condition) %>%
+      group_by(condition, rowname) %>%
       summarize(mean = mean(val), sd = sd(val), n = n()) %>%
       mutate(error = qnorm(0.975) * sd / sqrt(n),
              CI.L = mean - error,
              CI.R = mean + error)
+    df_mean$rowname <- parse_factor(df_mean$rowname, levels = proteins)
     # Plot the centered fold change values for the replicates as well as the mean
-    p1 <- ggplot(df_mean, aes(condition, mean)) +
+    p <- ggplot(df_mean, aes(condition, mean)) +
       geom_hline(yintercept = 0) +
       geom_col(colour = "black", fill = "grey") +
       geom_point(data = df_reps, aes(condition, val, col = replicate),
                  shape = 18, size = 5, position = position_dodge(width=0.3)) +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
-      labs(title = protein,
-           x = "Baits",
+      labs(x = "Baits",
            y = "Centered intensity (log2; 95% CI)",
            col = "rep") +
+      facet_wrap(~rowname) +
       theme_DEP2()
   }
   if(type == "contrast") {
     # Select values for a single protein
     df <- row_data %>%
       data.frame() %>%
-      filter(name == protein) %>%
-      column_to_rownames(var = "name") %>%
-      select(ends_with("_diff"),
+      filter(name %in% proteins) %>%
+      select(name,
+             ends_with("_diff"),
              ends_with("_CI.L"),
              ends_with("_CI.R")) %>%
-      gather(var, val) %>%
+      gather(var, val, -name) %>%
       mutate(condition = gsub("_diff|_CI.L|_CI.R", "", var),
              var = gsub(".*_", "", var)) %>%
       spread(var, val)
+    df$name <- parse_factor(df$name, levels = proteins)
     # Plot the average fold change of conditions versus the control condition
-    p1 <- ggplot(df, aes(condition, diff)) +
+    p <- ggplot(df, aes(condition, diff)) +
       geom_hline(yintercept = 0) +
       geom_col(colour = "black", fill = "grey") +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
-      labs(title = protein,
-           x = "",
+      labs(x = "",
            y = "Fold change (log2; 95% CI)") +
+      facet_wrap(~name) +
       theme_DEP2()
   }
-  p1
+  p
 }
 
 #' Plot a heatmap

@@ -4,15 +4,15 @@
 \alias{plot_single}
 \title{Plot values for a protein of interest}
 \usage{
-plot_single(dep, protein, type = c("contrast", "centered"))
+plot_single(dep, proteins, type = c("contrast", "centered"))
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
 Data object for which differentially enriched proteins are annotated
 (output from \code{\link{test_diff}()} and \code{\link{add_rejections}()}).}
 
-\item{protein}{Character(1),
-Protein name.}
+\item{proteins}{Character,
+The name of the proteins to plot.}
 
 \item{type}{'contrast' or 'centered',
 The type of data scaling used for plotting.
@@ -46,6 +46,7 @@ diff <- test_diff(imputed, "Ctrl", "control")
 dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 
 # Plot single proteins
+plot_single(dep, 'USP15')
 plot_single(dep, 'USP15', 'centered')
-plot_single(dep, 'USP15', 'contrast')
+plot_single(dep, c('USP15', 'CUL1'))
 }
