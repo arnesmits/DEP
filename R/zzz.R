@@ -22,7 +22,12 @@
         "qnorm", "error", "var",
 
         # plot_functions2.R globalVariables
-        "n_con", "conditions", "category"
+        "n_con", "conditions", "category",
+
+        # enrichR_functions.R globalVariables
+        "Adjusted.P.value", "Term", "log_odds",
+        "Overlap", "bg_IN", "bg_OUT", "IN", "OUT",
+        "installed.packages"
         )
     )
   invisible()

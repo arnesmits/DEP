@@ -108,6 +108,14 @@
 #'   and the overlap in proteins between conditions.
 #' }
 #'
+#' @section Visualization functions:
+#' \itemize{
+#'   \item \code{\link{test_gsea}}:
+#'   Gene Set Enrichment Analysis using enrichR.
+#'   \item \code{\link{plot_gsea}}:
+#'   Barplot of enriched gene sets.
+#' }
+#'
 #' @section Additional functions:
 #' \itemize{
 #'   \item \code{\link{get_df_wide}}:

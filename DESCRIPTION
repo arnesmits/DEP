@@ -30,6 +30,7 @@ Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr, broom, Biobase,
     DT, rmarkdown, assertthat, gridExtra, grid, stats
 RoxygenNote: 6.0.1
 Suggests: testthat,
+    enrichR,
     knitr,
     BiocStyle
 biocViews: Proteomics, MassSpectrometry, DifferentialExpression, 
