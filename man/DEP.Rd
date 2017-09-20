@@ -122,7 +122,9 @@ are provided by the package.
   Barplot of the frequency of significant conditions per protein
   and the overlap in proteins between conditions.
 }
+}
 
+\section{Gene Set Enrichment Analysis functions}{
 
 \itemize{
   \item \code{\link{test_gsea}}:

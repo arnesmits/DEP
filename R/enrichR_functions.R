@@ -79,7 +79,7 @@ test_gsea <- function(dep,
   # Check for valid databases
   libraries <- enrichR::listEnrichrDbs()$libraryName
   if(all(!databases %in% libraries)) {
-    stop("Please run `test_enrichment()` with valid databases as argument",
+    stop("Please run `test_gsea()` with valid databases as argument",
          "\nSee http://amp.pharm.mssm.edu/Enrichr/ for available databases")
   }
   if(any(!databases %in% libraries)) {
@@ -193,11 +193,11 @@ test_gsea <- function(dep,
 #' Sets the number of enriched terms per contrast to be plotted.
 #' @param alpha Numeric(1),
 #' Sets the threshold for the adjusted P value.
-#' @param contrast Character(1),
-#' Specifies the contrast to plot.
-#' If 'NULL' all contrast will be plotted.
-#' @param database Character(1),
-#' Specifies the database to plot.
+#' @param contrasts Character,
+#' Specifies the contrast(s) to plot.
+#' If 'NULL' all contrasts will be plotted.
+#' @param databases Character,
+#' Specifies the database(s) to plot.
 #' If 'NULL' all databases will be plotted.
 #' @param nrow Numeric(1),
 #' Sets the number of rows for the plot.
@@ -234,7 +234,7 @@ test_gsea <- function(dep,
 #' }
 #' @export
 plot_gsea <- function(gsea_results, number = 10, alpha = 0.05,
-                      contrast = NULL, database = NULL,
+                      contrasts = NULL, databases = NULL,
                       nrow = 1,term_size = 8) {
   assertthat::assert_that(is.data.frame(gsea_results),
                           is.numeric(number),
@@ -256,43 +256,51 @@ plot_gsea <- function(gsea_results, number = 10, alpha = 0.05,
          call. = FALSE)
   }
 
-  if(!is.null(contrast)) {
-    assertthat::assert_that(is.character(contrast),
-                            length(contrast) == 1)
+  if(!is.null(contrasts)) {
+    assertthat::assert_that(is.character(contrasts))
 
     valid_contrasts <- unique(gsea_results$contrast)
 
-    if(!contrast %in% valid_contrasts) {
+    if(!all(contrasts %in% valid_contrasts)) {
       valid_cntrsts_msg <- paste0("Valid contrasts are: '",
                                   paste0(valid_contrasts, collapse = "', '"),
                                   "'")
-      stop("Not a valid contrast, please run `plot_enrichment()`",
+      stop("Not a valid contrast, please run `plot_gsea()`",
            "with a valid contrast as argument\n",
            valid_cntrsts_msg,
            call. = FALSE)
     }
+    if(!any(contrasts %in% valid_contrasts)) {
+      contrasts <- contrasts[contrasts %in% valid_contrasts]
+      message("Not all contrasts found",
+              "\nPlotting the following contrasts: '",
+              paste0(contrasts, collapse = "', '"), "'")
+    }
 
-    filt_contrast <- contrast
-    gsea_results <- filter(gsea_results, contrast == filt_contrast)
+    gsea_results <- filter(gsea_results, contrast %in% contrasts)
   }
-  if(!is.null(database)) {
-    assertthat::assert_that(is.character(database),
-                            length(database) == 1)
+  if(!is.null(databases)) {
+    assertthat::assert_that(is.character(databases))
 
     valid_databases <- unique(gsea_results$var)
 
-    if(!database %in% valid_databases) {
-      valid_cntrsts_msg <- paste0("Valid contrasts are: '",
+    if(all(!databases %in% valid_databases)) {
+      valid_cntrsts_msg <- paste0("Valid databases are: '",
                                   paste0(valid_databases, collapse = "', '"),
                                   "'")
-      stop("Not a valid database, please run `plot_enrichment()`",
-           "with a valid database as argument\n",
+      stop("Not a valid database, please run `plot_gsea()`",
+           "with valid databases as argument\n",
            valid_cntrsts_msg,
            call. = FALSE)
     }
+    if(any(!databases %in% valid_databases)) {
+      databases <- databases[databases %in% valid_databases]
+      message("Not all databases found",
+              "\nPlotting the following databases: '",
+              paste0(databases, collapse = "', '"), "'")
+    }
 
-    filt_database <- database
-    gsea_results <- filter(gsea_results, var == filt_database)
+    gsea_results <- filter(gsea_results, var %in% databases)
   }
 
   # Get top enriched gene sets

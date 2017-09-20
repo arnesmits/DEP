@@ -108,7 +108,7 @@
 #'   and the overlap in proteins between conditions.
 #' }
 #'
-#' @section Visualization functions:
+#' @section Gene Set Enrichment Analysis functions:
 #' \itemize{
 #'   \item \code{\link{test_gsea}}:
 #'   Gene Set Enrichment Analysis using enrichR.

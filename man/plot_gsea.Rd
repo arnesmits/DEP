@@ -4,8 +4,8 @@
 \alias{plot_gsea}
 \title{Plot enriched Gene Sets}
 \usage{
-plot_gsea(gsea_results, number = 10, alpha = 0.05, contrast = NULL,
-  database = NULL, nrow = 1, term_size = 8)
+plot_gsea(gsea_results, number = 10, alpha = 0.05, contrasts = NULL,
+  databases = NULL, nrow = 1, term_size = 8)
 }
 \arguments{
 \item{gsea_results}{Data.frame,
@@ -18,12 +18,12 @@ Sets the number of enriched terms per contrast to be plotted.}
 \item{alpha}{Numeric(1),
 Sets the threshold for the adjusted P value.}
 
-\item{contrast}{Character(1),
-Specifies the contrast to plot.
-If 'NULL' all contrast will be plotted.}
+\item{contrasts}{Character,
+Specifies the contrast(s) to plot.
+If 'NULL' all contrasts will be plotted.}
 
-\item{database}{Character(1),
-Specifies the database to plot.
+\item{databases}{Character,
+Specifies the database(s) to plot.
 If 'NULL' all databases will be plotted.}
 
 \item{nrow}{Numeric(1),
