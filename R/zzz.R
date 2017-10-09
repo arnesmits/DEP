@@ -27,7 +27,7 @@
         # enrichR_functions.R globalVariables
         "Adjusted.P.value", "Term", "log_odds",
         "Overlap", "bg_IN", "bg_OUT", "IN", "OUT",
-        "installed.packages"
+        "installed.packages", "contrast"
         )
     )
   invisible()
