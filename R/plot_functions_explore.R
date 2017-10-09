@@ -129,6 +129,7 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
     labs(title = paste0("PCA plot - top ", n, " variable proteins"),
          x = colnames(pca_df)[PC_cols[x]],
          y = colnames(pca_df)[PC_cols[y]]) +
+    coord_fixed() +
     theme_DEP1()
 
   if(length(indicate) == 0) {
