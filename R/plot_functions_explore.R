@@ -178,6 +178,9 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 #' Sets the color panel (from \code{\link[RColorBrewer]{brewer.pal}}).
 #' @param pal_rev Logical(1),
 #' Whether or not to invert the color palette.
+#' @param indicate Character,
+#' Sets additional annotation on the top of the heatmap
+#' based on columns from the experimental design (colData).
 #' @param font_size Integer(1),
 #' Sets the size of the labels.
 #' @param ... Additional arguments for Heatmap function as depicted in
@@ -207,7 +210,8 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 #' plot_cor(dep)
 #' @export
 plot_cor <- function(dep, significant = TRUE, lower = -1, upper = 1,
-                      pal = "PRGn", pal_rev = FALSE, font_size = 12, ...) {
+                     pal = "PRGn", pal_rev = FALSE, indicate = NULL,
+                     font_size = 12, ...) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
                           is.logical(significant),
@@ -235,11 +239,60 @@ plot_cor <- function(dep, significant = TRUE, lower = -1, upper = 1,
     rownames_to_column() %>%
     filter(category != "qual")
   if(!pal %in% pals$rowname) {
-    stop(paste0("'", pal,"' is not a valid color panel",
-                " (qualitative panels also not allowed).\n",
-                "Run plot_pca() with one of the following 'pal' options: ",
-                paste(pals$rowname, collapse = "', '"), "'."),
+    stop("'", pal,"' is not a valid color panel",
+         " (qualitative panels also not allowed)\n",
+         "Run plot_pca() with one of the following 'pal' options: ",
+         paste(pals$rowname, collapse = "', '"), "'",
          call. = FALSE)
+  }
+
+  # Heatmap annotation
+  if(!is.null(indicate)) {
+    assertthat::assert_that(is.character(indicate))
+
+    col_data <- colData(dep) %>%
+      as.data.frame()
+    columns <- colnames(col_data)
+    if(any(!indicate %in% columns)) {
+      stop("'",
+           paste0(indicate, collapse = "' and/or '"),
+           "' column(s) is/are not present in ",
+           deparse(substitute(dep)),
+           ".\nValid columns are: '",
+           paste(columns, collapse = "', '"),
+           "'.",
+           call. = FALSE)
+    }
+
+    # Get annotation
+    anno <- colData(dep) %>%
+      data.frame() %>%
+      select(indicate)
+
+    # Annotation color
+    names <- colnames(anno)
+    anno_col <- vector(mode="list", length=length(names))
+    names(anno_col) <- names
+    for(i in names) {
+      var = anno[[i]] %>% unique() %>% sort()
+      if(length(var) == 1)
+        cols <- c("black")
+      if(length(var) == 2)
+        cols <- c("orangered", "cornflowerblue")
+      if(length(var) < 7 & length(var) > 2)
+        cols <- RColorBrewer::brewer.pal(length(var), "Pastel1")
+      if(length(var) > 7)
+        cols <- RColorBrewer::brewer.pal(length(var), "Set3")
+      names(cols) <- var
+      anno_col[[i]] <-  cols
+    }
+
+    # HeatmapAnnotation object
+    ha1 = HeatmapAnnotation(df = anno,
+                            col = anno_col,
+                            show_annotation_name = TRUE)
+  } else {
+    ha1 <- NULL
   }
 
   # Filter for significant proteins
@@ -275,6 +328,7 @@ plot_cor <- function(dep, significant = TRUE, lower = -1, upper = 1,
                 name = "Pearson correlation",
                 column_names_gp = gpar(fontsize = font_size),
                 row_names_gp = gpar(fontsize = font_size),
+                top_annotation = ha1,
                 ...)
   draw(ht1, heatmap_legend_side = "right")
 }

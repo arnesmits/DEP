@@ -5,7 +5,7 @@
 \title{Plot correlation matrix}
 \usage{
 plot_cor(dep, significant = TRUE, lower = -1, upper = 1, pal = "PRGn",
-  pal_rev = FALSE, font_size = 12, ...)
+  pal_rev = FALSE, indicate = NULL, font_size = 12, ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
@@ -26,6 +26,10 @@ Sets the color panel (from \code{\link[RColorBrewer]{brewer.pal}}).}
 
 \item{pal_rev}{Logical(1),
 Whether or not to invert the color palette.}
+
+\item{indicate}{Character,
+Sets additional annotation on the top of the heatmap
+based on columns from the experimental design (colData).}
 
 \item{font_size}{Integer(1),
 Sets the size of the labels.}

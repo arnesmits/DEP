@@ -173,6 +173,10 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
 #' Sets the number of k-means clusters.
 #' @param col_limit Integer(1),
 #' Sets the outer limits of the color scale.
+#' @param indicate Character,
+#' Sets additional annotation on the top of the heatmap
+#' based on columns from the experimental design (colData).
+#' Only applicable to type = 'centered'.
 #' @param row_font_size Integer(1),
 #' Sets the size of row labels.
 #' @param col_font_size Integer(1),
@@ -206,7 +210,7 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
 #' plot_heatmap(dep, 'contrast', col_limit = 10, row_font_size = 3)
 #' @export
 plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
-                         k = 6, col_limit = 6,
+                         k = 6, col_limit = 6, indicate = NULL,
                          row_font_size = 6, col_font_size = 10, ...) {
   # Show error if inputs are not the required classes
   if(is.integer(k)) k <- as.numeric(k)
@@ -246,6 +250,59 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
                 deparse(substitute(dep)),
                 "'.\nRun add_rejections() to obtain the required column."),
          call. = FALSE)
+  }
+
+  # Heatmap annotation
+  if(!is.null(indicate) & type == "centered") {
+    assertthat::assert_that(is.character(indicate))
+
+    col_data <- colData(dep) %>%
+      as.data.frame()
+    if(type == "contrast") {
+      x <- col_data %>%
+        select(-label, -ID, -replicate)
+    }
+    columns <- colnames(col_data)
+    if(any(!indicate %in% columns)) {
+      stop("'",
+           paste0(indicate, collapse = "' and/or '"),
+           "' column(s) is/are not present in ",
+           deparse(substitute(dep)),
+           ".\nValid columns are: '",
+           paste(columns, collapse = "', '"),
+           "'.",
+           call. = FALSE)
+    }
+
+    # Get annotation
+    anno <- col_data %>%
+      data.frame() %>%
+      select(indicate)
+
+    # Annotation color
+    names <- colnames(anno)
+    anno_col <- vector(mode="list", length=length(names))
+    names(anno_col) <- names
+    for(i in names) {
+      var = anno[[i]] %>% unique() %>% sort()
+      if(length(var) == 1)
+        cols <- c("black")
+      if(length(var) == 2)
+        cols <- c("orangered", "cornflowerblue")
+      if(length(var) < 7 & length(var) > 2)
+        cols <- RColorBrewer::brewer.pal(length(var), "Pastel1")
+      if(length(var) > 7)
+        cols <- RColorBrewer::brewer.pal(length(var), "Set3")
+      names(cols) <- var
+      anno_col[[i]] <-  cols
+    }
+
+    # HeatmapAnnotation object
+    ha1 = HeatmapAnnotation(df = anno,
+                            col = anno_col,
+                            show_annotation_name = TRUE)
+  } else {
+    ha1 <- NULL
   }
 
   # Filter for significant proteins only
@@ -330,6 +387,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
                 name = legend,
                 row_names_gp = gpar(fontsize = row_font_size),
                 column_names_gp = gpar(fontsize = col_font_size),
+                top_annotation = ha1,
                 ...)
   draw(ht1, heatmap_legend_side = "top")
 }

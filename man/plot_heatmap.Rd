@@ -5,7 +5,8 @@
 \title{Plot a heatmap}
 \usage{
 plot_heatmap(dep, type = c("contrast", "centered"), kmeans = FALSE, k = 6,
-  col_limit = 6, row_font_size = 6, col_font_size = 10, ...)
+  col_limit = 6, indicate = NULL, row_font_size = 6, col_font_size = 10,
+  ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
@@ -25,6 +26,11 @@ Sets the number of k-means clusters.}
 
 \item{col_limit}{Integer(1),
 Sets the outer limits of the color scale.}
+
+\item{indicate}{Character,
+Sets additional annotation on the top of the heatmap
+based on columns from the experimental design (colData).
+Only applicable to type = 'centered'.}
 
 \item{row_font_size}{Integer(1),
 Sets the size of row labels.}
