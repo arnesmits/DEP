@@ -5,8 +5,8 @@
 \title{LFQ workflow}
 \usage{
 LFQ(proteins, expdesign, fun = c("man", "bpca", "knn", "QRILC", "MLE",
-  "MinDet", "MinProb", "min", "zero", "mixed", "nbavg"), control,
-  type = c("all", "control", "manual"), test = NULL, filter = c("Reverse",
+  "MinDet", "MinProb", "min", "zero", "mixed", "nbavg"), type = c("all",
+  "control", "manual"), control = NULL, test = NULL, filter = c("Reverse",
   "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs",
   alpha = 0.05, lfc = 1)
 }
@@ -22,12 +22,12 @@ The experimental design object.}
 Function used for data imputation based on \code{\link{manual_impute}}
 and \code{\link[MSnbase]{impute}}.}
 
+\item{type}{'all', 'control' or 'manual',
+The type of contrasts that will be generated.}
+
 \item{control}{Character(1),
 The sample name to which the contrasts are generated
 (the control sample would be most appropriate).}
-
-\item{type}{'all', 'control' or 'manual',
-The type of contrasts that will be generated.}
 
 \item{test}{Character,
 The contrasts that will be tested if type = "manual".
@@ -76,6 +76,6 @@ is used as direct input.
 
 data <- UbiLength
 expdesign <- UbiLength_ExpDesign
-results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
+results <- LFQ(data, expdesign, 'MinProb', 'control', 'Ctrl')
 
 }

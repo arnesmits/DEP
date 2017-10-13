@@ -39,26 +39,26 @@ test_that("process returns a SummarizedExperiment object", {
 })
 
 test_that("analyze_dep throws error without valid input", {
-  expect_error(analyze_dep("test_impute", "Ctrl", type = "control", alpha = 0.05,
+  expect_error(analyze_dep("test_impute", "control", "Ctrl", alpha = 0.05,
                            lfc = 1, test = NULL, incl_repl = FALSE))
-  expect_error(analyze_dep(test_impute, Ctrl, type = "control", alpha = 0.05,
+  expect_error(analyze_dep(test_impute, control, "Ctrl", alpha = 0.05,
                            lfc = 1, test = NULL, incl_repl = FALSE))
-  expect_error(analyze_dep(test_impute, "Ctrl", type = control, alpha = 0.05,
+  expect_error(analyze_dep(test_impute, "control", Ctrl, alpha = 0.05,
                            lfc = 1, test = NULL, incl_repl = FALSE))
-  expect_error(analyze_dep(test_impute, "Ctrl", type = "control", alpha = "0.05",
+  expect_error(analyze_dep(test_impute, "control", "Ctrl", alpha = "0.05",
                            lfc = 1, test = NULL, incl_repl = FALSE))
-  expect_error(analyze_dep(test_impute, "Ctrl", type = "control", alpha = 0.05,
+  expect_error(analyze_dep(test_impute, "control", "Ctrl", alpha = 0.05,
                            lfc = "1", test = NULL, incl_repl = FALSE))
-  expect_error(analyze_dep(test_impute, "Ctrl", type = "manual", alpha = 0.05,
+  expect_error(analyze_dep(test_impute, type = "manual", alpha = 0.05,
                            lfc = 1, test = bla, incl_repl = FALSE))
-  expect_error(analyze_dep(test_impute, "Ctrl", type = "control", alpha = 0.05,
+  expect_error(analyze_dep(test_impute, "control", "Ctrl", alpha = 0.05,
                            lfc = 1, test = NULL, incl_repl = "FALSE"))
-  expect_error(analyze_dep(test_impute, "Ctrl", type = "Bla", alpha = 0.05,
+  expect_error(analyze_dep(test_impute, type = "Bla", alpha = 0.05,
                            lfc = 1, test = NULL, incl_repl = FALSE))
 })
 
 test_that("analyze_dep returns a SummarizedExperiment object", {
-  expect_is(analyze_dep(test_impute, "Ctrl", "control"), "SummarizedExperiment")
+  expect_is(analyze_dep(test_impute, "control", "Ctrl"), "SummarizedExperiment")
 })
 
 test_that("plot_all throws error without valid input", {

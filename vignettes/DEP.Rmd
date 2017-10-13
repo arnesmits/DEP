@@ -275,14 +275,14 @@ Additionally, the types of contrasts to be produced need to be indicated, allowi
 # Differential enrichment analysis  based on linear models and empherical Bayes statistics
 
 # Test every sample versus control
-data_diff <- test_diff(data_imp, control = "Ctrl", type = "control")
+data_diff <- test_diff(data_imp, type = "control", control = "Ctrl")
 
 # Test all possible comparisons of samples
-data_diff_all_contrasts <- test_diff(data_imp, control = "Ctrl", type = "all")
+data_diff_all_contrasts <- test_diff(data_imp, type = "all")
 
 # Test manually defined comparisons
-data_diff_manual <- test_diff(data_imp, control = "Ctrl", 
-    type = "manual", test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
+data_diff_manual <- test_diff(data_imp, type = "manual", 
+                              test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
 ```
    
 Finally, significant proteins are defined by user-defined cutoffs using _add_rejections_.
@@ -434,7 +434,7 @@ experimental_design <- UbiLength_ExpDesign
 
 # The wrapper function performs the full analysis
 data_results <- LFQ(data, experimental_design, fun = "MinProb", 
-      control = "Ctrl", type = "control", alpha = 0.05, lfc = 1)
+      type = "control", control = "Ctrl", alpha = 0.05, lfc = 1)
 ```
 
 This wrapper produces a list of objects, which can be used to create a report and/or for further analysis.
@@ -485,8 +485,8 @@ TMTdata <- example_data
 Exp_Design <- example_Exp_Design
 
 # The wrapper function performs the full analysis
-TMTdata_results <- TMT(TMTdata, expdesign = Exp_Design, fun = "QRILC",
-    control = "Con_", type = "control", alpha = 0.05, lfc = 1)
+TMTdata_results <- TMT(TMTdata, expdesign = Exp_Design, fun = "MinProb",
+    type = "control", control = "Control", alpha = 0.05, lfc = 1)
 ```
 
 # Session information

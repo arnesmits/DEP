@@ -203,7 +203,7 @@ server <- shinyServer(function(input, output) {
   })
 
   df <- reactive({
-    test_diff(imp(), input$control, input$contrasts)
+    test_diff(imp(), input$contrasts, input$control)
   })
 
   dep <- reactive({

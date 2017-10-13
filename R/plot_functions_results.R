@@ -29,7 +29,7 @@
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot single proteins
@@ -197,7 +197,7 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot heatmap
@@ -367,7 +367,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot volcano

@@ -33,7 +33,7 @@ se <- import_MaxQuant(data, exp_design)
 processed <- process(se)
 
 # Differential protein expression analysis
-dep <- analyze_dep(processed, "Ctrl", "control")
+dep <- analyze_dep(processed, "control", "Ctrl")
 
 \dontrun{
 # Plot all plots

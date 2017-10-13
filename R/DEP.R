@@ -157,7 +157,7 @@
 #' @importFrom tibble rownames_to_column column_to_rownames
 #' @importFrom purrr map_df
 #' @importFrom readr parse_factor
-#' @importFrom stats median model.matrix rnorm sd cor prcomp
+#' @importFrom stats median model.matrix rnorm sd cor prcomp formula terms.formula
 #' @importFrom broom tidy
 #'
 #'

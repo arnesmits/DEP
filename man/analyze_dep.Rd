@@ -4,8 +4,9 @@
 \alias{analyze_dep}
 \title{Differential expression analysis}
 \usage{
-analyze_dep(se, control, type = c("all", "control", "manual"), alpha = 0.05,
-  lfc = 1, test = NULL, incl_repl = FALSE)
+analyze_dep(se, type = c("all", "control", "manual"), control = NULL,
+  alpha = 0.05, lfc = 1, test = NULL, design_formula = formula(~0 +
+  condition))
 }
 \arguments{
 \item{se}{SummarizedExperiment,
@@ -16,15 +17,15 @@ Additionally, the colData should contain sample annotation including
 The appropriate columns and objects can be generated
 using \code{\link{make_se}} or \code{\link{make_se_parse}}.}
 
-\item{control}{Character(1),
-The condition to which contrasts are generated
-(a control condition would be most appropriate).}
-
 \item{type}{"all", "control" or "manual",
 The type of contrasts that will be tested.
 This can be all possible pairwise comparisons ("all"),
 limited to the comparisons versus the control ("control"), or
 manually defined contrasts ("manual").}
+
+\item{control}{Character(1),
+The condition to which contrasts are generated
+(a control condition would be most appropriate).}
 
 \item{alpha}{Numeric(1),
 Sets the threshold for the adjusted P value.}
@@ -37,9 +38,8 @@ The contrasts that will be tested if type = "manual".
 These should be formatted as "SampleA_vs_SampleB" or
 c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 
-\item{incl_repl}{Logical(1),
-Whether or not to add a blocking factor
-for the replicates in the design matrix.}
+\item{design_formula}{Formula,
+Used to create the design matrix.}
 }
 \value{
 A SummarizedExperiment object
@@ -61,8 +61,8 @@ se <- import_MaxQuant(data, exp_design)
 processed <- process(se)
 
 # Differential protein expression analysis
-dep <- analyze_dep(processed, "Ctrl", "control")
-dep <- analyze_dep(processed, "Ctrl", "control",
+dep <- analyze_dep(processed, "control", "Ctrl")
+dep <- analyze_dep(processed, "control", "Ctrl",
     alpha = 0.01, lfc = log2(1.5))
-dep <- analyze_dep(processed, "Ctrl", "manual", test = c("Ubi6_vs_Ubi4"))
+dep <- analyze_dep(processed, "manual", test = c("Ubi6_vs_Ubi4"))
 }

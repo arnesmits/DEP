@@ -364,7 +364,7 @@ plot_missval <- function(se) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot p value histogram

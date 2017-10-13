@@ -4,8 +4,8 @@
 \alias{test_diff}
 \title{Differential enrichment test}
 \usage{
-test_diff(se, control, type = c("all", "control", "manual"), test = NULL,
-  incl_repl = FALSE)
+test_diff(se, type = c("control", "all", "manual"), control = NULL,
+  test = NULL, design_formula = formula(~0 + condition))
 }
 \arguments{
 \item{se}{SummarizedExperiment,
@@ -15,24 +15,23 @@ proteins with too many missing values using \code{\link{filter_missval}()},
 normalize the data using \code{\link{normalize_vsn}()} and
 impute remaining missing values using \code{\link{impute}()}.}
 
-\item{control}{Character(1),
-The condition to which contrasts are generated
-(a control condition would be most appropriate).}
-
-\item{type}{"all", "control" or "manual",
+\item{type}{"control", "all" or "manual",
 The type of contrasts that will be tested.
 This can be all possible pairwise comparisons ("all"),
 limited to the comparisons versus the control ("control"), or
 manually defined contrasts ("manual").}
+
+\item{control}{Character(1),
+The condition to which contrasts are generated if type = "control"
+(a control condition would be most appropriate).}
 
 \item{test}{Character,
 The contrasts that will be tested if type = "manual".
 These should be formatted as "SampleA_vs_SampleB" or
 c("SampleA_vs_SampleC", "SampleB_vs_SampleC").}
 
-\item{incl_repl}{Logical(1),
-Whether or not to add a blocking factor
-for the replicates in the design matrix.}
+\item{design_formula}{Formula,
+Used to create the design matrix.}
 }
 \value{
 A SummarizedExperiment object
@@ -60,7 +59,11 @@ norm <- normalize_vsn(filt)
 imputed <- impute(norm, fun = "MinProb", q = 0.01)
 
 # Test for differentially expressed proteins
-diff <- test_diff(imputed, "Ctrl", "control")
-diff <- test_diff(imputed, "Ctrl", "manual",
+diff <- test_diff(imputed, "control", "Ctrl")
+diff <- test_diff(imputed, "manual",
     test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
+
+# Test for differentially expressed proteins with a custom design formula
+diff <- test_diff(imputed, "control", "Ctrl",
+    design_formula = formula(~ 0 + condition + replicate))
 }

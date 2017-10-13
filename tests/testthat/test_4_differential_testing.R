@@ -1,33 +1,33 @@
 context("4 - Differential testing")
 
 test_that("test_diff throws error without valid input", {
-  expect_error(test_diff("test_impute", "Ctrl", "all"))
-  expect_error(test_diff(test_impute, Ctrl, "all"))
-  expect_error(test_diff(test_impute, "Ctrl", all))
-  expect_error(test_diff(test_impute, "Ctrl", "ALL"))
-  expect_error(test_diff(test_impute, "control", "all"))
-  expect_error(test_diff(test_impute, "Ctrl", "manual"))
-  expect_error(test_diff(test_impute, "Ctrl", "manual", Ubi4_vs_Ctrl))
-  expect_error(test_diff(test_impute, "Ctrl", "manual", "test"))
-  expect_error(test_diff(test_impute, "Ctrl", "control", incl_repl = "TRUE"))
+  expect_error(test_diff("test_impute", "control", "Ctrl"))
+  expect_error(test_diff(test_impute, "control", Ctrl))
+  expect_error(test_diff(test_impute, control, "Ctrl"))
+  expect_error(test_diff(test_impute, "CONTROL", "Ctrl"))
+  expect_error(test_diff(test_impute, "control", "control"))
+  expect_error(test_diff(test_impute, "manual"))
+  expect_error(test_diff(test_impute, "manual", test = Ubi4_vs_Ctrl))
+  expect_error(test_diff(test_impute, "manual", test = "test"))
+  expect_error(test_diff(test_impute, "manual", test = "Ubi4_vs_Ctrl", incl_repl = "TRUE"))
 
   test_impute_error <- test_impute
   SummarizedExperiment::colData(test_impute_error) <- SummarizedExperiment::colData(test_impute_error)[,-(3)]
-  expect_error(test_diff(test_impute_error, "Ctrl", "all"))
+  expect_error(test_diff(test_impute_error, "control", "Ctrl"))
 
   test_impute_error2 <- test_impute
   SummarizedExperiment::rowData(test_impute_error2) <- SummarizedExperiment::rowData(test_impute_error2)[,-(24:25)]
-  expect_error(test_diff(test_impute_error2, "Ctrl", "all"))
+  expect_error(test_diff(test_impute_error2, "control", "Ctrl"))
 })
 
 test_that("test_diff returns a SummarizedExperiment object", {
-  expect_is(test_diff(test_impute, "Ctrl", "all"), "SummarizedExperiment")
-  expect_is(test_diff(test_impute, "Ctrl", "manual", "Ubi4_vs_Ctrl"), "SummarizedExperiment")
-  expect_is(test_diff(test_impute, "Ctrl", "all", incl_repl = TRUE), "SummarizedExperiment")
+  expect_is(test_diff(test_impute, "control", "Ctrl"), "SummarizedExperiment")
+  expect_is(test_diff(test_impute, "manual", test = "Ubi4_vs_Ctrl"), "SummarizedExperiment")
+  expect_is(test_diff(test_impute, "all", design_formula = formula(~ 0 + condition + replicate)), "SummarizedExperiment")
 })
 
 test_that("test_diff returns an object with diff, p.val and p.adj columns", {
-  result <- SummarizedExperiment::rowData(test_diff(test_impute, "Ctrl", "control"))
+  result <- SummarizedExperiment::rowData(test_diff(test_impute, "control", "Ctrl"))
   expect_equal(grep("_diff$", colnames(result)), c(28,33,38))
   expect_equal(grep("_p.adj$", colnames(result)), c(29,34,39))
   expect_equal(grep("_p.val$", colnames(result)), c(30,35,40))

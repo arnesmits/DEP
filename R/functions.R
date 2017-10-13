@@ -636,21 +636,20 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 #' proteins with too many missing values using \code{\link{filter_missval}()},
 #' normalize the data using \code{\link{normalize_vsn}()} and
 #' impute remaining missing values using \code{\link{impute}()}.
-#' @param control Character(1),
-#' The condition to which contrasts are generated
-#' (a control condition would be most appropriate).
-#' @param type "all", "control" or "manual",
+#' @param type "control", "all" or "manual",
 #' The type of contrasts that will be tested.
 #' This can be all possible pairwise comparisons ("all"),
 #' limited to the comparisons versus the control ("control"), or
 #' manually defined contrasts ("manual").
+#' @param control Character(1),
+#' The condition to which contrasts are generated if type = "control"
+#' (a control condition would be most appropriate).
 #' @param test Character,
 #' The contrasts that will be tested if type = "manual".
 #' These should be formatted as "SampleA_vs_SampleB" or
 #' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
-#' @param incl_repl Logical(1),
-#' Whether or not to add a blocking factor
-#' for the replicates in the design matrix.
+#' @param design_formula Formula,
+#' Used to create the design matrix.
 #' @return A SummarizedExperiment object
 #' containing FDR estimates of differential expression.
 #' @examples
@@ -670,19 +669,22 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
-#' diff <- test_diff(imputed, "Ctrl", "manual",
+#' diff <- test_diff(imputed, "control", "Ctrl")
+#' diff <- test_diff(imputed, "manual",
 #'     test = c("Ubi4_vs_Ctrl", "Ubi6_vs_Ctrl"))
+#'
+#' # Test for differentially expressed proteins with a custom design formula
+#' diff <- test_diff(imputed, "control", "Ctrl",
+#'     design_formula = formula(~ 0 + condition + replicate))
 #' @export
-test_diff <- function(se, control, type = c("all", "control", "manual"),
-                      test = NULL, incl_repl = FALSE) {
+test_diff <- function(se, type = c("control", "all", "manual"),
+                      control = NULL, test = NULL,
+                      design_formula = formula(~ 0 + condition)) {
+
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(se, "SummarizedExperiment"),
-                          is.character(control),
-                          length(control) == 1,
                           is.character(type),
-                          is.logical(incl_repl),
-                          length(incl_repl) == 1)
+                          class(design_formula) == "formula")
 
   # Show error if inputs do not contain required columns
   type <- match.arg(type)
@@ -701,46 +703,75 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
          "'\nRun make_se() or make_se_parse() to obtain the required columns",
          call. = FALSE)
   }
-  # Show error if inputs are not valid
-  if(!control %in% unique(col_data$condition)) {
-    stop("run test_diff() with a valid control.\nValid controls are: '",
-         paste0(unique(col_data$condition), collapse = "', '"), "'",
-         call. = FALSE)
+
+  if(!is.null(control)) {
+    # Show error if control input is not valid
+    assertthat::assert_that(is.character(control),
+                            length(control) == 1)
+    if(!control %in% unique(col_data$condition)) {
+      stop("run test_diff() with a valid control.\nValid controls are: '",
+           paste0(unique(col_data$condition), collapse = "', '"), "'",
+           call. = FALSE)
+    }
+  }
+
+  # variables in formula
+  variables <- terms.formula(design_formula) %>%
+    attr(., "variables") %>%
+    as.character() %>%
+    .[-1]
+
+  # Throw error if variables are not col_data columns
+  if(any(!variables %in% colnames(col_data))) {
+    stop("run make_diff() with an appropriate 'design_formula'")
+  }
+  if(variables[1] != "condition") {
+    stop("first factor of 'design_formula' should be 'condition'")
+  }
+
+  # Obtain variable factors
+  for(var in variables) {
+    temp <- factor(col_data[[var]])
+    assign(var, temp)
   }
 
   # Make an appropriate design matrix
-  conditions <- factor(col_data$condition)
-  replicate <- factor(col_data$replicate)
-  if(incl_repl) {
-    design <- model.matrix(~ 0 + conditions + replicate)
-    colnames(design) <- gsub("conditions", "", colnames(design))
-  } else {
-    design <- model.matrix(~ 0 + conditions)
-    colnames(design) <- gsub("conditions", "", colnames(design))
-  }
+  design <- model.matrix(design_formula, data = environment())
+  colnames(design) <- gsub("condition", "", colnames(design))
 
   # Generate contrasts to be tested
   # Either make all possible combinations ("all"),
   # only the contrasts versus the control sample ("control") or
-  # use manual input
-  conditions <- as.character(unique(conditions))
+  # use manual contrasts
+  conditions <- as.character(unique(condition))
   if(type == "all") {
+    # All possible combinations
     cntrst <- apply(utils::combn(conditions, 2), 2, paste, collapse = " - ")
-    # Make sure that contrast containing
-    # the control sample have the control as denominator
-    flip <- grep(paste("^", control, sep = ""), cntrst)
-    if(length(flip) >= 1) {
-      cntrst[flip] <- cntrst[flip] %>%
-        gsub(paste(control, "- ", sep = " "), "", .) %>%
-        paste(" - ", control, sep = "")
+
+    if(!is.null(control)) {
+      # Make sure that contrast containing
+      # the control sample have the control as denominator
+      flip <- grep(paste("^", control, sep = ""), cntrst)
+      if(length(flip) >= 1) {
+        cntrst[flip] <- cntrst[flip] %>%
+          gsub(paste(control, "- ", sep = " "), "", .) %>%
+          paste(" - ", control, sep = "")
+      }
     }
+
   }
   if(type == "control") {
+    # Throw error if no control argument is present
+    if(is.null(control))
+      stop("run test_diff(type = 'control') with a 'control' argument")
+
+    # Make contrasts
     cntrst <- paste(conditions[!conditions %in% control],
                     control,
                     sep = " - ")
   }
   if(type == "manual") {
+    # Throw error if no test argument is present
     if(is.null(test)) {
       stop("run test_diff(type = 'manual') with a 'test' argument")
     }
@@ -797,7 +828,6 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
   rowData(se) <- merge(rowData(se), table, by.x = "name", by.y = "rowname")
   return(se)
 }
-
 #' Mark significant proteins
 #'
 #' \code{add_rejections} marks significant proteins based on defined cutoffs.
@@ -828,7 +858,7 @@ test_diff <- function(se, control, type = c("all", "control", "manual"),
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #' @export
 add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
@@ -909,7 +939,7 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Get results
@@ -1008,7 +1038,7 @@ get_results <- function(dep) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Get a wide data.frame
@@ -1069,7 +1099,7 @@ get_df_wide <- function(se) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Get a long data.frame

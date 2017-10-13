@@ -176,7 +176,7 @@ plot_coverage <- function(se) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot frequency of significant conditions
@@ -254,7 +254,7 @@ plot_cond_freq <- function(dep) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot condition overlap
@@ -361,7 +361,7 @@ plot_cond_overlap <- function(dep) {
 #' imputed <- impute(norm, fun = "MinProb", q = 0.01)
 #'
 #' # Test for differentially expressed proteins
-#' diff <- test_diff(imputed, "Ctrl", "control")
+#' diff <- test_diff(imputed, "control", "Ctrl")
 #' dep <- add_rejections(diff, alpha = 0.05, lfc = 1)
 #'
 #' # Plot histogram with overlaps

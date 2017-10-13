@@ -54,7 +54,7 @@
 TMT <- function(proteins, expdesign,
                 fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet",
                         "MinProb", "min", "zero", "mixed", "nbavg"),
-                control, type = c("all", "control", "manual"), test = NULL,
+                type = c("all", "control", "manual"), control = NULL, test = NULL,
                 name = "gene_name", ids = "protein_id",
                 alpha = 0.05, lfc = 1) {
     # Show error if inputs are not the required classes
@@ -63,8 +63,6 @@ TMT <- function(proteins, expdesign,
     assertthat::assert_that(is.data.frame(proteins),
                             is.data.frame(expdesign),
                             is.character(fun),
-                            is.character(control),
-                            length(control) == 1,
                             is.character(type),
                             is.character(name),
                             length(name) == 1,
@@ -121,7 +119,7 @@ TMT <- function(proteins, expdesign,
     imputed <- impute(norm, fun)
     # Test for differential expression by empirical Bayes moderation
     # of a linear model and defined contrasts
-    diff <- test_diff(imputed, control, type)
+    diff <- test_diff(imputed, type, control)
     # Denote differential expressed proteins
     dep <- add_rejections(diff, alpha, lfc)
     # Generate a results table
@@ -185,13 +183,13 @@ TMT <- function(proteins, expdesign,
 #'
 #' data <- UbiLength
 #' expdesign <- UbiLength_ExpDesign
-#' results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
+#' results <- LFQ(data, expdesign, 'MinProb', 'control', 'Ctrl')
 #'
 #' @export
 LFQ <- function(proteins, expdesign,
                 fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet",
                         "MinProb", "min", "zero", "mixed", "nbavg"),
-                control, type = c("all", "control", "manual"), test = NULL,
+                type = c("all", "control", "manual"), control = NULL, test = NULL,
                 filter = c("Reverse", "Potential.contaminant"),
                 name = "Gene.names", ids = "Protein.IDs",
                 alpha = 0.05, lfc = 1) {
@@ -201,8 +199,6 @@ LFQ <- function(proteins, expdesign,
     assertthat::assert_that(is.data.frame(proteins),
                             is.data.frame(expdesign),
                             is.character(fun),
-                            is.character(control),
-                            length(control) == 1,
                             is.character(type),
                             is.character(filter),
                             is.character(name),
@@ -273,7 +269,7 @@ LFQ <- function(proteins, expdesign,
     imputed <- impute(norm, fun)
     # Test for differential expression by empirical Bayes moderation
     # of a linear model and defined contrasts
-    diff <- test_diff(imputed, control, type)
+    diff <- test_diff(imputed, type, control)
     # Denote differential expressed proteins
     dep <- add_rejections(diff, alpha, lfc)
     # Generate a results table

@@ -252,9 +252,8 @@ process <- function(se, thr = 0, fun = c("man", "bpca", "knn", "QRILC", "MLE",
 #' The contrasts that will be tested if type = "manual".
 #' These should be formatted as "SampleA_vs_SampleB" or
 #' c("SampleA_vs_SampleC", "SampleB_vs_SampleC").
-#' @param incl_repl Logical(1),
-#' Whether or not to add a blocking factor
-#' for the replicates in the design matrix.
+#' @param design_formula Formula,
+#' Used to create the design matrix.
 #' @return A SummarizedExperiment object
 #' containing FDR estimates of differential expression and
 #' logical columns indicating significant proteins.
@@ -268,30 +267,28 @@ process <- function(se, thr = 0, fun = c("man", "bpca", "knn", "QRILC", "MLE",
 #' processed <- process(se)
 #'
 #' # Differential protein expression analysis
-#' dep <- analyze_dep(processed, "Ctrl", "control")
-#' dep <- analyze_dep(processed, "Ctrl", "control",
+#' dep <- analyze_dep(processed, "control", "Ctrl")
+#' dep <- analyze_dep(processed, "control", "Ctrl",
 #'     alpha = 0.01, lfc = log2(1.5))
-#' dep <- analyze_dep(processed, "Ctrl", "manual", test = c("Ubi6_vs_Ubi4"))
+#' dep <- analyze_dep(processed, "manual", test = c("Ubi6_vs_Ubi4"))
 #' @export
-analyze_dep <- function(se, control, type = c("all", "control", "manual"),
-                     alpha = 0.05, lfc = 1,
-                     test = NULL, incl_repl = FALSE) {
+analyze_dep <- function(se, type = c("all", "control", "manual"),
+                     control = NULL, alpha = 0.05, lfc = 1,
+                     test = NULL, design_formula = formula(~ 0 + condition)) {
+
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(se, "SummarizedExperiment"),
-                          is.character(control),
-                          length(control) == 1,
                           is.character(type),
                           is.numeric(alpha),
                           length(alpha) == 1,
                           is.numeric(lfc),
                           length(lfc) == 1,
-                          is.logical(incl_repl),
-                          length(incl_repl) == 1)
+                          class(design_formula) == "formula")
   type <- match.arg(type)
 
   # Test for differentially enriched proteins
   message("Test for differentially enriched proteins")
-  diff <- test_diff(se, control, type, test, incl_repl)
+  diff <- test_diff(se, type, control, test, design_formula)
 
   # Add rejections
   message("Add rejections")
@@ -322,7 +319,7 @@ analyze_dep <- function(se, control, type = c("all", "control", "manual"),
 #' processed <- process(se)
 #'
 #' # Differential protein expression analysis
-#' dep <- analyze_dep(processed, "Ctrl", "control")
+#' dep <- analyze_dep(processed, "control", "Ctrl")
 #'
 #' \dontrun{
 #' # Plot all plots
