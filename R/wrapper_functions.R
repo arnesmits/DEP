@@ -73,7 +73,7 @@ import_MaxQuant <- function(proteins,
   }
 
   # Filter based on 'filter' columns
-  filter_MaxQuant(proteins, filter)
+  proteins <- filter_MaxQuant(proteins, filter)
 
   # Make unique names
   message("Making unique names")
