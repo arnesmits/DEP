@@ -297,7 +297,7 @@ LFQ <- function(proteins, expdesign,
 #' data <- UbiLength
 #' expdesign <- UbiLength_ExpDesign
 #'
-#' results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
+#' results <- LFQ(data, expdesign, 'MinProb', 'control', 'Ctrl')
 #' report(results)
 #'
 #' }

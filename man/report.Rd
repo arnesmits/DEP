@@ -25,7 +25,7 @@ Additionally, the results table is saved as a tab-delimited file.
 data <- UbiLength
 expdesign <- UbiLength_ExpDesign
 
-results <- LFQ(data, expdesign, 'MinProb', 'Ctrl', 'control')
+results <- LFQ(data, expdesign, 'MinProb', 'control', 'Ctrl')
 report(results)
 
 }
