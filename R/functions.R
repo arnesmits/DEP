@@ -394,6 +394,110 @@ filter_missval <- function(se, thr = 0) {
   return(se_fltrd)
 }
 
+#' Filter proteins
+#'
+#' \code{filter_proteins} filters a proteomic dataset based on missing values.
+#' Different types of filtering can be applied, which range from only keeping
+#' proteins without missing values to keeping proteins with a certain percent
+#' valid values in all samples or keeping proteins that are complete
+#' in at least one condition.
+#'
+#' @param se SummarizedExperiment,
+#' Proteomics data (output from \code{\link{make_se}()} or
+#' \code{\link{make_se_parse}()}).
+#' @param type "complete", "condition" or "percentage",
+#' Sets the type of filtering applied. "complete" will only keep
+#' proteins with valid values in all samples. "condition" will keep
+#' proteins that have a maximum of 'thr' missing values in at least
+#' one condition. "percentage" will keep proteins that have a certain
+#' percent of valid values in all samples.
+#' @param thr Integer(1),
+#' Sets the threshold for the allowed number of missing values
+#' in at least one condition if type = "condition".
+#' @param min Numeric(1),
+#' Sets the threshold for the minimum percent of missing values
+#' allowed for any protein if type = "percentage".
+#' @return A filtered SummarizedExperiment object.
+#' @examples
+#' # Load example
+#' data <- UbiLength
+#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
+#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' # Make SummarizedExperiment
+#' columns <- grep("LFQ.", colnames(data_unique))
+#' exp_design <- UbiLength_ExpDesign
+#' se <- make_se(data_unique, columns, exp_design)
+#'
+#' # Filter
+#' stringent_filter <- filter_proteins(se, type = "complete")
+#' less_stringent_filter <- filter_proteins(se, type = "condition", thr = 0)
+#' @export
+filter_proteins <- function(se, type = c("complete", "condition", "percentage"),
+                            thr = NULL, min = NULL) {
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(se, "SummarizedExperiment"))
+  type <- match.arg(type)
+
+  # Show error if inputs do not contain required columns
+  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
+    stop("'name' and/or 'ID' columns are not present in '",
+         deparse(substitute(se)),
+         "'\nRun make_unique() and make_se() to obtain the required columns",
+         call. = FALSE)
+  }
+  if(any(!c("label", "condition", "replicate") %in% colnames(colData(se)))) {
+    stop("'label', 'condition' and/or 'replicate' columns are not present in '",
+         deparse(substitute(se)),
+         "'\nRun make_se() or make_se_parse() to obtain the required columns",
+         call. = FALSE)
+  }
+
+  if(type == "complete") {
+    keep <- !apply(assay(se), 1, function(x) any(is.na(x)))
+    filtered <- se[keep,]
+  }
+  if(type == "condition") {
+    assertthat::assert_that(is.numeric(thr),
+                            length(thr) == 1)
+    max_repl <- max(colData(se)$replicate)
+    if(thr < 0 | thr > max_repl) {
+      stop("invalid filter threshold 'thr' applied",
+           "\nRun filter() with a threshold ranging from 0 to ",
+           max_repl)
+    }
+
+    filtered <- filter_missval(se, thr = thr)
+  }
+  if(type == "percentage") {
+    assertthat::assert_that(is.numeric(min),
+                            length(min) == 1)
+    if(min < 0 | min > 1) {
+      stop("invalid filter threshold 'min' applied",
+           "\nRun filter() with a percent ranging from 0 to 1")
+    }
+
+    bin_data <- assay(se)
+    idx <- is.na(assay(se))
+    bin_data[!idx] <- 1
+    bin_data[idx] <- 0
+
+    # Filter se on the maximum allowed number of
+    # missing values per condition (defined by thr)
+    keep <- bin_data %>%
+      as.data.frame() %>%
+      rownames_to_column() %>%
+      gather(ID, value, -rowname) %>%
+      group_by(rowname) %>%
+      summarize(n = n(),
+                valid = sum(value),
+                frac = valid / n) %>%
+      filter(frac >= min)
+    filtered <- se[keep$rowname, ]
+  }
+  return(filtered)
+}
+
 #' Normalization using vsn
 #'
 #' \code{normalize_vsn} performs variance stabilizing transformation

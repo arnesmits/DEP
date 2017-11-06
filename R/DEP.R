@@ -56,8 +56,8 @@
 #'   Turn data.frame into SummarizedExperiment by parsing column names.
 #'   \item \code{\link{make_se}}:
 #'   Turn data.frame into SummarizedExperiment using an experimental design.
-#'   \item \code{\link{filter_missval}}:
-#'   Filter on missing values.
+#'   \item \code{\link{filter_proteins}}:
+#'   Filter proteins based on missing values.
 #'   \item \code{\link{normalize_vsn}}:
 #'   Normalize data using vsn.
 #'   \item \code{\link{impute}}:
@@ -124,6 +124,8 @@
 #'   Generate a long data.frame from a SummarizedExperiment.
 #'   \item \code{\link{se2msn}}:
 #'   SummarizedExperiment object to MSnSet object conversion.
+#'   \item \code{\link{filter_missval}}:
+#'   Filter on missing values.
 #'   \item \code{\link{manual_impute}}:
 #'   Imputation by random draws from a manually defined distribution.
 #'   \item \code{\link{get_prefix}}:
