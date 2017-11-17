@@ -38,7 +38,7 @@ test_that("impute throws error without valid input", {
 
   NAs <- apply(SummarizedExperiment::assay(test_vsn), 1, function(x) any(is.na(x)))
   no_NAs <- test_vsn[!NAs,]
-  expect_error(impute(no_NAs, "MinProb"))
+  expect_warning(impute(no_NAs, "MinProb"))
 })
 
 test_that("impute returns a MSnSet object", {

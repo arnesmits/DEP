@@ -149,7 +149,7 @@
 #'
 #'
 #' @import ggplot2 dplyr SummarizedExperiment limma
-#' @import ComplexHeatmap grid assertthat
+#' @import ComplexHeatmap grid assertthat imputeLCMD
 #' @import shinydashboard
 #' @importFrom shiny runApp
 #' @importFrom DT dataTableOutput renderDataTable

@@ -603,8 +603,10 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 
   # Show error if there are no missing values
   if(!any(is.na(assay(se)))) {
-    stop("No missing values in '", deparse(substitute(se)), "'",
+    warning("No missing values in '", deparse(substitute(se)), "'. ",
+            "Returning the unchanged object.",
          call. = FALSE)
+    return(se)
   }
 
   # Annotate whether or not there are missing values and how many

@@ -203,6 +203,9 @@ server <- shinyServer(function(input, output) {
   })
 
   df <- reactive({
+    validate(
+      need(input$control != "", "Please select a control condition")
+    )
     test_diff(imp(), input$contrasts, input$control)
   })
 
@@ -227,13 +230,47 @@ server <- shinyServer(function(input, output) {
     })
 
     output$significantBox <- renderInfoBox({
-      infoBox("Significant proteins",
-              paste(dep() %>%
-                      .[rowData(.)$significant, ] %>%
-                      nrow(), " out of", dep() %>%
-                      nrow(), sep = " "),
-              icon = icon("thumbs-up", lib = "glyphicon"),
-              color = "green", width = 4)
+      num_total <- dep() %>%
+        nrow()
+      num_signif <- dep() %>%
+        .[rowData(.)$significant, ] %>%
+        nrow()
+      frac <- num_signif / num_total
+
+      if(frac > 0.2) {
+        info_box <- infoBox("Significant proteins",
+                            paste0(num_signif,
+                                   " out of ",
+                                   num_total),
+                            paste0("Too large fraction (",
+                                   signif(frac * 100, digits = 3),
+                                   "%) of proteins differentially expressed"),
+                            icon = icon("minus", lib = "glyphicon"),
+                            color = "orange",
+                            width = 4)
+      }
+      if(frac == 0) {
+        info_box <- infoBox("Significant proteins",
+                            paste0(num_signif,
+                                   " out of ",
+                                   num_total),
+                            "No proteins differentially expressed",
+                            icon = icon("thumbs-down", lib = "glyphicon"),
+                            color = "red",
+                            width = 4)
+      }
+      if(frac > 0 & frac <= 0.2) {
+        info_box <- 		infoBox("Significant proteins",
+                              paste0(num_signif,
+                                     " out of ",
+                                     num_total),
+                              paste0(signif(frac * 100, digits = 3),
+                                     "% of proteins differentially expressed"),
+                              icon = icon("thumbs-up", lib = "glyphicon"),
+                              color = "green",
+                              width = 4)
+      }
+      info_box
     })
 
     output$select <- renderUI({
