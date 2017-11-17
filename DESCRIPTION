@@ -27,7 +27,7 @@ LazyData: true
 Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr, broom, Biobase, 
     SummarizedExperiment, MSnbase, limma, vsn, fdrtool, ggrepel, 
     ComplexHeatmap, RColorBrewer, circlize, shiny, shinydashboard, 
-    DT, rmarkdown, assertthat, gridExtra, grid, stats
+    DT, rmarkdown, assertthat, gridExtra, grid, stats, imputeLCMD
 RoxygenNote: 6.0.1
 Suggests: testthat,
     enrichR,
