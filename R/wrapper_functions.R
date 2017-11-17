@@ -462,6 +462,8 @@ filter_MaxQuant <- function(proteins, filter_column_names) {
   # Filter proteins based on 'filter_column_names' columns
   message("Filtering based on '", paste(filter_column_names, collapse = "', '"), "' column(s)")
   if (!is.null(cols_filt)) {
+    NAs <- is.na(proteins[,cols_filt])
+    proteins[,cols_filt][NAs] <- ""
     if (length(cols_filt) == 1) {
       proteins <- filter(proteins, proteins[,cols_filt] != "+")
     } else if(length(cols_filt) > 1) {
