@@ -8,6 +8,15 @@ test_that("se2msn returns a MSnSet object", {
   expect_is(se2msn(test_se), "MSnSet")
 })
 
+test_that("msn2se throws error without valid input", {
+  expect_error(msn2se("test_se"))
+})
+
+test_that("msn2se returns a SE object", {
+  test_msn <- se2msn(test_se)
+  expect_is(msn2se(test_msn), "SummarizedExperiment")
+})
+
 test_that("manual_impute throws error without valid input", {
   expect_error(manual_impute("test_vsn", 0.3, 1.8))
   expect_error(manual_impute(test_vsn, "0.3", 1.8))

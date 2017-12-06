@@ -143,6 +143,8 @@ are provided by the package.
   Generate a long data.frame from a SummarizedExperiment.
   \item \code{\link{se2msn}}:
   SummarizedExperiment object to MSnSet object conversion.
+  \item \code{\link{msn2se}}:
+  MSnSet object to SummarizedExperiment object conversion.
   \item \code{\link{filter_missval}}:
   Filter on missing values.
   \item \code{\link{manual_impute}}:

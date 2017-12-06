@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{filter_proteins}
 \alias{filter_proteins}
-\title{Filter proteins}
+\title{Filter proteins based on missing values}
 \usage{
 filter_proteins(se, type = c("complete", "condition", "percentage"),
   thr = NULL, min = NULL)
@@ -24,7 +24,7 @@ Sets the threshold for the allowed number of missing values
 in at least one condition if type = "condition".}
 
 \item{min}{Numeric(1),
-Sets the threshold for the minimum percent of missing values
+Sets the threshold for the minimum percent of valid values
 allowed for any protein if type = "percentage".}
 }
 \value{

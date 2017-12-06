@@ -49,20 +49,17 @@ make_unique <- function(proteins, names, ids, delim = ";") {
     proteins <- as.data.frame(proteins)
 
   # Select the name and id columns, and check for NAs
-  columns <- match(c(names, ids), col_names)
-  double_NAs <- apply(proteins[,columns], 1, function(x) all(is.na(x)))
+  double_NAs <- apply(proteins[,c(names, ids)], 1, function(x) all(is.na(x)))
   if(any(double_NAs)) {
     stop("NAs in both the 'names' and 'ids' columns")
   }
 
   # Take the first identifier per row and make unique names.
   # If there is no name, the ID will be taken.
-  unique_names <- proteins %>%
-    select(columns) %>%
-    mutate(name = gsub(paste0(delim, ".*"), "", .[, 1]),
-           ID = gsub(paste0(delim, ".*"), "", .[, 2]),
+  proteins_unique <- proteins %>%
+    mutate(name = gsub(paste0(delim, ".*"), "", get(names)),
+           ID = gsub(paste0(delim, ".*"), "", get(ids)),
            name = make.unique(ifelse(name == "" | is.na(name), ID, name)))
-  proteins_unique <- left_join(proteins, unique_names)
   return(proteins_unique)
 }
 
@@ -394,7 +391,7 @@ filter_missval <- function(se, thr = 0) {
   return(se_fltrd)
 }
 
-#' Filter proteins
+#' Filter proteins based on missing values
 #'
 #' \code{filter_proteins} filters a proteomic dataset based on missing values.
 #' Different types of filtering can be applied, which range from only keeping
@@ -415,7 +412,7 @@ filter_missval <- function(se, thr = 0) {
 #' Sets the threshold for the allowed number of missing values
 #' in at least one condition if type = "condition".
 #' @param min Numeric(1),
-#' Sets the threshold for the minimum percent of missing values
+#' Sets the threshold for the minimum percent of valid values
 #' allowed for any protein if type = "percentage".
 #' @return A filtered SummarizedExperiment object.
 #' @examples
@@ -646,6 +643,46 @@ se2msn <- function(se) {
                          pData = Biobase::AnnotatedDataFrame(pheno_data),
                          fData = Biobase::AnnotatedDataFrame(feat_data))
   return(msn)
+}
+
+#' MSnSet to SummarizedExperiment object conversion
+#'
+#' \code{msn2se} generates a SummarizedExperiment object from a MSnSet object.
+#'
+#' @param msn MSnSet object,
+#' Object which will be turned into a SummarizedExperiment object.
+#' @return A SummarizedExperiment object.
+#' @examples
+#' # Load example
+#' data <- UbiLength
+#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
+#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
+#'
+#' # Make SummarizedExperiment
+#' columns <- grep("LFQ.", colnames(data_unique))
+#' exp_design <- UbiLength_ExpDesign
+#' se <- make_se(data_unique, columns, exp_design)
+#'
+#' # Convert to MSnSet
+#' data_msn <- se2msn(se)
+#' # Convert back to SE
+#' data_se <- msn2se(data_msn)
+#' @export
+msn2se <- function(msn) {
+  # Show error if inputs are not the required classes
+  assertthat::assert_that(inherits(msn, "MSnSet"))
+
+  # Extract expression, feature and pheno data
+  raw <- Biobase::exprs(msn)
+  row_data <- data.frame(Biobase::fData(msn))
+  rownames(row_data) <- row_data$name
+  col_data <- data.frame(Biobase::pData(msn))
+
+  # Generate MSnSet object
+  se <- SummarizedExperiment(assays = as.matrix(raw),
+                              rowData = row_data,
+                              colData = col_data)
+  return(se)
 }
 
 #' Impute missing values
