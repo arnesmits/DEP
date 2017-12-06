@@ -501,17 +501,18 @@ plot_volcano <- function(dep, contrast, label_size = 3,
                  colnames(row_data))
   df <- data.frame(x = row_data[, diff],
                    y = -log10(row_data[, p_values]),
-                   z = row_data[, signif],
-                   name = row_data$name)
-  signif_prots <- df %>% filter(z)
+                   significant = row_data[, signif],
+                   name = row_data$name) %>%
+    filter(!is.na(significant)) %>%
+    arrange(significant)
+
   name1 <- gsub("_vs_.*", "", contrast)
   name2 <- gsub(".*_vs_", "", contrast)
 
   # Plot volcano with or without labels
   p <- ggplot(df, aes(x, y)) +
     geom_vline(xintercept = 0) +
-    geom_point(col = "grey") +
-    geom_point(data = signif_prots, col = "black") +
+    geom_point(aes(col = significant)) +
     geom_text(data = data.frame(), aes(x = c(Inf, -Inf),
                                        y = c(-Inf, -Inf),
                                        hjust = c(1, 0),
@@ -521,9 +522,10 @@ plot_volcano <- function(dep, contrast, label_size = 3,
                                        fontface = "bold")) +
     labs(x = "Fold change (log2)") +
     theme_DEP1() +
-    theme(legend.position = "none")
+    theme(legend.position = "none") +
+    scale_color_manual(values = c("TRUE" = "black", "FALSE" = "grey"))
   if (add_names) {
-    p <- p + ggrepel::geom_text_repel(data = signif_prots,
+    p <- p + ggrepel::geom_text_repel(data = filter(df, significant),
                                       aes(label = name),
                                       size = label_size,
                                       box.padding = unit(0.1, 'lines'),
