@@ -96,22 +96,26 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
             "'")
   }
 
+  # Single protein
+  subset <- dep[proteins]
+
   # Plot either the centered log-intensity values
   # per condition ('centered') or the average fold change of conditions
   # versus the control condition ('contrast') for a single protein
   if(type == "centered") {
     # Obtain protein-centered fold change values
-    row_data$mean <- rowMeans(assay(dep))
-    df <- assay(dep) - row_data$mean
-    df <- data.frame(df) %>% rownames_to_column()
-    # Select values for a single protein in long format and add sample annotation
-    df_reps <- filter(df, rowname %in% proteins) %>%
+    means <- rowMeans(assay(subset), na.rm = TRUE)
+    df <- assay(subset) - means
+    df_reps <- data.frame(df) %>%
+      rownames_to_column() %>%
       gather(ID, val, -rowname) %>%
-      left_join(., data.frame(colData(dep)), by = "ID")
+      left_join(., data.frame(colData(subset)), by = "ID")
     df_reps$replicate <- as.factor(df_reps$replicate)
     df_mean <- df_reps %>%
       group_by(condition, rowname) %>%
-      summarize(mean = mean(val), sd = sd(val), n = n()) %>%
+      summarize(mean = mean(val, na.rm = TRUE),
+        sd = sd(val, na.rm = TRUE),
+        n = n()) %>%
       mutate(error = qnorm(0.975) * sd / sqrt(n),
              CI.L = mean - error,
              CI.R = mean + error)
@@ -131,24 +135,25 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
   }
   if(type == "contrast") {
     # Select values for a single protein
-    df <- row_data %>%
+    df <- rowData(subset) %>%
       data.frame() %>%
-      filter(name %in% proteins) %>%
       select(name,
              ends_with("_diff"),
              ends_with("_CI.L"),
              ends_with("_CI.R")) %>%
       gather(var, val, -name) %>%
-      mutate(condition = gsub("_diff|_CI.L|_CI.R", "", var),
+      mutate(contrast = gsub("_diff|_CI.L|_CI.R", "", var),
              var = gsub(".*_", "", var)) %>%
       spread(var, val)
     df$name <- parse_factor(df$name, levels = proteins)
+    suffix <- get_suffix(df$contrast)
+    if(length(suffix)) {df$contrast <- delete_suffix(df$contrast)}
     # Plot the average fold change of conditions versus the control condition
-    p <- ggplot(df, aes(condition, diff)) +
+    p <- ggplot(df, aes(contrast, diff)) +
       geom_hline(yintercept = 0) +
       geom_col(colour = "black", fill = "grey") +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
-      labs(x = "",
+      labs(x = suffix,
            y = "Fold change (log2; 95% CI)") +
       facet_wrap(~name) +
       theme_DEP2()
@@ -251,6 +256,9 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
                 "'.\nRun add_rejections() to obtain the required column."),
          call. = FALSE)
   }
+  if(any(is.na(assay(dep)))) {
+    stop("Missing values in '", deparse(substitute(dep)), "'")
+  }
 
   # Heatmap annotation
   if(!is.null(indicate) & type == "centered") {
@@ -313,7 +321,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
   # versus the control condition ('contrast')
   if (type == "centered") {
     # Obtain protein-centered fold change values
-    rowData(filtered)$mean <- rowMeans(assay(filtered))
+    rowData(filtered)$mean <- rowMeans(assay(filtered), na.rm = TRUE)
     df <- assay(filtered) - rowData(filtered)$mean
 
     if(kmeans) {

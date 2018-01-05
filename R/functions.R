@@ -204,12 +204,70 @@ get_prefix <- function(words) {
   paste(mat[prefix, 1], collapse = "")
 }
 
+#' Obtain the longest common suffix
+#'
+#' \code{get_suffix} returns the longest common suffix
+#' of the supplied words.
+#'
+#' @param words Character vector,
+#' A list of words.
+#' @return A character vector containing the suffix
+#' @examples
+#' # Get suffix
+#' names <- c("xyz_rep", "abc_rep")
+#' get_suffix(names)
+#' @export
+get_suffix <- function(words) {
+  # Show error if input is not the required class
+  assertthat::assert_that(is.character(words))
+
+  # Show error if 'words' contains 1 or less elements
+  if(length(words) <= 1) {
+    stop("'words' should contain more than one element")
+  }
+  # Show error if 'words' contains NA
+  if(any(is.na(words))) {
+    stop("'words' contains NAs")
+  }
+
+  # Truncate words to smallest name
+  minlen <- min(nchar(words))
+  truncated <- substr(words, nchar(words) - minlen + 1, nchar(words))
+
+  # Show error if one of the elements is shorter than one character
+  if(minlen < 1) {
+    stop("At least one of the elements is too short")
+  }
+
+  # Reverse characters wihtin word
+  rev_string <- function(str) {
+    paste(rev(strsplit(str, "")[[1]]), collapse = "")
+  }
+  rev_truncated <- sapply(truncated, rev_string)
+
+  # Get identifical characters
+  mat <- data.frame(strsplit(rev_truncated, ""), stringsAsFactors = FALSE)
+  identical <- apply(mat, 1, function(x) length(unique(x)) == 1)
+
+  # Obtain the longest common prefix
+  prefix <- as.logical(cumprod(identical))
+  rev_string(paste(mat[prefix, 1], collapse = ""))
+}
+
 # Short internal function to delete the longest common prefix
 delete_prefix <- function(words) {
   # Get prefix
   prefix <- get_prefix(words)
   # Delete prefix from words
   gsub(paste0("^", prefix), "", words)
+}
+
+# Short internal function to delete the longest common suffix
+delete_suffix <- function(words) {
+  # Get prefix
+  suffix <- get_suffix(words)
+  # Delete prefix from words
+  gsub(paste0(suffix, "$"), "", words)
 }
 
 #' Data.frame to SummarizedExperiment object
@@ -833,6 +891,7 @@ test_diff <- function(se, type = c("control", "all", "manual"),
   type <- match.arg(type)
 
   col_data <- colData(se)
+  raw <- assay(se)
 
   if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
     stop("'name' and/or 'ID' columns are not present in '",
@@ -845,6 +904,9 @@ test_diff <- function(se, type = c("control", "all", "manual"),
          deparse(substitute(se)),
          "'\nRun make_se() or make_se_parse() to obtain the required columns",
          call. = FALSE)
+  }
+  if(any(is.na(raw))) {
+    warning("Missing values in '", deparse(substitute(se)), "'")
   }
 
   if(!is.null(control)) {
@@ -937,18 +999,28 @@ test_diff <- function(se, type = c("control", "all", "manual"),
 
   # Test for differential expression by empirical Bayes moderation
   # of a linear model on the predefined contrasts
-  eB_fit <- eBayes(
-    contrasts.fit(
-      lmFit(assay(se), design = design),
-      makeContrasts(contrasts = cntrst, levels = design)
-    )
-  )
+  fit <- lmFit(raw, design = design)
+  made_contrasts <- makeContrasts(contrasts = cntrst, levels = design)
+  contrast_fit <- contrasts.fit(fit, made_contrasts)
+
+  if(any(is.na(raw))) {
+    for(i in cntrst) {
+      covariates <- strsplit(i, " - ") %>% unlist
+      single_contrast <- makeContrasts(contrasts = i, levels = design[, covariates])
+      single_contrast_fit <- contrasts.fit(fit[, covariates], single_contrast)
+      contrast_fit$coefficients[, i] <- single_contrast_fit$coefficients[, 1]
+      contrast_fit$stdev.unscaled[, i] <- single_contrast_fit$stdev.unscaled[, 1]
+    }
+  }
+
+  eB_fit <- eBayes(contrast_fit)
 
   # function to retrieve the results of
   # the differential expression test using 'fdrtool'
   retrieve_fun <- function(comp, fit = eB_fit){
     res <- topTable(fit, sort.by = "t", coef = comp,
                     number = Inf, confint = TRUE)
+    res <- res[!is.na(res$t),]
     fdr_res <- fdrtool::fdrtool(res$t, plot = FALSE, verbose = FALSE)
     res$qval <- fdr_res$qval
     res$lfdr <- fdr_res$lfdr
@@ -971,6 +1043,7 @@ test_diff <- function(se, type = c("control", "all", "manual"),
   rowData(se) <- merge(rowData(se), table, by.x = "name", by.y = "rowname")
   return(se)
 }
+
 #' Mark significant proteins
 #'
 #' \code{add_rejections} marks significant proteins based on defined cutoffs.
@@ -1014,7 +1087,8 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
                           is.numeric(lfc),
                           length(lfc) == 1)
 
-  row_data <- rowData(diff)
+  row_data <- rowData(diff) %>%
+    as.data.frame()
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in '",
@@ -1043,10 +1117,13 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
       gsub("p.adj", "significant", colnames(row_data)[cols_p])
   }
   if(length(cols_p) > 1) {
-    sign_df <- apply(row_data[, cols_p], 2, function(x) x <= alpha) &
-      apply(row_data[, cols_diff], 2, function(x) abs(x) >= lfc)
+    p_reject <- row_data[, cols_p] <= alpha
+    p_reject[is.na(p_reject)] <- FALSE
+    diff_reject <- abs(row_data[, cols_diff]) >= lfc
+    diff_reject[is.na(diff_reject)] <- FALSE
+    sign_df <- p_reject & diff_reject
     sign_df <- cbind(sign_df,
-                     significant = apply(sign_df, 1, function(x) any(x)))
+      significant = apply(sign_df, 1, function(x) any(x)))
     colnames(sign_df) <- gsub("_p.adj", "_significant", colnames(sign_df))
 
     sign_df <- cbind(name = row_data$name, as.data.frame(sign_df))
@@ -1095,7 +1172,7 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
 #' @export
 get_results <- function(dep) {
   # Show error if inputs are not the required classes
-  assert_that(inherits(dep, "SummarizedExperiment"))
+  assertthat::assert_that(inherits(dep, "SummarizedExperiment"))
 
   row_data <- rowData(dep)
   # Show error if inputs do not contain required columns
@@ -1113,7 +1190,7 @@ get_results <- function(dep) {
   }
 
   # Obtain average protein-centered enrichment values per condition
-  row_data$mean <- rowMeans(assay(dep))
+  row_data$mean <- rowMeans(assay(dep), na.rm = TRUE)
   centered <- assay(dep) - row_data$mean
   centered <- data.frame(centered) %>%
     rownames_to_column() %>%
@@ -1139,12 +1216,13 @@ get_results <- function(dep) {
   # Select the adjusted p-values and significance columns
   pval <- as.data.frame(row_data) %>%
     column_to_rownames("name") %>%
-    select(ends_with("p.adj"), ends_with("significant")) %>%
+    select(ends_with("p.val"),
+      ends_with("p.adj"),
+      ends_with("significant")) %>%
     rownames_to_column()
   pval[, grep("p.adj", colnames(pval))] <-
-    format(signif(pval[, grep("p.adj", colnames(pval))]
-                  , digits = 3),
-           scientific = TRUE)
+    pval[, grep("p.adj", colnames(pval))] %>%
+    signif(digits = 3)
 
   # Join into a results table
   ids <- as.data.frame(row_data) %>% select(name, ID)

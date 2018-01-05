@@ -111,7 +111,9 @@ are provided by the package.
   \item \code{\link{plot_pca}}:
   PCA plot of top variable proteins.
   \item \code{\link{plot_cor}}:
-  Correlation matrix.
+  Plot correlation matrix.
+  \item \code{\link{plot_cor}}:
+  Plot Gower's distance matrix.
   \item \code{\link{plot_p_hist}}:
   P value histogram.
   \item \code{\link{plot_cond_freq}}:
@@ -151,6 +153,8 @@ are provided by the package.
   Imputation by random draws from a manually defined distribution.
   \item \code{\link{get_prefix}}:
   Obtain the longest common prefix.
+  \item \code{\link{get_suffix}}:
+  Obtain the longest common suffix.
 }
 }
 

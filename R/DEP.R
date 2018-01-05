@@ -96,7 +96,9 @@
 #'   \item \code{\link{plot_pca}}:
 #'   PCA plot of top variable proteins.
 #'   \item \code{\link{plot_cor}}:
-#'   Correlation matrix.
+#'   Plot correlation matrix.
+#'   \item \code{\link{plot_cor}}:
+#'   Plot Gower's distance matrix.
 #'   \item \code{\link{plot_p_hist}}:
 #'   P value histogram.
 #'   \item \code{\link{plot_cond_freq}}:
@@ -132,6 +134,8 @@
 #'   Imputation by random draws from a manually defined distribution.
 #'   \item \code{\link{get_prefix}}:
 #'   Obtain the longest common prefix.
+#'   \item \code{\link{get_suffix}}:
+#'   Obtain the longest common suffix.
 #' }
 #'
 #' @section Example data:
@@ -163,6 +167,7 @@
 #' @importFrom readr parse_factor
 #' @importFrom stats median model.matrix rnorm sd cor prcomp formula terms.formula
 #' @importFrom broom tidy
+#' @importFrom cluster daisy
 #'
 #'
 NULL
