@@ -37,25 +37,25 @@ test_that("manual_impute returns an object without missing values", {
 })
 
 test_that("impute throws error without valid input", {
-  expect_error(impute("test_vsn", "MinProb"))
-  expect_error(impute(test_vsn, MinProb))
+  expect_error(impute("test_vsn", "QRILC"))
+  expect_error(impute(test_vsn, QRILC))
   expect_error(impute(test_vsn, "FOO"))
 
   test_vsn_error <- test_vsn
   SummarizedExperiment::rowData(test_vsn_error) <- SummarizedExperiment::rowData(test_vsn_error)[,-(24:25)]
-  expect_error(impute(test_vsn_error, "MinProb"))
+  expect_error(impute(test_vsn_error, "QRILC"))
 
   NAs <- apply(SummarizedExperiment::assay(test_vsn), 1, function(x) any(is.na(x)))
   no_NAs <- test_vsn[!NAs,]
-  expect_warning(impute(no_NAs, "MinProb"))
+  expect_warning(impute(no_NAs, "QRILC"))
 })
 
 test_that("impute returns a MSnSet object", {
-  expect_is(impute(test_vsn, "MinProb"), "SummarizedExperiment")
+  expect_is(impute(test_vsn, "QRILC"), "SummarizedExperiment")
   expect_is(impute(test_vsn, "man"), "SummarizedExperiment")
 })
 
 test_that("impute returns an object without missing values", {
-  result <- SummarizedExperiment::assay(impute(test_vsn, "MinProb"))
+  result <- SummarizedExperiment::assay(impute(test_vsn, "QRILC"))
   expect_true(all(!is.na(result)))
 })

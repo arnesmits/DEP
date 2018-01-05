@@ -33,6 +33,8 @@ test_that("plot_heatmap throws error without valid input", {
   expect_error(plot_heatmap(test_sign, "centered", k = 6, col_limit = "4", labelsize = 8))
   expect_error(plot_heatmap(test_sign, "centered", k = 6, col_limit = 4, labelsize = "8"))
   expect_error(plot_heatmap(test_sign, "test", k = 6, col_limit = 4, labelsize = 8))
+  expect_error(plot_heatmap(test_sign, "centered", k = 6, col_limit = 4, labelsize = 8, indicate = "bla"))
+  expect_error(plot_heatmap(test_sign, "centered", k = 6, col_limit = 4, labelsize = 8, indicate = bla))
 
   test_sign_error1 <- test_sign
   SummarizedExperiment::colData(test_sign_error1) <- SummarizedExperiment::colData(test_sign_error1)[,-(3)]
@@ -52,6 +54,7 @@ test_that("plot_heatmap returns a HeatmapList object", {
   expect_is(plot_heatmap(test_sign, "contrast", col_limit = 8, row_font_size = 3), "HeatmapList")
   expect_is(plot_heatmap(test_sign, "centered", kmeans = TRUE, col_limit = 4, row_font_size = 3), "HeatmapList")
   expect_is(plot_heatmap(test_sign, "contrast", kmeans = TRUE, col_limit = 8, row_font_size = 3), "HeatmapList")
+  expect_is(plot_heatmap(test_sign, "centered", kmeans = TRUE, col_limit = 8, row_font_size = 3, indicate = "replicate"), "HeatmapList")
 })
 
 test_that("plot_volcano throws error without valid input", {

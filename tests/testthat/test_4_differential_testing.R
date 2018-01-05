@@ -75,9 +75,9 @@ test_that("get_results returns a data.frame", {
 test_that("get_results returns a data.frame with the expected column", {
   result <- get_results(test_sign)
   expect_equal(nrow(result), 203)
-  expect_equal(ncol(result), 16)
-  expect_equal(grep("_centered$", colnames(result)), 13:16)
-  expect_equal(grep("_ratio$", colnames(result)), 10:12)
+  expect_equal(ncol(result), 19)
+  expect_equal(grep("_centered$", colnames(result)), 16:19)
+  expect_equal(grep("_ratio$", colnames(result)), 13:15)
   expect_equal(nrow(result[result$significant,]), 45)
 })
 
