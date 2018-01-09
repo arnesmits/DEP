@@ -2,7 +2,7 @@
 % Please edit documentation in R/functions.R
 \name{se2msn}
 \alias{se2msn}
-\title{SummarizedExperiment to MSnSet object conversion}
+\title{Deprecated Function to coerce SummarizedExperiment to MSnSet object}
 \usage{
 se2msn(se)
 }
@@ -14,7 +14,7 @@ Object which will be turned into a MSnSet object.}
 A MSnSet object.
 }
 \description{
-\code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
+Use \code{\link[methods]{as}} instead.
 }
 \examples{
 # Load example
@@ -28,5 +28,7 @@ exp_design <- UbiLength_ExpDesign
 se <- make_se(data_unique, columns, exp_design)
 
 # Convert to MSnSet
-data_msn <- se2msn(se)
+data_msn <- as(se, "MSnSet")
+# Convert back to SE
+se_back <- as(data_msn, "SummarizedExperiment")
 }

@@ -126,8 +126,6 @@
 #'   Generate a long data.frame from a SummarizedExperiment.
 #'   \item \code{\link{se2msn}}:
 #'   SummarizedExperiment object to MSnSet object conversion.
-#'   \item \code{\link{msn2se}}:
-#'   MSnSet object to SummarizedExperiment object conversion.
 #'   \item \code{\link{filter_missval}}:
 #'   Filter on missing values.
 #'   \item \code{\link{manual_impute}}:
@@ -159,6 +157,7 @@
 #' @import ggplot2 dplyr SummarizedExperiment limma
 #' @import ComplexHeatmap grid assertthat imputeLCMD
 #' @import shinydashboard
+#' @rawNamespace import(MSnbase, except = combine)
 #' @importFrom shiny runApp
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom tidyr unite gather spread separate

@@ -665,9 +665,9 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
   return(se)
 }
 
-#' SummarizedExperiment to MSnSet object conversion
+#' Deprecated Function to coerce SummarizedExperiment to MSnSet object
 #'
-#' \code{se2msn} generates a MSnSet object from a SummarizedExperiment object.
+#' Use \code{\link[methods]{as}} instead.
 #'
 #' @param se SummarizedExperiment,
 #' Object which will be turned into a MSnSet object.
@@ -684,63 +684,13 @@ manual_impute <- function(se, scale = 0.3, shift = 1.8) {
 #' se <- make_se(data_unique, columns, exp_design)
 #'
 #' # Convert to MSnSet
-#' data_msn <- se2msn(se)
+#' data_msn <- as(se, "MSnSet")
+#' # Convert back to SE
+#' se_back <- as(data_msn, "SummarizedExperiment")
 #' @export
 se2msn <- function(se) {
-  # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(se, "SummarizedExperiment"))
-
-  # Extract expression, feature and pheno data
-  raw <- assay(se)
-  feat_data <- data.frame(rowData(se))
-  rownames(feat_data) <- feat_data$name
-  pheno_data <- data.frame(colData(se))
-
-  # Generate MSnSet object
-  msn <- MSnbase::MSnSet(exprs = as.matrix(raw),
-                         pData = Biobase::AnnotatedDataFrame(pheno_data),
-                         fData = Biobase::AnnotatedDataFrame(feat_data))
-  return(msn)
-}
-
-#' MSnSet to SummarizedExperiment object conversion
-#'
-#' \code{msn2se} generates a SummarizedExperiment object from a MSnSet object.
-#'
-#' @param msn MSnSet object,
-#' Object which will be turned into a SummarizedExperiment object.
-#' @return A SummarizedExperiment object.
-#' @examples
-#' # Load example
-#' data <- UbiLength
-#' data <- data[data$Reverse != "+" & data$Potential.contaminant != "+",]
-#' data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
-#'
-#' # Make SummarizedExperiment
-#' columns <- grep("LFQ.", colnames(data_unique))
-#' exp_design <- UbiLength_ExpDesign
-#' se <- make_se(data_unique, columns, exp_design)
-#'
-#' # Convert to MSnSet
-#' data_msn <- se2msn(se)
-#' # Convert back to SE
-#' data_se <- msn2se(data_msn)
-#' @export
-msn2se <- function(msn) {
-  # Show error if inputs are not the required classes
-  assertthat::assert_that(inherits(msn, "MSnSet"))
-
-  # Extract expression, feature and pheno data
-  raw <- Biobase::exprs(msn)
-  row_data <- data.frame(Biobase::fData(msn))
-  rownames(row_data) <- row_data$name
-  col_data <- data.frame(Biobase::pData(msn))
-
-  # Generate MSnSet object
-  se <- SummarizedExperiment(assays = as.matrix(raw),
-                              rowData = row_data,
-                              colData = col_data)
-  return(se)
+  .Deprecated("as(se, \"MSnSet\")")
+  as(se, "MSnSet")
 }
 
 #' Impute missing values
@@ -818,7 +768,7 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
   }
   # else use the MSnSet::impute function
   else {
-    MSnSet_data <- se2msn(se)
+    MSnSet_data <- as(se, "MSnSet")
     MSnSet_imputed <- MSnbase::impute(MSnSet_data, method = fun, ...)
     assay(se) <- MSnbase::exprs(MSnSet_imputed)
   }
