@@ -1,5 +1,5 @@
 ---
-title: "DEP package"
+title: "Introduction to DEP"
 author: "Arne Smits"
 date: "`r doc_date()`"
 package: "`r pkg_ver('DEP')`"
@@ -325,7 +325,8 @@ Additionally, the clustering of samples (columns) can indicate closer related sa
 ``` {r heatmap, fig.height = 5, fig.width = 3}
 # Plot a heatmap of all significant proteins with the data centered per protein
 plot_heatmap(dep, type = "centered", kmeans = TRUE, 
-             k = 6, col_limit = 4, show_row_names = FALSE)
+             k = 6, col_limit = 4, show_row_names = FALSE,
+             indicate = c("condition", "replicate"))
 ```
 
 The heatmap shows a clustering of replicates and indicates that 4Ubi and 6Ubi enrich a similar repertoire of proteins. The k-means clustering of proteins (general clusters of rows) nicely separates protein classes with different binding behaviors.  
@@ -354,8 +355,8 @@ plot_volcano(dep, contrast = "Ubi6_vs_Ctrl", label_size = 2, add_names = TRUE)
 It can also be useful to plot the data of a single protein, for example if this protein is of special interest.
 
 ``` {r bar, fig.height = 3.5, fig.width = 3.5}
-# Plot a barplot for the protein USP15
-plot_single(dep, proteins = "USP15")
+# Plot a barplot for USP15 and IKBKG
+plot_single(dep, proteins = c("USP15", "IKBKG"))
 
 # Plot a barplot for the protein USP15 with the data centered
 plot_single(dep, proteins = "USP15", type = "centered")

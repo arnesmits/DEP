@@ -131,7 +131,7 @@ plot_normalization <- function(raw, norm) {
       geom_boxplot(notch = TRUE, na.rm = TRUE) +
       coord_flip() +
       facet_wrap(~var, ncol = 1) +
-      labs(x = "", y = "Intensity (log2)") +
+      labs(x = "", y = expression(log[2]~"Intensity")) +
       theme_DEP1()
 }
 
@@ -205,7 +205,7 @@ plot_imputation <- function(raw, imp) {
     ggplot(df, aes(val, col = condition)) +
       geom_density(na.rm = TRUE) +
       facet_wrap(~var, ncol = 1) +
-      labs(x = "Intensity (log2)", y = "Density") +
+      labs(x = expression(log[2]~"Intensity"), y = "Density") +
       theme_DEP1()
 }
 
@@ -269,12 +269,12 @@ plot_detect <- function(se) {
     # proteins with and without missing values
     p1 <- ggplot(stat, aes(mean, col = missval)) +
       geom_density(na.rm = TRUE) +
-      labs(x = "Intensity (log2)", y = "Density") +
+      labs(x = expression(log[2]~"Intensity"), y = "Density") +
       guides(col = guide_legend(title = "Missing values")) +
       theme_DEP1()
     p2 <- ggplot(cumsum, aes(mean, cs_frac, col = missval)) +
       geom_line() +
-      labs(x = "Intensity (log2)", y = "Cumulative fraction") +
+      labs(x = expression(log[2]~"Intensity"), y = "Cumulative fraction") +
       guides(col = guide_legend(title = "Missing values")) +
       theme_DEP1()
     gridExtra::grid.arrange(p1, p2, ncol = 1)
@@ -416,7 +416,7 @@ plot_p_hist <- function(dep, adjusted = FALSE, wrap = FALSE) {
   p <- ggplot(p_val, aes(val)) +
     geom_histogram(bins = 100, center = 0.005) +
     labs(title = "P value histogram",
-         x = "p value") +
+         x = "P-value") +
     theme_DEP1()
   if(wrap) {
     p <- p + facet_wrap(~ var)

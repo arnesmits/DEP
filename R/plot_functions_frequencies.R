@@ -40,7 +40,7 @@ plot_numbers <- function(se) {
     summarize(n = n(), sum = sum(bin)) %>%
     left_join(., data.frame(colData(se)), by = "ID")
   ggplot(stat, aes(x = ID, y = sum, fill = condition)) +
-    geom_bar(stat = "identity") +
+    geom_col() +
     geom_hline(yintercept = unique(stat$n)) +
     labs(title = "Proteins per sample", x = "",
          y = "Number of proteins") +
@@ -89,7 +89,7 @@ plot_frequency <- function(se) {
   # were observerd and plot these numbers
   table <- table(stat$sum) %>% data.frame()
   ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) +
-    geom_bar(stat = "identity") +
+    geom_col() +
     scale_fill_grey(start = 0.8, end = 0.2) +
     labs(title = "Protein identifications overlap",
          x = "Identified in number of samples",
@@ -147,7 +147,7 @@ plot_coverage <- function(se) {
     labs(title = "Protein coverage",
          x = "",
          y = "Number of proteins",
-         fill = "samples") +
+         fill = "Samples") +
     theme_DEP1()
 }
 
@@ -220,7 +220,7 @@ plot_cond_freq <- function(dep) {
 
   # Plot the count table as a bar graph
   ggplot(table, aes(x = Var1, y = Freq, fill = Var1)) +
-    geom_bar(stat = "identity") +
+    geom_col() +
     labs(x = "Number of significant conditions",
          y = "Number of proteins",
          title = "Frequency of significant conditions per protein") +
@@ -429,7 +429,7 @@ plot_cond <- function(dep) {
 
   # Plot conditions overlap histogram
   p1 <- ggplot(counts, aes(x = n_con, y = Freq, fill = conditions)) +
-    geom_bar(stat = "identity") +
+    geom_col() +
     geom_text(aes(label = ID), size = 3, hjust = 0.5,
               position = position_stack(vjust = 0.5)) +
     labs(x = "Number of significant conditions",
