@@ -79,9 +79,10 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
     }
 
     if(length(possibilities) > 0) {
-      possibilities_msg <- paste0("Do you mean: '",
-                                  paste0(possibilities, collapse = "', '"),
-                                  "'")
+      possibilities_msg <- paste0(
+        "Do you mean: '",
+        paste0(possibilities, collapse = "', '"),
+        "'")
     } else {
       possibilities_msg <- NULL
     }
@@ -105,13 +106,12 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
   if(type == "centered") {
     # Obtain protein-centered fold change values
     means <- rowMeans(assay(subset), na.rm = TRUE)
-    df <- assay(subset) - means
-    df_reps <- data.frame(df) %>%
+    df_reps <- data.frame(assay(subset) - means) %>%
       rownames_to_column() %>%
       gather(ID, val, -rowname) %>%
       left_join(., data.frame(colData(subset)), by = "ID")
     df_reps$replicate <- as.factor(df_reps$replicate)
-    df_mean <- df_reps %>%
+    df <- df_reps %>%
       group_by(condition, rowname) %>%
       summarize(mean = mean(val, na.rm = TRUE),
         sd = sd(val, na.rm = TRUE),
@@ -119,17 +119,18 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
       mutate(error = qnorm(0.975) * sd / sqrt(n),
              CI.L = mean - error,
              CI.R = mean + error)
-    df_mean$rowname <- parse_factor(df_mean$rowname, levels = proteins)
-    # Plot the centered fold change values for the replicates as well as the mean
-    p <- ggplot(df_mean, aes(condition, mean)) +
+    df$rowname <- parse_factor(df$rowname, levels = proteins)
+
+    # Plot the centered intensity values for the replicates and the mean
+    p <- ggplot(df, aes(condition, mean)) +
       geom_hline(yintercept = 0) +
       geom_col(colour = "black", fill = "grey") +
       geom_point(data = df_reps, aes(condition, val, col = replicate),
                  shape = 18, size = 5, position = position_dodge(width=0.3)) +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
       labs(x = "Baits",
-           y = "Centered intensity (log2; 95% CI)",
-           col = "rep") +
+           y = expression(log[2]~"Centered intensity"~"(\u00B195% CI)"),
+           col = "Rep") +
       facet_wrap(~rowname) +
       theme_DEP2()
   }
@@ -154,11 +155,65 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
       geom_col(colour = "black", fill = "grey") +
       geom_errorbar(aes(ymin = CI.L, ymax = CI.R), width = 0.3) +
       labs(x = suffix,
-           y = "Fold change (log2; 95% CI)") +
+           y = expression(log[2]~"Fold change"~"(\u00B195% CI)")) +
       facet_wrap(~name) +
       theme_DEP2()
   }
   p
+}
+
+# Internal function to get ComplexHeatmap::HeatmapAnnotation object
+get_annotation <- function(dep, indicate) {
+  assertthat::assert_that(
+    inherits(dep, "SummarizedExperiment"),
+    is.character(indicate))
+
+  # Check indicate columns
+  col_data <- colData(dep) %>%
+    as.data.frame()
+  columns <- colnames(col_data)
+  if(all(!indicate %in% columns)) {
+    stop("'",
+      paste0(indicate, collapse = "' and/or '"),
+      "' column(s) is/are not present in ",
+      deparse(substitute(dep)),
+      ".\nValid columns are: '",
+      paste(columns, collapse = "', '"),
+      "'.",
+      call. = FALSE)
+  }
+  if(any(!indicate %in% columns)) {
+    indicate <- indicate[indicate %in% columns]
+    warning("Only used the following indicate column(s): '",
+      paste0(indicate, collapse = "', '"),
+      "'")
+  }
+
+  # Get annotation
+  anno <- select(col_data, indicate)
+
+  # Annotation color
+  names <- colnames(anno)
+  anno_col <- vector(mode="list", length=length(names))
+  names(anno_col) <- names
+  for(i in names) {
+    var = anno[[i]] %>% unique() %>% sort()
+    if(length(var) == 1)
+      cols <- c("black")
+    if(length(var) == 2)
+      cols <- c("orangered", "cornflowerblue")
+    if(length(var) < 7 & length(var) > 2)
+      cols <- RColorBrewer::brewer.pal(length(var), "Pastel1")
+    if(length(var) > 7)
+      cols <- RColorBrewer::brewer.pal(length(var), "Set3")
+    names(cols) <- var
+    anno_col[[i]] <-  cols
+  }
+
+  # HeatmapAnnotation object
+  HeatmapAnnotation(df = anno,
+    col = anno_col,
+    show_annotation_name = TRUE)
 }
 
 #' Plot a heatmap
@@ -182,6 +237,11 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
 #' Sets additional annotation on the top of the heatmap
 #' based on columns from the experimental design (colData).
 #' Only applicable to type = 'centered'.
+#' @param clustering_distance "euclidean", "maximum", "manhattan", "canberra",
+#' "binary", "minkowski", "pearson", "spearman", "kendall" or "gower",
+#' Function used to calculate clustering distance (for proteins and samples).
+#' Based on \code{\link[ComplexHeatmap]{Heatmap}}
+#' and \code{\link[cluster]{daisy}}.
 #' @param row_font_size Integer(1),
 #' Sets the size of row labels.
 #' @param col_font_size Integer(1),
@@ -214,101 +274,66 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered")) {
 #' plot_heatmap(dep, 'centered', kmeans = TRUE, k = 6, row_font_size = 3)
 #' plot_heatmap(dep, 'contrast', col_limit = 10, row_font_size = 3)
 #' @export
-plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
-                         k = 6, col_limit = 6, indicate = NULL,
-                         row_font_size = 6, col_font_size = 10, ...) {
+plot_heatmap <- function(
+  dep, type = c("contrast", "centered"),
+  kmeans = FALSE, k = 6,
+  col_limit = 6, indicate = NULL,
+  clustering_distance = c("euclidean", "maximum", "manhattan", "canberra",
+    "binary", "minkowski", "pearson", "spearman", "kendall", "gower"),
+  row_font_size = 6, col_font_size = 10, ...) {
+
   # Show error if inputs are not the required classes
   if(is.integer(k)) k <- as.numeric(k)
   if(is.integer(col_limit)) col_limit <- as.numeric(col_limit)
   if(is.integer(row_font_size)) row_font_size <- as.numeric(row_font_size)
   if(is.integer(col_font_size)) col_font_size <- as.numeric(col_font_size)
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
-                          is.character(type),
-                          is.logical(kmeans),
-                          is.numeric(k),
-                          length(k) == 1,
-                          is.numeric(col_limit),
-                          length(col_limit) == 1,
-                          is.numeric(row_font_size),
-                          length(row_font_size) == 1,
-                          is.numeric(col_font_size),
-                          length(col_font_size) == 1)
+    is.character(type),
+    is.logical(kmeans),
+    is.numeric(k),
+    length(k) == 1,
+    is.numeric(col_limit),
+    length(col_limit) == 1,
+    is.numeric(row_font_size),
+    length(row_font_size) == 1,
+    is.numeric(col_font_size),
+    length(col_font_size) == 1)
 
   # Show error if inputs do not contain required columns
   type <- match.arg(type)
+  clustering_distance <- match.arg(clustering_distance)
 
+  # Extract row and col data
   row_data <- rowData(dep)
+  col_data <- colData(dep) %>%
+    as.data.frame()
 
-  if(any(!c("label", "condition", "replicate") %in% colnames(colData(dep)))) {
+  # Show error if inputs do not contain required columns
+  if(any(!c("label", "condition", "replicate") %in% colnames(col_data))) {
     stop(paste0("'label', 'condition' and/or 'replicate' columns are not present in '",
-                deparse(substitute(dep)), "'"),
-         call. = FALSE)
+      deparse(substitute(dep)), "'"),
+      call. = FALSE)
   }
   if(length(grep("_diff", colnames(row_data))) < 1) {
     stop(paste0("'[contrast]_diff' columns are not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun test_diff() to obtain the required columns."),
-         call. = FALSE)
+      deparse(substitute(dep)),
+      "'.\nRun test_diff() to obtain the required columns."),
+      call. = FALSE)
   }
   if(!"significant" %in% colnames(row_data)) {
     stop(paste0("'significant' column is not present in '",
-                deparse(substitute(dep)),
-                "'.\nRun add_rejections() to obtain the required column."),
-         call. = FALSE)
-  }
-  if(any(is.na(assay(dep)))) {
-    stop("Missing values in '", deparse(substitute(dep)), "'")
+      deparse(substitute(dep)),
+      "'.\nRun add_rejections() to obtain the required column."),
+      call. = FALSE)
   }
 
   # Heatmap annotation
+  if(!is.null(indicate) & type == "contrast") {
+    warning("Heatmap annotation only applicable for type = 'centered'",
+      call. = FALSE)
+  }
   if(!is.null(indicate) & type == "centered") {
-    assertthat::assert_that(is.character(indicate))
-
-    col_data <- colData(dep) %>%
-      as.data.frame()
-    if(type == "contrast") {
-      x <- col_data %>%
-        select(-label, -ID, -replicate)
-    }
-    columns <- colnames(col_data)
-    if(any(!indicate %in% columns)) {
-      stop("'",
-           paste0(indicate, collapse = "' and/or '"),
-           "' column(s) is/are not present in ",
-           deparse(substitute(dep)),
-           ".\nValid columns are: '",
-           paste(columns, collapse = "', '"),
-           "'.",
-           call. = FALSE)
-    }
-
-    # Get annotation
-    anno <- col_data %>%
-      data.frame() %>%
-      select(indicate)
-
-    # Annotation color
-    names <- colnames(anno)
-    anno_col <- vector(mode="list", length=length(names))
-    names(anno_col) <- names
-    for(i in names) {
-      var = anno[[i]] %>% unique() %>% sort()
-      if(length(var) == 1)
-        cols <- c("black")
-      if(length(var) == 2)
-        cols <- c("orangered", "cornflowerblue")
-      if(length(var) < 7 & length(var) > 2)
-        cols <- RColorBrewer::brewer.pal(length(var), "Pastel1")
-      if(length(var) > 7)
-        cols <- RColorBrewer::brewer.pal(length(var), "Set3")
-      names(cols) <- var
-      anno_col[[i]] <-  cols
-    }
-
-    # HeatmapAnnotation object
-    ha1 = HeatmapAnnotation(df = anno,
-                            col = anno_col,
-                            show_annotation_name = TRUE)
+    ha1 <- get_annotation(dep, indicate)
   } else {
     ha1 <- NULL
   }
@@ -316,35 +341,24 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
   # Filter for significant proteins only
   filtered <- dep[row_data$significant, ]
 
-  # Plot a heatmap of the average protein-centered fold change values
-  # per condition ('centered') or the average fold change of conditions
-  # versus the control condition ('contrast')
-  if (type == "centered") {
-    # Obtain protein-centered fold change values
+  # Check for missing values
+  if(any(is.na(assay(filtered)))) {
+    warning("Missing values in '", deparse(substitute(dep)), "'. ",
+      "Using clustering_distance = 'gower'",
+      call. = FALSE)
+    clustering_distance <- "gower"
+    obs_NA <- TRUE
+  } else {
+    obs_NA <- FALSE
+  }
+
+  # Get centered intensity values ('centered')
+  if(type == "centered") {
     rowData(filtered)$mean <- rowMeans(assay(filtered), na.rm = TRUE)
     df <- assay(filtered) - rowData(filtered)$mean
-
-    if(kmeans) {
-      # Perform k-means clustering
-      set.seed(1)
-      df_kmeans <- kmeans(df, k)
-      # Order the k-means clusters according to the maximum fold change
-      # in all samples averaged over the proteins in the cluster
-      order <- df %>%
-        data.frame() %>%
-        cbind(., cluster = df_kmeans$cluster) %>%
-        mutate(row = apply(.[, 1:(ncol(.) - 1)], 1, function(x) max(x))) %>%
-        group_by(cluster) %>%
-        summarize(index = sum(row)/n()) %>%
-        arrange(desc(index)) %>%
-        collect %>%
-        .[[1]] %>%
-        match(seq(1:k), .)
-      df_kmeans$cluster <- order[df_kmeans$cluster]
-    }
   }
-  if (type == "contrast") {
-    # Obtain average fold change of conditions versus the control condition
+  # Get contrast fold changes ('contrast')
+  if(type == "contrast") {
     df <- rowData(filtered) %>%
       data.frame() %>%
       column_to_rownames(var = "name") %>%
@@ -352,51 +366,88 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"), kmeans = FALSE,
     colnames(df) <-
       gsub("_diff", "", colnames(df)) %>%
       gsub("_vs_", " vs ", .)
+  }
 
-    if(kmeans) {
-      # Perform k-means clustering
-      set.seed(1)
-      df_kmeans <- kmeans(df, k)
+  # Facultative kmeans clustering
+  if(kmeans & obs_NA) {
+    warning("Cannot perform kmeans clustering with missing values",
+      call. = FALSE)
+    kmeans <- FALSE
+  }
+  if(kmeans & !obs_NA) {
+    set.seed(1)
+    df_kmeans <- kmeans(df, k)
+    if(type == "centered") {
+      # Order the k-means clusters according to the maximum fold change
+      # in all samples averaged over the proteins in the cluster
+      order <- data.frame(df) %>%
+        cbind(., cluster = df_kmeans$cluster) %>%
+        mutate(row = apply(.[, 1:(ncol(.) - 1)], 1, function(x) max(x))) %>%
+        group_by(cluster) %>%
+        summarize(index = sum(row)/n()) %>%
+        arrange(desc(index)) %>%
+        pull(cluster) %>%
+        match(seq(1:k), .)
+      df_kmeans$cluster <- order[df_kmeans$cluster]
+    }
+    if(type == "contrast") {
       # Order the k-means clusters according to their average fold change
       order <- cbind(df, cluster = df_kmeans$cluster) %>%
         gather(condition, diff, -cluster) %>%
         group_by(cluster) %>%
         summarize(row = mean(diff)) %>%
         arrange(desc(row)) %>%
-        collect %>%
-        .[[1]] %>%
+        pull(cluster) %>%
         match(seq(1:k), .)
       df_kmeans$cluster <- order[df_kmeans$cluster]
     }
   }
 
-  if (ncol(df) == 1) {
-    clust = FALSE
+  if(ncol(df) == 1) {
+    col_clust = FALSE
   } else {
-    clust = TRUE
+    col_clust = TRUE
+  }
+  if(nrow(df) == 1) {
+    row_clust = FALSE
+  } else {
+    row_clust = TRUE
+  }
+  if(clustering_distance == "gower") {
+    clustering_distance <- function(x) {
+      dist <- cluster::daisy(x, metric = "gower")
+      dist[is.na(dist)] <- 1
+      return(dist)
+    }
   }
 
-  # Plot the heatmap
+  # Legend info
   legend <- ifelse(type == "contrast",
-                   "Fold change (log2)",
-                   "Centered log2-intensity")
+    "log2 Fold change",
+    "log2 Centered intensity")
+
+  # Heatmap
   ht1 = Heatmap(df,
-                col = circlize::colorRamp2(
-                  seq(-col_limit, col_limit, (col_limit/5)),
-                  rev(RColorBrewer::brewer.pal(11, "RdBu"))),
-                split = if(kmeans) {df_kmeans$cluster} else {NULL},
-                cluster_rows = clust,
-                row_names_side = "left",
-                column_names_side = "top",
-                heatmap_legend_param = list(color_bar = "continuous",
-                                            legend_direction = "horizontal",
-                                            legend_width = unit(5, "cm"),
-                                            title_position = "lefttop"),
-                name = legend,
-                row_names_gp = gpar(fontsize = row_font_size),
-                column_names_gp = gpar(fontsize = col_font_size),
-                top_annotation = ha1,
-                ...)
+    col = circlize::colorRamp2(
+      seq(-col_limit, col_limit, (col_limit/5)),
+      rev(RColorBrewer::brewer.pal(11, "RdBu"))),
+    split = if(kmeans) {df_kmeans$cluster} else {NULL},
+    cluster_rows = col_clust,
+    cluster_columns = row_clust,
+    row_names_side = "left",
+    column_names_side = "top",
+    clustering_distance_rows = clustering_distance,
+    clustering_distance_columns = clustering_distance,
+    heatmap_legend_param = list(color_bar = "continuous",
+      legend_direction = "horizontal",
+      legend_width = unit(5, "cm"),
+      title_position = "lefttop"),
+    name = legend,
+    row_names_gp = gpar(fontsize = row_font_size),
+    column_names_gp = gpar(fontsize = col_font_size),
+    top_annotation = ha1,
+    ...)
+  # Plot
   draw(ht1, heatmap_legend_side = "top")
 }
 
@@ -528,7 +579,8 @@ plot_volcano <- function(dep, contrast, label_size = 3,
                                        label = c(name1, name2),
                                        size = 5,
                                        fontface = "bold")) +
-    labs(x = "Fold change (log2)") +
+    labs(title = contrast,
+      x = expression(log[2]~"Fold change")) +
     theme_DEP1() +
     theme(legend.position = "none") +
     scale_color_manual(values = c("TRUE" = "black", "FALSE" = "grey"))
@@ -541,9 +593,9 @@ plot_volcano <- function(dep, contrast, label_size = 3,
                                       segment.size = 0.5)
   }
   if(adjusted) {
-    p <- p + labs(y = "Adjusted p-value (-log10)")
+    p <- p + labs(y = expression(-log[10]~"Adjusted p-value"))
   } else {
-    p <- p + labs(y = "P-value (-log10)")
+    p <- p + labs(y = expression(-log[10]~"P-value"))
   }
   p
 }
