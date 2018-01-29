@@ -49,7 +49,7 @@ logical columns indicating significant proteins.
 \description{
 \code{analyze_dep} tests for differential expression of proteins
 based on protein-wise linear models and empirical Bayes
-statistics using \code{\link[limma]{limma}}.
+statistics using \code{\link[limma:limma-package]{limma}}.
 }
 \examples{
 # Load datasets

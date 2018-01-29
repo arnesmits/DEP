@@ -123,8 +123,12 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
   pca_df$x <- pca_df[, PC_cols[x]]
   pca_df$y <- pca_df[, PC_cols[y]]
 
-  # Plot the PCA
-  pca_df$replicate <- as.factor(pca_df$replicate)
+  # Make factors of indicate features
+  for(feat in indicate) {
+    pca_df[[feat]] <- as.factor(pca_df[[feat]])
+  }
+
+  # Plot the PCA plot
   p <- ggplot(pca_df, aes(x = x, y = y)) +
     labs(title = paste0("PCA plot - top ", n, " variable proteins"),
          x = colnames(pca_df)[PC_cols[x]],
@@ -175,7 +179,7 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 #' @param upper Integer(1),
 #' Sets the upper limit of the color scale.
 #' @param pal Character(1),
-#' Sets the color panel (from \code{\link[RColorBrewer]{brewer.pal}}).
+#' Sets the color panel (from \code{\link[RColorBrewer]{RColorBrewer}}).
 #' @param pal_rev Logical(1),
 #' Whether or not to invert the color palette.
 #' @param indicate Character,

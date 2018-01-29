@@ -11,7 +11,7 @@ report(results)
 from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.}
 }
 \value{
-A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
+A \code{\link[rmarkdown:rmarkdown-package]{rmarkdown}} report is generated and saved.
 Additionally, the results table is saved as a tab-delimited txt file.
 }
 \description{

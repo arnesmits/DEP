@@ -19,7 +19,7 @@ The experimental design object.}
 \item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 "MinProb", "min", "zero", "mixed" or "nbavg",
 Function used for data imputation based on \code{\link{manual_impute}}
-and \code{\link[MSnbase]{impute}}.}
+and \code{\link[MSnbase:impute-methods]{impute}}.}
 
 \item{type}{'all', 'control' or 'manual',
 The type of contrasts that will be generated.}

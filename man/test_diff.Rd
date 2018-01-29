@@ -40,7 +40,7 @@ containing FDR estimates of differential expression.
 \description{
 \code{test_diff} performs a differential enrichment test based on
 protein-wise linear models and empirical Bayes
-statistics using \code{\link[limma]{limma}}.
+statistics using \code{\link[limma:limma-package]{limma}}.
 }
 \examples{
 # Load example

@@ -705,9 +705,9 @@ se2msn <- function(se) {
 #' @param fun "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "man", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
-#' and \code{\link[MSnbase]{impute}}.
+#' and \code{\link[MSnbase:impute-methods]{impute}}.
 #' @param ... Additional arguments for imputation functions as depicted in
-#' \code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.
+#' \code{\link{manual_impute}} and \code{\link[MSnbase:impute-methods]{impute}}.
 #' @return An imputed SummarizedExperiment object.
 #' @examples
 #' # Load example
@@ -779,7 +779,7 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 #'
 #' \code{test_diff} performs a differential enrichment test based on
 #' protein-wise linear models and empirical Bayes
-#' statistics using \code{\link[limma]{limma}}.
+#' statistics using \code{\link[limma:limma-package]{limma}}.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics data (output from \code{\link{make_se}()} or
@@ -1148,7 +1148,7 @@ get_results <- function(dep) {
     gather(ID, val, -rowname) %>%
     left_join(., data.frame(colData(dep)), by = "ID")
   centered <- group_by(centered, rowname, condition) %>%
-    summarize(val = mean(val)) %>%
+    summarize(val = mean(val, na.rm = TRUE)) %>%
     mutate(val = signif(val, digits = 3)) %>%
     spread(condition, val)
   colnames(centered)[2:ncol(centered)] <-

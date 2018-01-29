@@ -22,10 +22,10 @@ Sets the threshold for the allowed number of missing values per condition.}
 \item{fun}{"man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 "MinProb", "min", "zero", "mixed" or "nbavg",
 Function used for data imputation based on \code{\link{manual_impute}}
-and \code{\link[MSnbase]{impute}}.}
+and \code{\link[MSnbase:impute-methods]{impute}}.}
 
 \item{...}{Additional arguments for imputation functions as depicted in
-\code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.}
+\code{\link{manual_impute}} and \code{\link[MSnbase:impute-methods]{impute}}.}
 }
 \value{
 A filtered, normalized and imputed SummarizedExperiment object.

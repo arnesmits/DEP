@@ -182,9 +182,9 @@ import_IsobarQuant <- function(proteins,
 #' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
-#' and \code{\link[MSnbase]{impute}}.
+#' and \code{\link[MSnbase:impute-methods]{impute}}.
 #' @param ... Additional arguments for imputation functions as depicted in
-#' \code{\link{manual_impute}} and \code{\link[MSnbase]{impute}}.
+#' \code{\link{manual_impute}} and \code{\link[MSnbase:impute-methods]{impute}}.
 #' @return A filtered, normalized and imputed SummarizedExperiment object.
 #' @examples
 #' # Load datasets
@@ -227,7 +227,7 @@ process <- function(se, thr = 0, fun = c("man", "bpca", "knn", "QRILC", "MLE",
 #'
 #' \code{analyze_dep} tests for differential expression of proteins
 #' based on protein-wise linear models and empirical Bayes
-#' statistics using \code{\link[limma]{limma}}.
+#' statistics using \code{\link[limma:limma-package]{limma}}.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics data with unique names and identifiers

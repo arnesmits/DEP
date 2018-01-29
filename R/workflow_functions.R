@@ -14,7 +14,7 @@
 #' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
-#' and \code{\link[MSnbase]{impute}}.
+#' and \code{\link[MSnbase:impute-methods]{impute}}.
 #' @param control Character(1),
 #' The sample name to which the contrasts are generated
 #' (the control sample would be most appropriate).
@@ -146,7 +146,7 @@ TMT <- function(proteins, expdesign,
 #' @param fun "man", "bpca", "knn", "QRILC", "MLE", "MinDet",
 #' "MinProb", "min", "zero", "mixed" or "nbavg",
 #' Function used for data imputation based on \code{\link{manual_impute}}
-#' and \code{\link[MSnbase]{impute}}.
+#' and \code{\link[MSnbase:impute-methods]{impute}}.
 #' @param control Character(1),
 #' The sample name to which the contrasts are generated
 #' (the control sample would be most appropriate).
@@ -289,7 +289,7 @@ LFQ <- function(proteins, expdesign,
 #'
 #' @param results List of SummarizedExperiment objects obtained
 #' from the \code{\link{LFQ}} or \code{\link{TMT}} wrapper functions.
-#' @return A \code{\link[rmarkdown]{rmarkdown}} report is generated and saved.
+#' @return A \code{\link[rmarkdown:rmarkdown-package]{rmarkdown}} report is generated and saved.
 #' Additionally, the results table is saved as a tab-delimited txt file.
 #' @examples
 #' \dontrun{
