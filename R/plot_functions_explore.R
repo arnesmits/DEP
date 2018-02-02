@@ -179,7 +179,7 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 #' @param upper Integer(1),
 #' Sets the upper limit of the color scale.
 #' @param pal Character(1),
-#' Sets the color panel (from \code{\link[RColorBrewer]{RColorBrewer}}).
+#' Sets the color panel (from \pkg{RColorBrewer}).
 #' @param pal_rev Logical(1),
 #' Whether or not to invert the color palette.
 #' @param indicate Character,
@@ -350,7 +350,7 @@ plot_cor <- function(dep, significant = TRUE, lower = -1, upper = 1,
 #' @param significant Logical(1),
 #' Whether or not to filter for significant proteins.
 #' @param pal Character(1),
-#' Sets the color panel (from \code{\link[RColorBrewer]{brewer.pal}}).
+#' Sets the color panel (from \pkg{RColorBrewer}).
 #' @param pal_rev Logical(1),
 #' Whether or not to invert the color palette.
 #' @param indicate Character,

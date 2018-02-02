@@ -16,7 +16,7 @@ Data object for which differentially enriched proteins are annotated
 Whether or not to filter for significant proteins.}
 
 \item{pal}{Character(1),
-Sets the color panel (from \code{\link[RColorBrewer]{brewer.pal}}).}
+Sets the color panel (from \pkg{RColorBrewer}).}
 
 \item{pal_rev}{Logical(1),
 Whether or not to invert the color palette.}

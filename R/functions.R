@@ -779,7 +779,7 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 #'
 #' \code{test_diff} performs a differential enrichment test based on
 #' protein-wise linear models and empirical Bayes
-#' statistics using \code{\link[limma:limma-package]{limma}}.
+#' statistics using \pkg{limma}.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics data (output from \code{\link{make_se}()} or

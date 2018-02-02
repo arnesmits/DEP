@@ -227,7 +227,7 @@ process <- function(se, thr = 0, fun = c("man", "bpca", "knn", "QRILC", "MLE",
 #'
 #' \code{analyze_dep} tests for differential expression of proteins
 #' based on protein-wise linear models and empirical Bayes
-#' statistics using \code{\link[limma:limma-package]{limma}}.
+#' statistics using \pkg{limma}.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics data with unique names and identifiers

@@ -22,7 +22,7 @@ Sets the lower limit of the color scale.}
 Sets the upper limit of the color scale.}
 
 \item{pal}{Character(1),
-Sets the color panel (from \code{\link[RColorBrewer]{RColorBrewer}}).}
+Sets the color panel (from \pkg{RColorBrewer}).}
 
 \item{pal_rev}{Logical(1),
 Whether or not to invert the color palette.}
