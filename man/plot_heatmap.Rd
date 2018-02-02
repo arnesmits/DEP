@@ -8,7 +8,7 @@ plot_heatmap(dep, type = c("contrast", "centered"), kmeans = FALSE, k = 6,
   col_limit = 6, indicate = NULL, clustering_distance = c("euclidean",
   "maximum", "manhattan", "canberra", "binary", "minkowski", "pearson",
   "spearman", "kendall", "gower"), row_font_size = 6, col_font_size = 10,
-  ...)
+  plot = TRUE, ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
@@ -45,6 +45,11 @@ Sets the size of row labels.}
 
 \item{col_font_size}{Integer(1),
 Sets the size of column labels.}
+
+\item{plot}{Logical(1),
+If \code{TRUE} (default) the heatmap is produced.
+Otherwise (if \code{FALSE}), the data which the
+heatmap is based on are returned.}
 
 \item{...}{Additional arguments for Heatmap function as depicted in
 \code{\link[ComplexHeatmap]{Heatmap}}}

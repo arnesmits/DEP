@@ -4,11 +4,16 @@
 \alias{plot_frequency}
 \title{Plot protein overlap between samples}
 \usage{
-plot_frequency(se)
+plot_frequency(se, plot = TRUE)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
 Data object for which to plot observation frequency.}
+
+\item{plot}{Logical(1),
+If \code{TRUE} (default) the barplot is produced.
+Otherwise (if \code{FALSE}), the data which the
+barplot is based on are returned.}
 }
 \value{
 Barplot of overlap of protein identifications

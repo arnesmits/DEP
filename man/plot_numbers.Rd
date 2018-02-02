@@ -4,12 +4,17 @@
 \alias{plot_numbers}
 \title{Plot protein numbers}
 \usage{
-plot_numbers(se)
+plot_numbers(se, plot = TRUE)
 }
 \arguments{
 \item{se}{SummarizedExperiment,
 Data object for which to plot protein numbers
 (output from \code{\link{make_se}()} or \code{\link{make_se_parse}()}).}
+
+\item{plot}{Logical(1),
+If \code{TRUE} (default) the barplot is produced.
+Otherwise (if \code{FALSE}), the data which the
+barplot is based on are returned.}
 }
 \value{
 Barplot of the number of identified proteins per sample

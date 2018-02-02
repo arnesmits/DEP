@@ -5,7 +5,7 @@
 \title{Plot Gower's distance matrix}
 \usage{
 plot_dist(dep, significant = TRUE, pal = "YlOrRd", pal_rev = TRUE,
-  indicate = NULL, font_size = 12, ...)
+  indicate = NULL, font_size = 12, plot = TRUE, ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
@@ -27,6 +27,11 @@ based on columns from the experimental design (colData).}
 
 \item{font_size}{Integer(1),
 Sets the size of the labels.}
+
+\item{plot}{Logical(1),
+If \code{TRUE} (default) the distance matrix plot is produced.
+Otherwise (if \code{FALSE}), the data which the
+distance matrix plot is based on are returned.}
 
 \item{...}{Additional arguments for Heatmap function as depicted in
 \code{\link[ComplexHeatmap]{Heatmap}}}

@@ -42,20 +42,20 @@
 #' meanSdPlot(norm)
 #' @export
 meanSdPlot <- function(x,
-                   ranks = TRUE,
-                   xlab = ifelse(ranks, "rank(mean)", "mean"),
-                   ylab = "sd",
-                   pch,
-                   plot = TRUE,
-                   bins = 50,
-                   ...) {
+  ranks = TRUE,
+  xlab = ifelse(ranks, "rank(mean)", "mean"),
+  ylab = "sd",
+  pch,
+  plot = TRUE,
+  bins = 50,
+  ...) {
   vsn::meanSdPlot(assay(x),
-                  ranks = ranks,
-                  xlab = xlab,
-                  ylab = ylab,
-                  pch = pch,
-                  plot = plot,
-                  ...)
+    ranks = ranks,
+    xlab = xlab,
+    ylab = ylab,
+    pch = pch,
+    plot = plot,
+    ...)
 }
 
 #' Visualize normalization
@@ -93,7 +93,7 @@ meanSdPlot <- function(x,
 plot_normalization <- function(raw, norm) {
     # Show error if inputs are not the required classes
     assertthat::assert_that(inherits(raw, "SummarizedExperiment"),
-                            inherits(norm, "SummarizedExperiment"))
+      inherits(norm, "SummarizedExperiment"))
 
     # Show error if inputs do not contain required columns
     if (any(!c("label", "ID", "condition", "replicate") %in% colnames(colData(raw)))) {

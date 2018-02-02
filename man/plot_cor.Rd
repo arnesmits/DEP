@@ -5,7 +5,7 @@
 \title{Plot correlation matrix}
 \usage{
 plot_cor(dep, significant = TRUE, lower = -1, upper = 1, pal = "PRGn",
-  pal_rev = FALSE, indicate = NULL, font_size = 12, ...)
+  pal_rev = FALSE, indicate = NULL, font_size = 12, plot = TRUE, ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,
@@ -33,6 +33,11 @@ based on columns from the experimental design (colData).}
 
 \item{font_size}{Integer(1),
 Sets the size of the labels.}
+
+\item{plot}{Logical(1),
+If \code{TRUE} (default) the correlation matrix plot is produced.
+Otherwise (if \code{FALSE}), the data which the
+correlation matrix plot is based on are returned.}
 
 \item{...}{Additional arguments for Heatmap function as depicted in
 \code{\link[ComplexHeatmap]{Heatmap}}}
