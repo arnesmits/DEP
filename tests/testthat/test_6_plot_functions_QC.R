@@ -5,8 +5,7 @@ test_that("meanSdPlot returns a list object", {
 })
 
 test_that("plot_normalization throws error without valid input", {
-  expect_error(plot_normalization("test_filter", test_vsn))
-  expect_error(plot_normalization(test_filter, "test_vsn"))
+  expect_error(plot_normalization(test_data))
 
   test_filter_error <- test_filter
   SummarizedExperiment::colData(test_filter_error) <- SummarizedExperiment::colData(test_filter_error)[,-(3)]
@@ -22,8 +21,7 @@ test_that("plot_normalization returns a ggplot object", {
 })
 
 test_that("plot_imputation throws error without valid input", {
-  expect_error(plot_imputation("test_vsn", test_impute))
-  expect_error(plot_imputation(test_vsn, "test_impute"))
+  expect_error(plot_imputation(test_data))
 
   test_vsn_error <- test_vsn
   SummarizedExperiment::colData(test_vsn_error) <- SummarizedExperiment::colData(test_vsn_error)[,-(3)]
