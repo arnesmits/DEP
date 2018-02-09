@@ -24,12 +24,12 @@
 make_unique <- function(proteins, names, ids, delim = ";") {
   # Show error if inputs are not the required classes
   assertthat::assert_that(is.data.frame(proteins),
-                          is.character(names),
-                          length(names) == 1,
-                          is.character(ids),
-                          length(ids) == 1,
-                          is.character(delim),
-                          length(delim) == 1)
+    is.character(names),
+    length(names) == 1,
+    is.character(ids),
+    length(ids) == 1,
+    is.character(delim),
+    length(delim) == 1)
 
   col_names <- colnames(proteins)
   # Show error if inputs do not contain required columns
@@ -58,8 +58,8 @@ make_unique <- function(proteins, names, ids, delim = ";") {
   # If there is no name, the ID will be taken.
   proteins_unique <- proteins %>%
     mutate(name = gsub(paste0(delim, ".*"), "", get(names)),
-           ID = gsub(paste0(delim, ".*"), "", get(ids)),
-           name = make.unique(ifelse(name == "" | is.na(name), ID, name)))
+      ID = gsub(paste0(delim, ".*"), "", get(ids)),
+      name = make.unique(ifelse(name == "" | is.na(name), ID, name)))
   return(proteins_unique)
 }
 

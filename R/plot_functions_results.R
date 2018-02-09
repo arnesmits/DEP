@@ -446,7 +446,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
   if(clustering_distance == "gower") {
     clustering_distance <- function(x) {
       dist <- cluster::daisy(x, metric = "gower")
-      dist[is.na(dist)] <- 1
+      dist[is.na(dist)] <- max(dist, na.rm = TRUE)
       return(dist)
     }
   }
