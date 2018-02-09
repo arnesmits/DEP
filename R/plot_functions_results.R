@@ -412,12 +412,12 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
       # in all samples averaged over the proteins in the cluster
       order <- data.frame(df) %>%
         cbind(., cluster = df_kmeans$cluster) %>%
-        mutate(row = apply(.[, 1:(ncol(.) - 1)], 1, function(x) max(x))) %>%
+        mutate(row = apply(.[, seq_len(ncol(.) - 1)], 1, function(x) max(x))) %>%
         group_by(cluster) %>%
         summarize(index = sum(row)/n()) %>%
         arrange(desc(index)) %>%
         pull(cluster) %>%
-        match(seq(1:k), .)
+        match(seq_len(k), .)
       df_kmeans$cluster <- order[df_kmeans$cluster]
     }
     if(type == "contrast") {
@@ -428,7 +428,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
         summarize(row = mean(diff)) %>%
         arrange(desc(row)) %>%
         pull(cluster) %>%
-        match(seq(1:k), .)
+        match(seq_len(k), .)
       df_kmeans$cluster <- order[df_kmeans$cluster]
     }
   }
@@ -652,7 +652,7 @@ plot_volcano <- function(dep, contrast, label_size = 3,
     df <- df %>%
       select(name, x, y, significant) %>%
       arrange(desc(x))
-    colnames(df)[1:3] <- c("protein", "log2_fold_change", "p_value_-log10")
+    colnames(df)[c(1,2,3)] <- c("protein", "log2_fold_change", "p_value_-log10")
     if(adjusted) {
       colnames(df)[3] <- "adjusted_p_value_-log10"
     }

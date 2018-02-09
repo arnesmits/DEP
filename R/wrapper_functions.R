@@ -586,7 +586,7 @@ get_table <- function(results, type = c("centered", "contrast")) {
   if(type == "centered") {
     cols <- grep("_ratio", colnames(significant))
     table <- significant[,-cols]
-    colnames(table)[1:2] <- c("Protein Name", "Protein ID")
+    colnames(table)[c(1,2)] <- c("Protein Name", "Protein ID")
     colnames(table)[grep("significant", colnames(table))] <-
       gsub("[.]", " - ", colnames(table)[grep("significant", colnames(table))])
     colnames(table) <- gsub("_centered", "", colnames(table)) %>% gsub("[_]", " ", .)
@@ -595,7 +595,7 @@ get_table <- function(results, type = c("centered", "contrast")) {
   if(type == "contrast") {
     cols <- grep("_centered", colnames(significant))
     table <- significant[,-cols]
-    colnames(table)[1:2] <- c("Protein Name", "Protein ID")
+    colnames(table)[c(1,2)] <- c("Protein Name", "Protein ID")
     colnames(table)[grep("significant", colnames(table))] <-
       gsub("[.]", " - ", colnames(table)[grep("significant", colnames(table))])
     colnames(table) <- gsub("_ratio", "", colnames(table)) %>% gsub("[_]", " ", .)

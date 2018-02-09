@@ -1,6 +1,6 @@
 Package: DEP
 Title: Differential Enrichment analysis of Proteomics data
-Version: 1.1.3
+Version: 1.1.4
 Authors@R: c(
     person("Arne", "Smits", email = "arne.smits@embl.de", role = c("cre", "aut")),
     person("Wolfgang", "Huber", email = "wolfgang.huber@embl.de", role = "aut"))
@@ -21,10 +21,10 @@ Description: This package provides an integrated analysis workflow for robust
     analysis workflow and generate a report. Even easier to use are the 
     interactive Shiny apps that are provided by the package.
 License: Artistic-2.0
-Depends: R (>= 3.4)
+Depends: R (>= 3.5)
 Encoding: UTF-8
 LazyData: true
-Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr, broom, Biobase, 
+Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr,
     SummarizedExperiment, MSnbase, limma, vsn, fdrtool, ggrepel, 
     ComplexHeatmap, RColorBrewer, circlize, shiny, shinydashboard, 
     DT, rmarkdown, assertthat, gridExtra, grid, stats, imputeLCMD, cluster

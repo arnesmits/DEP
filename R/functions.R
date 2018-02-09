@@ -243,7 +243,7 @@ get_suffix <- function(words) {
   rev_string <- function(str) {
     paste(rev(strsplit(str, "")[[1]]), collapse = "")
   }
-  rev_truncated <- sapply(truncated, rev_string)
+  rev_truncated <- vapply(truncated, rev_string, character(1))
 
   # Get identifical characters
   mat <- data.frame(strsplit(rev_truncated, ""), stringsAsFactors = FALSE)

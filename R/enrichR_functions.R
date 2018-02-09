@@ -308,7 +308,7 @@ plot_gsea <- function(gsea_results, number = 10, alpha = 0.05,
     group_by(contrast, var) %>%
     filter(Adjusted.P.value <= alpha) %>%
     arrange(Adjusted.P.value) %>%
-    dplyr::slice(1:number) %>%
+    dplyr::slice(seq_len(number)) %>%
     .$Term
   subset <- gsea_results %>%
     filter(Term %in% terms) %>%

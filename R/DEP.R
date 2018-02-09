@@ -165,7 +165,6 @@
 #' @importFrom purrr map_df
 #' @importFrom readr parse_factor
 #' @importFrom stats median model.matrix rnorm sd cor prcomp formula terms.formula
-#' @importFrom broom tidy
 #' @importFrom cluster daisy
 #'
 #'

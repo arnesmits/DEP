@@ -96,7 +96,7 @@ plot_normalization <- function(se, ...) {
   # Get arguments from call
   call <- match.call()
   arglist <- lapply(call[-1], function(x) x)
-  var.names <- sapply(arglist, deparse)
+  var.names <- vapply(arglist, deparse, character(1))
   arglist <- lapply(arglist, eval.parent, n = 2)
   names(arglist) <- var.names
 
@@ -172,7 +172,7 @@ plot_imputation <- function(se, ...) {
   # Get arguments from call
   call <- match.call()
   arglist <- lapply(call[-1], function(x) x)
-  var.names <- sapply(arglist, deparse)
+  var.names <- vapply(arglist, deparse, character(1))
   arglist <- lapply(arglist, eval.parent, n = 2)
   names(arglist) <- var.names
 

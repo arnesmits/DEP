@@ -55,7 +55,7 @@ plot_numbers <- function(se, plot = TRUE) {
     return(p)
   } else {
     df <- as.data.frame(stat)
-    colnames(df)[1:3] <- c("sample", "total_proteins", "proteins_in_sample")
+    colnames(df)[seq_len(3)] <- c("sample", "total_proteins", "proteins_in_sample")
     return(df)
   }
 }
@@ -358,10 +358,10 @@ plot_cond_overlap <- function(dep, plot = TRUE) {
     filter(Freq > 0)
 
   # Parse condition names
-  mat <- counts[,1:(ncol(counts)-1)] == TRUE
+  mat <- counts[,seq_len(ncol(counts)-1)] == TRUE
   counts$conditions <-
     apply(mat, 1, function(x) {
-      paste0(colnames(counts[,1:(ncol(counts)-1)])[x], collapse = " ")
+      paste0(colnames(counts[,seq_len(ncol(counts)-1)])[x], collapse = " ")
     })
 
   # Sort on number of conditions
@@ -479,10 +479,10 @@ plot_cond <- function(dep, plot = TRUE) {
     filter(Freq > 0)
 
   # Parse condition names
-  mat <- counts[,1:(ncol(counts)-1)] == TRUE
+  mat <- counts[,seq_len(ncol(counts)-1)] == TRUE
   counts$conditions <-
     apply(mat, 1, function(x) {
-      paste0(colnames(counts[,1:(ncol(counts)-1)])[x], collapse = " ")
+      paste0(colnames(counts[,seq_len(ncol(counts)-1)])[x], collapse = " ")
     })
 
   # Sort on number of conditions

@@ -111,7 +111,7 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
 
   # Get the variance per protein and take the top n variable proteins
   var <- apply(assay(dep), 1, sd)
-  df <- assay(dep)[order(var, decreasing = TRUE)[1:n],]
+  df <- assay(dep)[order(var, decreasing = TRUE)[seq_len(n)],]
 
   # Calculate PCA
   pca <- prcomp(t(df), scale = FALSE)
