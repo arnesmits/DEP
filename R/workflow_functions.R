@@ -325,7 +325,10 @@ report <- function(results) {
 
     message("Render reports")
     # Render the Rmarkdown report
-    wd <- paste(getwd(), "/Report", sep = "")
+    wd <- paste(getwd(),
+      "/Report_",
+      format(Sys.time(), "%Y%m%d_%H%M%S"),
+      sep = "")
     dir.create(wd)
     file <- paste(system.file(package = "DEP"), "/Report.Rmd", sep = "")
     rmarkdown::render(file, output_format = "all",
