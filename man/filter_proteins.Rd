@@ -12,20 +12,20 @@ filter_proteins(se, type = c("complete", "condition", "percentage"),
 Proteomics data (output from \code{\link{make_se}()} or
 \code{\link{make_se_parse}()}).}
 
-\item{type}{"complete", "condition" or "percentage",
+\item{type}{"complete", "condition" or "fraction",
 Sets the type of filtering applied. "complete" will only keep
 proteins with valid values in all samples. "condition" will keep
 proteins that have a maximum of 'thr' missing values in at least
-one condition. "percentage" will keep proteins that have a certain
-percent of valid values in all samples.}
+one condition. "fraction" will keep proteins that have a certain
+fraction of valid values in all samples.}
 
 \item{thr}{Integer(1),
 Sets the threshold for the allowed number of missing values
 in at least one condition if type = "condition".}
 
 \item{min}{Numeric(1),
-Sets the threshold for the minimum percent of valid values
-allowed for any protein if type = "percentage".}
+Sets the threshold for the minimum fraction of valid values
+allowed for any protein if type = "fraction".}
 }
 \value{
 A filtered SummarizedExperiment object.

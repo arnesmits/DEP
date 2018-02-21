@@ -460,18 +460,18 @@ filter_missval <- function(se, thr = 0) {
 #' @param se SummarizedExperiment,
 #' Proteomics data (output from \code{\link{make_se}()} or
 #' \code{\link{make_se_parse}()}).
-#' @param type "complete", "condition" or "percentage",
+#' @param type "complete", "condition" or "fraction",
 #' Sets the type of filtering applied. "complete" will only keep
 #' proteins with valid values in all samples. "condition" will keep
 #' proteins that have a maximum of 'thr' missing values in at least
-#' one condition. "percentage" will keep proteins that have a certain
-#' percent of valid values in all samples.
+#' one condition. "fraction" will keep proteins that have a certain
+#' fraction of valid values in all samples.
 #' @param thr Integer(1),
 #' Sets the threshold for the allowed number of missing values
 #' in at least one condition if type = "condition".
 #' @param min Numeric(1),
-#' Sets the threshold for the minimum percent of valid values
-#' allowed for any protein if type = "percentage".
+#' Sets the threshold for the minimum fraction of valid values
+#' allowed for any protein if type = "fraction".
 #' @return A filtered SummarizedExperiment object.
 #' @examples
 #' # Load example
@@ -488,7 +488,7 @@ filter_missval <- function(se, thr = 0) {
 #' stringent_filter <- filter_proteins(se, type = "complete")
 #' less_stringent_filter <- filter_proteins(se, type = "condition", thr = 0)
 #' @export
-filter_proteins <- function(se, type = c("complete", "condition", "percentage"),
+filter_proteins <- function(se, type = c("complete", "condition", "fraction"),
                             thr = NULL, min = NULL) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(se, "SummarizedExperiment"))
@@ -524,7 +524,7 @@ filter_proteins <- function(se, type = c("complete", "condition", "percentage"),
 
     filtered <- filter_missval(se, thr = thr)
   }
-  if(type == "percentage") {
+  if(type == "fraction") {
     assertthat::assert_that(is.numeric(min),
                             length(min) == 1)
     if(min < 0 | min > 1) {
