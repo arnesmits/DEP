@@ -40,9 +40,22 @@ and which proteins are differentially expressed between the control and sample c
 
 We generate a dataset with 3300 proteins, 
 of which 300 proteins are differentially expressed.
+The variables used to generate the data are depicted below.
+
+```{r variables}
+# Variables
+replicates = 3
+bg_proteins = 3000
+DE_proteins = 300
+log2_mean_bg = 27
+log2_sd_bg = 2
+log2_mean_DE_control = 25
+log2_mean_DE_treatment = 30
+log2_sd_DE = 2
+```
 
 ```{r simulate_data}
-# Loading DEP and a packages required for data handling
+# Loading DEP and packages required for data handling
 library("DEP")
 library("dplyr")
 library("tidyr")
@@ -50,42 +63,42 @@ library("purrr")
 library("ggplot2")
 library("SummarizedExperiment")
 
-# Generate simulated data
+# Background data (sampled from null distribution)
+sim_null <- data_frame(
+  name = paste0("bg_", rep(1:bg_proteins, rep((2*replicates), bg_proteins))),
+  ID = rep(1:bg_proteins, rep((2*replicates), bg_proteins)),
+  var = rep(c("control_1", "control_2", "control_3", 
+    "treatment_1", "treatment_2", "treatment_3"), bg_proteins), 
+  val = 2^rnorm(2*replicates*bg_proteins, mean = log2_mean_bg, sd = log2_sd_bg))
 
-# Background data (null distribution)
-sim_null <- data.frame(
-  name = paste0("Prot_BG_", rep(1:3000, rep(6, 3000))),
-  ID = paste0("X", rep(1:3000, rep(6, 3000))),
-  var = rep(c("con_1", "con_2", "con_3", 
-    "sample_1", "sample_2", "sample_3"), 3000), 
-  val = 2^rnorm(18000, mean = 27, sd = 2),
-  stringsAsFactors = FALSE)
-
-# Differentially expressed data
+# Data for DE proteins (sampled from alternative distribution)
 sim_diff <- rbind(
-  data.frame(
-    name = paste0("Prot_DE_", rep(1:300, rep(3, 300))),
-    ID = paste0("X", rep(3001:3300, rep(3, 300))),
-    var = rep(c("con_1", "con_2", "con_3"), 300), 
-    val = 2^rnorm(900, mean = 25, sd = 2),
-    stringsAsFactors = FALSE),
-  data.frame(
-    name = paste0("Prot_DE_", rep(1:300, rep(3, 300))),
-    ID = paste0("X", rep(3001:3300, rep(3, 300))),
-    var = rep(c("sample_1", "sample_2", "sample_3"), 300),
-    val = 2^rnorm(900, mean = 30, sd = 2)),
-  stringsAsFactors = FALSE)
+  data_frame(
+    name = paste0("DE_", rep(1:DE_proteins, rep(replicates, DE_proteins))),
+    ID = rep((bg_proteins+1):(bg_proteins+DE_proteins), 
+      rep(replicates, DE_proteins)),
+    var = rep(c("control_1", "control_2", "control_3"), DE_proteins), 
+    val = 2^rnorm(replicates*DE_proteins, 
+      mean = log2_mean_DE_control, sd = log2_sd_DE)),
+  data_frame(
+    name = paste0("DE_", rep(1:DE_proteins, rep(replicates, DE_proteins))),
+    ID = rep((bg_proteins+1):(bg_proteins+DE_proteins), 
+      rep(replicates, DE_proteins)),
+    var = rep(c("treatment_1", "treatment_2", "treatment_3"), DE_proteins),
+    val = 2^rnorm(replicates*DE_proteins, 
+      mean = log2_mean_DE_treatment, sd = log2_sd_DE)))
 
 # Combine null and DE data
 sim <- rbind(sim_null, sim_diff) %>% 
-  spread(var, val)
+  spread(var, val) %>% 
+  arrange(ID)
 
 # Generate experimental design
-experimental_design <- data.frame(
-  label = colnames(sim[,3:8]),
-  condition = c(rep("control", 3), rep("sample", 3)),
-  replicate = rep(1:3, 2),
-  stringsAsFactors = FALSE)
+experimental_design <- data_frame(
+  label = colnames(sim)[!colnames(sim) %in% c("name", "ID")],
+  condition = c(rep("control", replicates), 
+    rep("treatment", replicates)),
+  replicate = rep(1:replicates, 2))
 ```
 
 ## Introduce missing values
@@ -100,22 +113,35 @@ To mimick these two types of missing values,
 we introduce missing values randomly over all data points (MAR)
 and we introduce missing values in the control samples of
 100 differentially expressed proteins (MNAR).
+The variables used to introduce missing values are depicted below.
+
+```{r missing_values_variables}
+# Variables
+MAR_fraction = 0.05
+MNAR_proteins = 100
+```
 
 ```{r add_missing_values}
 # Generate a MAR matrix
 MAR_matrix <- matrix(
-  data = sample(c(TRUE, FALSE), size = 19800, 
-    replace = TRUE, prob = c(0.05, 0.95)), 
-  nrow = 3300 , 
-  ncol = 6)
+  data = sample(c(TRUE, FALSE), 
+    size = 2*replicates*(bg_proteins+DE_proteins), 
+    replace = TRUE, 
+    prob = c(MAR_fraction, 1-MAR_fraction)), 
+  nrow = bg_proteins+DE_proteins, 
+  ncol = 2*replicates)
 
-# Introduce missing values at random
-sim[, 3:8][MAR_matrix] <- 0
+# Introduce missing values at random (MAR)
+controls <- grep("control", colnames(sim))
+treatments <- grep("treatment", colnames(sim))
+sim[, c(controls, treatments)][MAR_matrix] <- 0
 sim$MAR <- apply(MAR_matrix, 1, any)
 
-# Introduce missing values not at random
-sim[sim$ID %in% paste0("X", 3201:3300), 3:5] <- 0
-sim$MNAR <- ifelse(sim$ID %in% paste0("X", 3201:3300), TRUE, FALSE)
+# Introduce missing values not at random (MNAR)
+DE_protein_IDs <- grep("DE", sim$name)
+sim[DE_protein_IDs[1:MNAR_proteins], controls] <- 0
+sim$MNAR <- FALSE
+sim$MNAR[DE_protein_IDs[1:MNAR_proteins]] <- TRUE
 ```
 
 ## Generate a SummarizedExperiment
@@ -126,7 +152,7 @@ as described in the 'Introduction to DEP' vignette.
 ```{r generate_SE}
 # Generate a SummarizedExperiment object
 sim_unique_names <- make_unique(sim, "name", "ID", delim = ";")
-se <- make_se(sim_unique_names, 3:8, experimental_design)
+se <- make_se(sim_unique_names, c(controls, treatments), experimental_design)
 ```
 
 # Filter proteins based on missing values
@@ -150,7 +176,7 @@ only a small subset of proteins were detected in less than half of the samples.
 
 We can choose to not filter out any proteins at all,
 filter for only the proteins without missing values,
-filter for proteins with a certain percentage of quantified samples, and
+filter for proteins with a certain fraction of quantified samples, and
 for proteins that are quantified in all replicates of at least one condition.
 
 ```{r filter_proteins}
@@ -159,16 +185,41 @@ no_filter <- se
 
 # Filter for proteins that are quantified in all replicates of at least one condition
 condition_filter <- filter_proteins(se, "condition", thr = 0)
-nrow(condition_filter)
 
 # Filter for proteins that have no missing values
 complete_cases <- filter_proteins(se, "complete")
-nrow(complete_cases)
 
 # Filter for proteins that are quantified in at least 2/3 of the samples.
-perc_filtered <- filter_proteins(se, "percentage", min = 0.66)
-nrow(perc_filtered)
+frac_filtered <- filter_proteins(se, "fraction", min = 0.66)
 ```
+
+To check the consequences of filtering, we calculate the number of background 
+and DE proteins left in the dataset.
+
+```{r filter_consequences}
+# Function to extract number of proteins
+number_prots <- function(se) {
+  names <- rownames(get(se))
+  data_frame(Dataset = se,
+    bg_proteins = sum(grepl("bg", names)),
+    DE_proteins = sum(grepl("DE", names)))
+}
+
+# Number of bg and DE proteins still included
+objects <- c("no_filter", 
+  "condition_filter",
+  "complete_cases",
+  "frac_filtered")
+
+map_df(objects, number_prots)
+```
+
+For our simulated dataset, filtering for complete cases drastically reduces
+the number of proteins, only keeping half of the DE proteins. Filtering protein
+to be quantified in at least 2/3 of the samples, keeps many more DE proteins and
+filters out all proteins with values MNAR. Filtering for proteins quantified in
+all replicates of at least one condition only filters out a minimal amount of
+DE proteins.
 
 ## Scaling and variance stabilization
 
@@ -179,7 +230,7 @@ The data is scaled and variance stabilized using `r Biocpkg("vsn") `.
 no_filter <- normalize_vsn(se)
 condition_filter <- normalize_vsn(condition_filter)
 complete_cases <- normalize_vsn(complete_cases)
-perc_filtered <- normalize_vsn(perc_filtered)
+frac_filtered <- normalize_vsn(frac_filtered)
 ```
 
 ```{r plot_norm, fig.width = 4, fig.height = 5}
@@ -278,8 +329,8 @@ if it has missing values in all replicates of at least one condition.
 # in all replicates of at least one condition
 proteins_MNAR <- get_df_long(no_filter) %>%
   group_by(name, condition) %>%
-  summarize(NAs = sum(is.na(intensity))) %>% 
-  filter(NAs == 3) %>% 
+  summarize(NAs = all(is.na(intensity))) %>% 
+  filter(NAs) %>% 
   pull(name) %>% 
   unique()
 
@@ -357,21 +408,20 @@ As an initial parameter we look at the number of
 differentially expressed proteins identified (adjusted P ≤ 0.05).
 
 ```{r rejections}
+# Function to extract number of DE proteins
+DE_prots <- function(results) {
+  data_frame(Dataset = gsub("_results", "", results),
+    significant_proteins = get(results) %>% 
+      filter(significant) %>% 
+      nrow())
+}
+
+# Number of significant proteins
 objects <- c("no_imputation_results", 
   "knn_imputation_results",
   "MinProb_imputation_results",
   "mixed_imputation_results")
 
-# Function to extract number of DE proteins
-DE_prots <- function(results) {
-  data.frame(Dataset = gsub("_results", "", results),
-    DE_proteins = get(results) %>% 
-      filter(significant) %>% 
-      nrow(),
-    stringsAsFactors = FALSE)
-}
-
-# Number of DE proteins
 map_df(objects, DE_prots)
 ```
 
@@ -395,11 +445,11 @@ ROC curves are plotted.
 # Function to obtain ROC data
 get_ROC_df <- function(results) {
   get(results) %>% 
-    select(name, sample_vs_control_p.val, significant) %>% 
+    select(name, treatment_vs_control_p.val, significant) %>% 
     mutate(
       DE = grepl("DE", name),
-      BG = grepl("BG", name)) %>% 
-    arrange(sample_vs_control_p.val) %>% 
+      BG = grepl("bg", name)) %>% 
+    arrange(treatment_vs_control_p.val) %>% 
     mutate(
       TPR = cumsum(as.numeric(DE)) / 300,
       FPR = cumsum(as.numeric(BG)) / 3000,
@@ -446,9 +496,10 @@ get_rejected_proteins <- function(results) {
     left_join(., select(sim, name, MAR, MNAR), by = "name") %>% 
     mutate(
       DE = grepl("DE", name),
-      BG = grepl("BG", name),
+      BG = grepl("bg", name),
       method = results)
 }
+
 # Get summary data for no, knn, MinProb and mixed imputation
 objects <- c("no_imputation_results", 
   "knn_imputation_results",
