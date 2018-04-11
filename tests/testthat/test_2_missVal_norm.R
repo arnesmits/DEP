@@ -48,7 +48,7 @@ test_that("filter_proteins throws error without valid input", {
 test_that("filter_proteins returns a SummarizedExperiment", {
   expect_is(filter_proteins(test_se, "complete"), "SummarizedExperiment")
   expect_is(filter_proteins(test_se, "condition", thr = 0), "SummarizedExperiment")
-  expect_is(filter_proteins(test_se, "percentage", min = 0.5), "SummarizedExperiment")
+  expect_is(filter_proteins(test_se, "fraction", min = 0.5), "SummarizedExperiment")
 })
 
 test_that("filter_proteins returns correct number of rows", {
@@ -56,8 +56,8 @@ test_that("filter_proteins returns correct number of rows", {
   expect_equal(filter_proteins(test_se, "condition", thr = 1) %>% nrow(), 243)
   expect_equal(filter_proteins(test_se, "condition", thr = 2) %>% nrow(), 393)
   expect_equal(filter_proteins(test_se, "complete") %>% nrow(), 75)
-  expect_equal(filter_proteins(test_se, "percentage", min = 0.5) %>% nrow(), 152)
-  expect_equal(filter_proteins(test_se, "percentage", min = 0.25) %>% nrow(), 214)
+  expect_equal(filter_proteins(test_se, "fraction", min = 0.5) %>% nrow(), 152)
+  expect_equal(filter_proteins(test_se, "fraction", min = 0.25) %>% nrow(), 214)
 })
 
 test_that("normalize_vsn throws error without valid input", {
