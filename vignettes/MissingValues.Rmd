@@ -5,7 +5,7 @@ date: "`r doc_date()`"
 package: "`r pkg_ver('DEP')`"
 output: BiocStyle::html_document
 vignette: >
-  %\VignetteIndexEntry{DEP package}
+  %\VignetteIndexEntry{DEP: Missing value handling}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
