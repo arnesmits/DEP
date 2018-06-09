@@ -1,6 +1,6 @@
 Package: DEP
 Title: Differential Enrichment analysis of Proteomics data
-Version: 1.3.0
+Version: 1.3.1
 Authors@R: c(
     person("Arne", "Smits", email = "smits.arne@gmail.com", role = c("cre", "aut")),
     person("Wolfgang", "Huber", email = "wolfgang.huber@embl.de", role = "aut"))
@@ -25,7 +25,7 @@ Depends: R (>= 3.5)
 Encoding: UTF-8
 LazyData: true
 Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr,
-    SummarizedExperiment, MSnbase, limma, vsn, fdrtool, ggrepel, 
+    SummarizedExperiment (>= 1.11.5), MSnbase, limma, vsn, fdrtool, ggrepel,
     ComplexHeatmap, RColorBrewer, circlize, shiny, shinydashboard, 
     DT, rmarkdown, assertthat, gridExtra, grid, stats, imputeLCMD, cluster
 RoxygenNote: 6.0.1

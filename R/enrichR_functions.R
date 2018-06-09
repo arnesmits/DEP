@@ -61,7 +61,7 @@ test_gsea <- function(dep,
          "\nTo install the package run: install.packages('enrichR')")
   }
 
-  row_data <- rowData(dep)
+  row_data <- rowData(dep, use.names = FALSE)
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in '",

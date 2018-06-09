@@ -332,20 +332,24 @@ plot_all <- function(dep, plots = c("volcano", "heatmap",
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"),
                           is.character(plots))
 
+  # Get row data
+  row_data <- rowData(dep, use.names = FALSE)
+
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(dep)))) {
+  dep_mcolnames <- colnames(row_data)
+  if(any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun make_unique() to obtain required columns",
          call. = FALSE)
   }
-  if(length(grep("_p.adj|_diff", colnames(rowData(dep)))) < 1) {
+  if(length(grep("_p.adj|_diff", colnames(row_data))) < 1) {
     stop("'[contrast]_diff' and '[contrast]_p.adj' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun test_diff() to obtain the required columns",
          call. = FALSE)
   }
-  if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
+  if(length(grep("_significant", colnames(row_data))) < 1) {
     stop("'[contrast]_significant' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required columns",
@@ -360,9 +364,6 @@ plot_all <- function(dep, plots = c("volcano", "heatmap",
          paste0(possible_plots, collapse = "', '"), "'.",
          call. = FALSE)
   }
-
-  # Get row data
-  row_data <- rowData(dep)
 
   # Get all contrasts
   contrasts <- row_data %>%
@@ -478,7 +479,8 @@ filter_MaxQuant <- function(proteins, filter_column_names) {
 exclude_deps <- function(dep, contrasts) {
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"))
 
-  if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
+  row_data <- rowData(dep, use.names = FALSE)
+  if(length(grep("_significant", colnames(row_data))) < 1) {
     stop("'[contrast]_significant' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required columns",
@@ -488,7 +490,6 @@ exclude_deps <- function(dep, contrasts) {
   if(is.null(contrasts)) {
     filtered <- dep
   } else {
-    row_data <- rowData(dep)
     contrasts_colnames <- paste0(contrasts, "_significant")
     matches <- match(contrasts_colnames, colnames(row_data))
 
@@ -521,7 +522,8 @@ exclude_deps <- function(dep, contrasts) {
 select_deps <- function(dep, contrasts) {
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"))
 
-  if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
+  row_data <- rowData(dep, use.names = FALSE)
+  if(length(grep("_significant", colnames(row_data))) < 1) {
     stop("'[contrast]_significant' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required columns",
@@ -531,7 +533,6 @@ select_deps <- function(dep, contrasts) {
   if(is.null(contrasts)) {
     filtered <- dep
   } else {
-    row_data <- rowData(dep)
     contrasts_colnames <- paste0(contrasts, "_significant")
     matches <- match(contrasts_colnames, colnames(row_data))
 

@@ -319,14 +319,14 @@ plot_cor <- function(dep, significant = TRUE, lower = -1, upper = 1,
   if(significant) {
 
     # Check for significant column
-    if(!"significant" %in% colnames(rowData(dep))) {
+    if(!"significant" %in% colnames(rowData(dep, use.names = FALSE))) {
       stop("'significant' column is not present in '",
            deparse(substitute(dep)),
            "'\nRun add_rejections() to obtain the required column",
            call. = FALSE)
     }
 
-    dep <- dep[rowData(dep)$significant, ]
+    dep <- dep[rowData(dep, use.names = FALSE)$significant, ]
   }
 
   # Calculate correlation matrix
@@ -489,14 +489,14 @@ plot_dist <- function(
   if(significant) {
 
     # Check for significant column
-    if(!"significant" %in% colnames(rowData(dep))) {
+    if(!"significant" %in% colnames(rowData(dep, use.names = FALSE))) {
       stop("'significant' column is not present in '",
         deparse(substitute(dep)),
         "'\nRun add_rejections() to obtain the required column",
         call. = FALSE)
     }
 
-    dep <- dep[rowData(dep)$significant, ]
+    dep <- dep[rowData(dep, use.names = FALSE)$significant, ]
   }
 
   # Calculate distance matrix

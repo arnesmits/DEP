@@ -379,7 +379,7 @@ plot_p_hist <- function(dep, adjusted = FALSE, wrap = FALSE) {
     length(wrap) == 1)
 
   # Get rowData
-  row_data <- rowData(dep) %>%
+  row_data <- rowData(dep, use.names = FALSE) %>%
     data.frame()
 
   if(length(grep("_p.adj", colnames(row_data))) < 1) {

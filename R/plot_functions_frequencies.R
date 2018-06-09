@@ -231,7 +231,8 @@ plot_cond_freq <- function(dep, plot = TRUE) {
     length(plot) == 1)
 
   # Check for significance columns
-  if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
+  row_data <- rowData(dep, use.names = FALSE)
+  if(length(grep("_significant", colnames(row_data))) < 1) {
     stop("'[contrast]_significant' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required columns",
@@ -239,7 +240,7 @@ plot_cond_freq <- function(dep, plot = TRUE) {
   }
 
   # Check for significant column
-  if(!"significant" %in% colnames(rowData(dep))) {
+  if(!"significant" %in% colnames(row_data)) {
     stop("'significant' column is not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required column",
@@ -247,10 +248,10 @@ plot_cond_freq <- function(dep, plot = TRUE) {
   }
 
   # Filter for significant proteins
-  significant <- dep[rowData(dep)$significant, ]
+  significant <- dep[row_data$significant, ]
 
   # Get significant columns and count significant conditions per protein
-  row_data <- rowData(significant) %>% data.frame()
+  row_data <- rowData(significant, use.names = FALSE) %>% data.frame()
   cols <- grep("_significant", colnames(row_data))
   df <- row_data %>%
     select(name, ID, cols) %>%
@@ -322,7 +323,8 @@ plot_cond_overlap <- function(dep, plot = TRUE) {
     length(plot) == 1)
 
   # Check for significance columns
-  if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
+  row_data <- rowData(dep, use.names = FALSE)
+  if(length(grep("_significant", colnames(row_data))) < 1) {
     stop("'[contrast]_significant' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required columns",
@@ -330,7 +332,7 @@ plot_cond_overlap <- function(dep, plot = TRUE) {
   }
 
   # Check for significant column
-  if(!"significant" %in% colnames(rowData(dep))) {
+  if(!"significant" %in% colnames(row_data)) {
     stop("'significant' column is not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required column",
@@ -338,10 +340,10 @@ plot_cond_overlap <- function(dep, plot = TRUE) {
   }
 
   # Filter for significant proteins
-  significant <- dep[rowData(dep)$significant, ]
+  significant <- dep[row_data$significant, ]
 
   # Get significant columns
-  row_data <- rowData(significant) %>% data.frame()
+  row_data <- rowData(significant, use.names = FALSE) %>% data.frame()
   cols <- grep("_significant", colnames(row_data))
   colnames(row_data)[cols] <- gsub("_significant", "", colnames(row_data)[cols])
 
@@ -444,7 +446,8 @@ plot_cond <- function(dep, plot = TRUE) {
     length(plot) == 1)
 
   # Check for significance columns
-  if(length(grep("_significant", colnames(rowData(dep)))) < 1) {
+  row_data <- rowData(dep, use.names = FALSE)
+  if(length(grep("_significant", colnames(row_data))) < 1) {
     stop("'[contrast]_significant' columns are not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required columns",
@@ -452,7 +455,7 @@ plot_cond <- function(dep, plot = TRUE) {
   }
 
   # Check for significant column
-  if(!"significant" %in% colnames(rowData(dep))) {
+  if(!"significant" %in% colnames(row_data)) {
     stop("'significant' column is not present in '",
          deparse(substitute(dep)),
          "'\nRun add_rejections() to obtain the required column",
@@ -460,10 +463,10 @@ plot_cond <- function(dep, plot = TRUE) {
   }
 
   # Filter for significant proteins
-  significant <- dep[rowData(dep)$significant, ]
+  significant <- dep[row_data$significant, ]
 
   # Get significant columns
-  row_data <- rowData(significant) %>% data.frame()
+  row_data <- rowData(significant, use.names = FALSE) %>% data.frame()
   cols <- grep("_significant", colnames(row_data))
   colnames(row_data)[cols] <- gsub("_significant", "", colnames(row_data)[cols])
 

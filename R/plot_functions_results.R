@@ -53,7 +53,7 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered"), plot = 
   # Show error if inputs do not contain required columns
   type <- match.arg(type)
 
-  row_data <- rowData(dep)
+  row_data <- rowData(dep, use.names = FALSE)
 
   if(any(!c("label", "condition", "replicate") %in% colnames(colData(dep)))) {
     stop("'label', 'condition' and/or 'replicate' columns are not present in '",
@@ -144,7 +144,7 @@ plot_single <- function(dep, proteins, type = c("contrast", "centered"), plot = 
   }
   if(type == "contrast") {
     # Select values for a single protein
-    df <- rowData(subset) %>%
+    df <- rowData(subset, use.names = FALSE) %>%
       data.frame() %>%
       select(name,
              ends_with("_diff"),
@@ -334,7 +334,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
   clustering_distance <- match.arg(clustering_distance)
 
   # Extract row and col data
-  row_data <- rowData(dep)
+  row_data <- rowData(dep, use.names = FALSE)
   col_data <- colData(dep) %>%
     as.data.frame()
 
@@ -385,11 +385,11 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
   # Get centered intensity values ('centered')
   if(type == "centered") {
     rowData(filtered)$mean <- rowMeans(assay(filtered), na.rm = TRUE)
-    df <- assay(filtered) - rowData(filtered)$mean
+    df <- assay(filtered) - rowData(filtered, use.names = FALSE)$mean
   }
   # Get contrast fold changes ('contrast')
   if(type == "contrast") {
-    df <- rowData(filtered) %>%
+    df <- rowData(filtered, use.names = FALSE) %>%
       data.frame() %>%
       column_to_rownames(var = "name") %>%
       select(ends_with("_diff"))
@@ -557,7 +557,7 @@ plot_volcano <- function(dep, contrast, label_size = 3,
     is.logical(plot),
     length(plot) == 1)
 
-  row_data <- rowData(dep)
+  row_data <- rowData(dep, use.names = FALSE)
 
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(row_data))) {

@@ -409,7 +409,7 @@ filter_missval <- function(se, thr = 0) {
                           length(thr) == 1)
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se, use.names = FALSE)))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
@@ -495,7 +495,7 @@ filter_proteins <- function(se, type = c("complete", "condition", "fraction"),
   type <- match.arg(type)
 
   # Show error if inputs do not contain required columns
-  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se, use.names = FALSE)))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
@@ -743,7 +743,7 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
   # Show error if inputs do not contain required columns
   fun <- match.arg(fun)
 
-  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se, use.names = FALSE)))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
@@ -843,7 +843,7 @@ test_diff <- function(se, type = c("control", "all", "manual"),
   col_data <- colData(se)
   raw <- assay(se)
 
-  if(any(!c("name", "ID") %in% colnames(rowData(se)))) {
+  if(any(!c("name", "ID") %in% colnames(rowData(se, use.names = FALSE)))) {
     stop("'name' and/or 'ID' columns are not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
@@ -990,7 +990,7 @@ test_diff <- function(se, type = c("control", "all", "manual"),
     mutate(variable = recode(variable, logFC = "diff", P.Value = "p.val", qval = "p.adj")) %>%
     unite(temp, comparison, variable) %>%
     spread(temp, value)
-  rowData(se) <- merge(rowData(se), table,
+  rowData(se) <- merge(rowData(se, use.names = FALSE), table,
     by.x = "name", by.y = "rowname", all.x = TRUE)
   return(se)
 }
@@ -1038,7 +1038,7 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
                           is.numeric(lfc),
                           length(lfc) == 1)
 
-  row_data <- rowData(diff) %>%
+  row_data <- rowData(diff, use.names = FALSE) %>%
     as.data.frame()
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(row_data))) {
@@ -1063,8 +1063,9 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
   if(length(cols_p) == 1) {
     rowData(diff)$significant <-
       row_data[, cols_p] <= alpha & abs(row_data[, cols_diff]) >= lfc
-    rowData(diff)$contrast_significant <- rowData(diff)$significant
-    colnames(rowData(diff))[ncol(rowData(diff))] <-
+    rowData(diff)$contrast_significant <-
+      rowData(diff, use.names = FALSE)$significant
+    colnames(rowData(diff))[ncol(rowData(diff, use.names = FALSE))] <-
       gsub("p.adj", "significant", colnames(row_data)[cols_p])
   }
   if(length(cols_p) > 1) {
@@ -1078,7 +1079,8 @@ add_rejections <- function(diff, alpha = 0.05, lfc = 1) {
     colnames(sign_df) <- gsub("_p.adj", "_significant", colnames(sign_df))
 
     sign_df <- cbind(name = row_data$name, as.data.frame(sign_df))
-    rowData(diff) <- merge(rowData(diff), sign_df, by = "name")
+    rowData(diff) <- merge(rowData(diff, use.names = FALSE), sign_df,
+                           by = "name")
   }
   return(diff)
 }
@@ -1125,7 +1127,7 @@ get_results <- function(dep) {
   # Show error if inputs are not the required classes
   assertthat::assert_that(inherits(dep, "SummarizedExperiment"))
 
-  row_data <- rowData(dep)
+  row_data <- rowData(dep, use.names = FALSE)
   # Show error if inputs do not contain required columns
   if(any(!c("name", "ID") %in% colnames(row_data))) {
     stop("'name' and/or 'ID' columns are not present in '",
@@ -1222,7 +1224,7 @@ get_df_wide <- function(se) {
   assert_that(inherits(se, "SummarizedExperiment"))
 
   # Show error if inputs do not contain required columns
-  if (!"name" %in% colnames(rowData(se))) {
+  if (!"name" %in% colnames(rowData(se, use.names = FALSE))) {
     stop("'name' column is not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
@@ -1230,7 +1232,7 @@ get_df_wide <- function(se) {
   }
 
   # Extract row data
-  row_data <- rowData(se) %>%
+  row_data <- rowData(se, use.names = FALSE) %>%
     data.frame()
   # Extract assay data
   assay_data <- assay(se) %>%
@@ -1283,7 +1285,7 @@ get_df_long <- function(se) {
   assert_that(inherits(se, "SummarizedExperiment"))
 
   # Show error if inputs do not contain required columns
-  if (!"name" %in% colnames(rowData(se))) {
+  if (!"name" %in% colnames(rowData(se, use.names = FALSE))) {
     stop("'name' column is not present in '",
          deparse(substitute(se)),
          "'\nRun make_unique() and make_se() to obtain the required columns",
@@ -1296,7 +1298,7 @@ col_data <- colData(se) %>%
   rownames_to_column() %>%
   select(-ID)
 # Extract row data
-row_data <- rowData(se) %>%
+row_data <- rowData(se, use.names = FALSE) %>%
   data.frame()
 # Extract assay data
 assay_data <- assay(se) %>%
