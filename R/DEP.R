@@ -157,7 +157,7 @@
 #' @import ggplot2 dplyr SummarizedExperiment limma
 #' @import ComplexHeatmap grid assertthat imputeLCMD
 #' @import shinydashboard
-#' @rawNamespace import(MSnbase, except = combine)
+#' @rawNamespace import(MSnbase, except = c(combine, exprs))
 #' @importFrom shiny runApp
 #' @importFrom DT dataTableOutput renderDataTable
 #' @importFrom tidyr unite gather spread separate
