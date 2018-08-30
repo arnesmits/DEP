@@ -40,8 +40,9 @@ as well as [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for Windows 
 Start R and install the DEP package:
 ```{r install, eval = FALSE}
 
-source("https://bioconductor.org/biocLite.R")
-biocLite("DEP")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("DEP")
 
 library("DEP")
 
