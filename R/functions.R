@@ -991,7 +991,7 @@ test_diff <- function(se, type = c("control", "all", "manual"),
     unite(temp, comparison, variable) %>%
     spread(temp, value)
   rowData(se) <- merge(rowData(se, use.names = FALSE), table,
-    by.x = "name", by.y = "rowname", all.x = TRUE)
+    by.x = "name", by.y = "rowname", all.x = TRUE, sort=FALSE)
   return(se)
 }
 

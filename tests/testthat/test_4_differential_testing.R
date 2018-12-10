@@ -104,3 +104,34 @@ test_that("get_df_long throws error without valid input", {
 test_that("get_df_long returns a data.frame", {
   expect_is(get_df_long(test_sign), "data.frame")
 })
+
+
+test_that("p-values are ordered correctly", {
+  
+  shuffled_order <- sample(seq_len(nrow(test_impute)))
+  test_shuffled <- test_impute[shuffled_order, ]
+  pval1 <- rowData(test_diff(test_impute, "manual", test = "Ubi4_vs_Ctrl"))$Ubi4_vs_Ctrl_p.val
+  pval2 <- rowData(test_diff(test_shuffled, "manual", test = "Ubi4_vs_Ctrl"))$Ubi4_vs_Ctrl_p.val
+  
+  expect_false(all(pval1 == pval2))
+  expect_equal(pval1[shuffled_order], pval2)
+  
+  # Compare ordered against limma output
+  design <- model.matrix(~ 0 + test_impute$condition)
+  colnames(design) <- levels(as.factor(test_impute$condition))
+  contrasts <- makeContrasts(Ubi4 - Ctrl, levels=design)
+  fit1 <- lmFit(assay(test_impute), design) 
+  fit2 <- contrasts.fit(fit1, contrasts)
+  fit3 <- eBayes(fit2)
+  expect_equal(pval1, topTable(fit3, sort.by = "none", number=Inf)$P.Value)  
+  
+  # Compare unordered against limma output
+  design <- model.matrix(~ 0 + test_shuffled$condition)
+  colnames(design) <- levels(as.factor(test_impute$condition))
+  contrasts <- makeContrasts(Ubi4 - Ctrl, levels=design)
+  fit1 <- lmFit(assay(test_shuffled), design) 
+  fit2 <- contrasts.fit(fit1, contrasts)
+  fit3 <- eBayes(fit2)
+  expect_equal(pval2, topTable(fit3, sort.by = "none", number=Inf)$P.Value)  
+  
+})
