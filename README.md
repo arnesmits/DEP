@@ -15,8 +15,9 @@ Even easier to use are the interactive Shiny apps that are provided by the packa
 Install and load the package:
 
 ``` r
-source("https://bioconductor.org/biocLite.R")
-biocLite("DEP")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("DEP")
 
 library("DEP")
 ```
