@@ -1,6 +1,6 @@
 Package: DEP
 Title: Differential Enrichment analysis of Proteomics data
-Version: 1.5.1
+Version: 1.5.2
 Authors@R: c(
     person("Arne", "Smits", email = "smits.arne@gmail.com", role = c("cre", "aut")),
     person("Wolfgang", "Huber", email = "wolfgang.huber@embl.de", role = "aut"))
@@ -33,6 +33,6 @@ Suggests: testthat,
     enrichR,
     knitr,
     BiocStyle
-biocViews: Proteomics, MassSpectrometry, DifferentialExpression, 
+biocViews: ImmunoOncology, Proteomics, MassSpectrometry, DifferentialExpression, 
     DataRepresentation
 VignetteBuilder: knitr
