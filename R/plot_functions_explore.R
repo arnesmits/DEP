@@ -301,7 +301,7 @@ plot_cor <- function(dep, significant = TRUE, lower = -1, upper = 1,
         cols <- c("orangered", "cornflowerblue")
       if(length(var) < 7 & length(var) > 2)
         cols <- RColorBrewer::brewer.pal(length(var), "Pastel1")
-      if(length(var) > 7)
+      if(length(var) >= 7)
         cols <- RColorBrewer::brewer.pal(length(var), "Set3")
       names(cols) <- var
       anno_col[[i]] <-  cols
@@ -471,7 +471,7 @@ plot_dist <- function(
         cols <- c("orangered", "cornflowerblue")
       if(length(var) < 7 & length(var) > 2)
         cols <- RColorBrewer::brewer.pal(length(var), "Pastel1")
-      if(length(var) > 7)
+      if(length(var) >= 7)
         cols <- RColorBrewer::brewer.pal(length(var), "Set3")
       names(cols) <- var
       anno_col[[i]] <-  cols
