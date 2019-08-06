@@ -5,7 +5,8 @@
 \title{Plot PCA}
 \usage{
 plot_pca(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
-  label = FALSE, n = 500, point_size = 4, label_size = 3, plot = TRUE)
+  label = FALSE, n = 500, point_size = 4, label_size = 3,
+  plot = TRUE)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,

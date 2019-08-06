@@ -396,6 +396,7 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
     colnames(df) <-
       gsub("_diff", "", colnames(df)) %>%
       gsub("_vs_", " vs ", .)
+    df <- as.matrix(df)
   }
 
   # Facultative kmeans clustering
@@ -422,7 +423,8 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
     }
     if(type == "contrast") {
       # Order the k-means clusters according to their average fold change
-      order <- cbind(df, cluster = df_kmeans$cluster) %>%
+      order <- data.frame(df) %>%
+        cbind(df, cluster = df_kmeans$cluster) %>%
         gather(condition, diff, -cluster) %>%
         group_by(cluster) %>%
         summarize(row = mean(diff)) %>%
@@ -487,9 +489,8 @@ plot_heatmap <- function(dep, type = c("contrast", "centered"),
     if(kmeans) {
       df <- cbind(df, k = df_kmeans$cluster)
     }
-    df[unlist(row_order(ht1)),] %>%
-      rownames_to_column(var = "protein") %>%
-      as.data.frame() %>%
+    return <- df[unlist(row_order(ht1)),]
+    data.frame(protein = row.names(return), return) %>%
       mutate(order = row_number())
   }
 }

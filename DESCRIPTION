@@ -1,6 +1,6 @@
 Package: DEP
 Title: Differential Enrichment analysis of Proteomics data
-Version: 1.7.0
+Version: 1.7.1
 Authors@R: c(
     person("Arne", "Smits", email = "smits.arne@gmail.com", role = c("cre", "aut")),
     person("Wolfgang", "Huber", email = "wolfgang.huber@embl.de", role = "aut"))
@@ -28,7 +28,7 @@ Imports: ggplot2, dplyr, purrr, readr, tibble, tidyr,
     SummarizedExperiment (>= 1.11.5), MSnbase, limma, vsn, fdrtool, ggrepel,
     ComplexHeatmap, RColorBrewer, circlize, shiny, shinydashboard, 
     DT, rmarkdown, assertthat, gridExtra, grid, stats, imputeLCMD, cluster
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Suggests: testthat,
     enrichR,
     knitr,

@@ -4,11 +4,11 @@
 \alias{plot_heatmap}
 \title{Plot a heatmap}
 \usage{
-plot_heatmap(dep, type = c("contrast", "centered"), kmeans = FALSE, k = 6,
-  col_limit = 6, indicate = NULL, clustering_distance = c("euclidean",
-  "maximum", "manhattan", "canberra", "binary", "minkowski", "pearson",
-  "spearman", "kendall", "gower"), row_font_size = 6, col_font_size = 10,
-  plot = TRUE, ...)
+plot_heatmap(dep, type = c("contrast", "centered"), kmeans = FALSE,
+  k = 6, col_limit = 6, indicate = NULL,
+  clustering_distance = c("euclidean", "maximum", "manhattan",
+  "canberra", "binary", "minkowski", "pearson", "spearman", "kendall",
+  "gower"), row_font_size = 6, col_font_size = 10, plot = TRUE, ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,

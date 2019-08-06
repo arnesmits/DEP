@@ -6,9 +6,9 @@
 \usage{
 LFQ(proteins, expdesign, fun = c("man", "bpca", "knn", "QRILC", "MLE",
   "MinDet", "MinProb", "min", "zero", "mixed", "nbavg"), type = c("all",
-  "control", "manual"), control = NULL, test = NULL, filter = c("Reverse",
-  "Potential.contaminant"), name = "Gene.names", ids = "Protein.IDs",
-  alpha = 0.05, lfc = 1)
+  "control", "manual"), control = NULL, test = NULL,
+  filter = c("Reverse", "Potential.contaminant"), name = "Gene.names",
+  ids = "Protein.IDs", alpha = 0.05, lfc = 1)
 }
 \arguments{
 \item{proteins}{Data.frame,

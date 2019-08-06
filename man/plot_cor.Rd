@@ -4,8 +4,9 @@
 \alias{plot_cor}
 \title{Plot correlation matrix}
 \usage{
-plot_cor(dep, significant = TRUE, lower = -1, upper = 1, pal = "PRGn",
-  pal_rev = FALSE, indicate = NULL, font_size = 12, plot = TRUE, ...)
+plot_cor(dep, significant = TRUE, lower = -1, upper = 1,
+  pal = "PRGn", pal_rev = FALSE, indicate = NULL, font_size = 12,
+  plot = TRUE, ...)
 }
 \arguments{
 \item{dep}{SummarizedExperiment,

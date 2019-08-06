@@ -35,12 +35,13 @@ Used to create the design matrix.}
 }
 \value{
 A SummarizedExperiment object
-containing FDR estimates of differential expression.
+containing fdr estimates of differential expression.
 }
 \description{
 \code{test_diff} performs a differential enrichment test based on
 protein-wise linear models and empirical Bayes
-statistics using \pkg{limma}.
+statistics using \pkg{limma}. False Discovery Rates are estimated
+using \pkg{fdrtool}.
 }
 \examples{
 # Load example
