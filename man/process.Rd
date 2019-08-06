@@ -4,8 +4,8 @@
 \alias{process}
 \title{Proteomics data processing}
 \usage{
-process(se, thr = 0, fun = c("man", "bpca", "knn", "QRILC", "MLE", "MinDet",
-  "MinProb", "min", "zero", "mixed", "nbavg"), ...)
+process(se, thr = 0, fun = c("man", "bpca", "knn", "QRILC", "MLE",
+  "MinDet", "MinProb", "min", "zero", "mixed", "nbavg"), ...)
 }
 \arguments{
 \item{se}{SummarizedExperiment,

@@ -100,9 +100,9 @@ TMT <- function(proteins, expdesign,
     }
 
     # If input is a tibble, convert to data.frame
-    if(tibble::is.tibble(proteins))
+    if(tibble::is_tibble(proteins))
       proteins <- as.data.frame(proteins)
-    if(tibble::is.tibble(expdesign))
+    if(tibble::is_tibble(expdesign))
       expdesign <- as.data.frame(expdesign)
 
     # Filter the proteins for Reverse hits (indicated by '###' in the gene_name)
@@ -240,8 +240,8 @@ LFQ <- function(proteins, expdesign,
     }
 
     # If input is a tibble, convert to data.frame
-    if(tibble::is.tibble(proteins)) proteins <- as.data.frame(proteins)
-    if(tibble::is.tibble(expdesign)) expdesign <- as.data.frame(expdesign)
+    if(tibble::is_tibble(proteins)) proteins <- as.data.frame(proteins)
+    if(tibble::is_tibble(expdesign)) expdesign <- as.data.frame(expdesign)
 
     # Filter out the positive proteins (indicated by '+')
     # in the pre-defined columns

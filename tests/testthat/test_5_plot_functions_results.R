@@ -57,6 +57,13 @@ test_that("plot_heatmap returns a HeatmapList object", {
   expect_is(plot_heatmap(test_sign, "centered", kmeans = TRUE, col_limit = 8, row_font_size = 3, indicate = "replicate"), "HeatmapList")
 })
 
+test_that("plot_heatmap returns a data frame object", {
+  expect_is(plot_heatmap(test_sign, "centered", col_limit = 4, row_font_size = 3, plot = FALSE), "data.frame")
+  expect_is(plot_heatmap(test_sign, "contrast", col_limit = 8, row_font_size = 3, plot = FALSE), "data.frame")
+  expect_is(plot_heatmap(test_sign, "centered", kmeans = TRUE, col_limit = 4, row_font_size = 3, plot = FALSE), "data.frame")
+  expect_is(plot_heatmap(test_sign, "contrast", kmeans = TRUE, col_limit = 8, row_font_size = 3, plot = FALSE), "data.frame")
+})
+
 test_that("plot_volcano throws error without valid input", {
   expect_error(plot_volcano("test_sign", "Ubi6_vs_Ctrl", label_size = 5, add_names = TRUE))
   expect_error(plot_volcano(test_sign, Ubi6_vs_Ctrl, label_size = 5, add_names = TRUE))

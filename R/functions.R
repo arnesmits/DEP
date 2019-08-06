@@ -45,7 +45,7 @@ make_unique <- function(proteins, names, ids, delim = ";") {
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(proteins))
+  if(tibble::is_tibble(proteins))
     proteins <- as.data.frame(proteins)
 
   # Select the name and id columns, and check for NAs
@@ -116,9 +116,9 @@ make_se <- function(proteins_unique, columns, expdesign) {
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(proteins_unique))
+  if(tibble::is_tibble(proteins_unique))
     proteins_unique <- as.data.frame(proteins_unique)
-  if(tibble::is.tibble(expdesign))
+  if(tibble::is_tibble(expdesign))
     expdesign <- as.data.frame(expdesign)
 
   # Select the assay data
@@ -333,7 +333,7 @@ make_se_parse <- function(proteins_unique, columns,
   }
 
   # If input is a tibble, convert to data.frame
-  if(tibble::is.tibble(proteins_unique))
+  if(tibble::is_tibble(proteins_unique))
     proteins_unique <- as.data.frame(proteins_unique)
 
   # Select the assay values
@@ -779,7 +779,8 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 #'
 #' \code{test_diff} performs a differential enrichment test based on
 #' protein-wise linear models and empirical Bayes
-#' statistics using \pkg{limma}.
+#' statistics using \pkg{limma}. False Discovery Rates are estimated
+#' using \pkg{fdrtool}.
 #'
 #' @param se SummarizedExperiment,
 #' Proteomics data (output from \code{\link{make_se}()} or
@@ -802,7 +803,7 @@ impute <- function(se, fun = c("bpca", "knn", "QRILC", "MLE",
 #' @param design_formula Formula,
 #' Used to create the design matrix.
 #' @return A SummarizedExperiment object
-#' containing FDR estimates of differential expression.
+#' containing fdr estimates of differential expression.
 #' @examples
 #' # Load example
 #' data <- UbiLength
