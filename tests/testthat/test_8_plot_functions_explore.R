@@ -15,6 +15,7 @@ test_that("plot_pca returns a ggplot object", {
   expect_is(plot_pca(test_sign, x = 1, y = 2, n = 100), "ggplot")
   expect_is(plot_pca(test_sign, x = 1, y = 2, n = 100, label = TRUE), "ggplot")
   expect_is(plot_pca(test_sign, x = 1, y = 2, n = 100, point_size = 2), "ggplot")
+  expect_is(plot_pca(test_sign, x = 1, y = 2, n = 100, loadings = TRUE), "ggplot")
   expect_is(plot_pca(test_sign, x = 1, y = 2, n = 100, indicate = "condition"), "ggplot")
   expect_is(plot_pca(test_sign, x = 1, y = 2, n = 100, indicate = c("label", "replicate", "condition")), "ggplot")
 })
