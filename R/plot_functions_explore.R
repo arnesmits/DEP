@@ -127,7 +127,9 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
       left_join(., data.frame(colData(dep)), by = c("rowname" = "ID"))
   } else {
     pca_df <- pca$rotation %>%
-      data.frame()
+      data.frame() %>%
+      rownames_to_column() %>%
+      left_join(., data.frame(colData(dep)), by = c("rowname" = "ID"))
   }
   
   # Calculate the percentage of variance explained
@@ -146,39 +148,52 @@ plot_pca <- function(dep, x = 1, y = 2, indicate = c("condition", "replicate"),
     coord_fixed() +
     theme_DEP1()
   
-  if(length(indicate) == 0) {
-    p <- p + geom_point(size = point_size)
-  }
-  if(length(indicate) == 1) {
-    p <- p + geom_point(aes(col = pca_df[[indicate[1]]]),
-                        size = point_size) +
-      labs(col = indicate[1])
-  }
-  if(length(indicate) == 2) {
-    p <- p + geom_point(aes(col = pca_df[[indicate[1]]],
-                            shape = pca_df[[indicate[2]]]),
-                        size = point_size) +
+  # Plot points for PCA plot or text for loadings plot
+  if (loadings == FALSE) {
+    if(length(indicate) == 0) {
+      p <- p + geom_point(size = point_size)
+    }
+    if(length(indicate) == 1) {
+      p <- p + geom_point(aes(col = pca_df[[indicate[1]]]),
+                          size = point_size) +
+        labs(col = indicate[1])
+    }
+    if(length(indicate) == 2) {
+      p <- p + geom_point(aes(col = pca_df[[indicate[1]]],
+                              shape = pca_df[[indicate[2]]]),
+                          size = point_size) +
+        labs(col = indicate[1],
+             shape = indicate[2])
+    }
+    if(length(indicate) == 3) {
+      p <- p + geom_point(aes(col = pca_df[[indicate[1]]],
+                              shape = pca_df[[indicate[2]]]),
+                          size = point_size) +
+        facet_wrap(~pca_df[[indicate[3]]])
       labs(col = indicate[1],
            shape = indicate[2])
+    }
+  } else {
+    label <- TRUE
   }
-  if(length(indicate) == 3) {
-    p <- p + geom_point(aes(col = pca_df[[indicate[1]]],
-                            shape = pca_df[[indicate[2]]]),
-                        size = point_size) +
-      facet_wrap(~pca_df[[indicate[3]]])
-    labs(col = indicate[1],
-         shape = indicate[2])
-  }
+  
   if(label) {
     p <- p + geom_text(aes(label = rowname), size = label_size)
   }
   if(plot) {
     return(p)
   } else {
-    df <- pca_df %>%
-      select(rowname, paste0("PC", c(x, y)), match(indicate, colnames(pca_df)))
-    colnames(df)[1] <- "sample"
-    return(df)
+    if (loadings == FALSE) {
+      df <- pca_df %>%
+        select(rowname, paste0("PC", c(x, y)), match(indicate, colnames(pca_df)))
+      colnames(df)[1] <- "sample"
+      return(df)
+    } else {
+      df <- pca_df %>%
+        select(rowname, paste0("PC", c(x, y)))
+      colnames(df)[1] <- "sample"
+      return(df)
+    }
   }
 }
 
