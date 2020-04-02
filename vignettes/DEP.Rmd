@@ -119,7 +119,7 @@ Additionally, some proteins do not have an annotated gene name and for those we 
 data_unique <- make_unique(data, "Gene.names", "Protein.IDs", delim = ";")
 
 # Are there any duplicated names?
-data$name %>% duplicated() %>% any()
+data_unique$name %>% duplicated() %>% any()
 ```
 
 ## Generate a SummarizedExperiment object
@@ -274,7 +274,7 @@ For the contrasts generation, the control sample has to be specified.
 Additionally, the types of contrasts to be produced need to be indicated, allowing the generation of all possible comparisons ("all") or the generation of contrasts of every sample versus control ("control"). Alternatively, the user can manually specify the contrasts to be tested (type = "manual"), which need to be specified in the argument _test_. 
 
 ``` {r statistics}
-# Differential enrichment analysis  based on linear models and empherical Bayes statistics
+# Differential enrichment analysis  based on linear models and empirical Bayes statistics
 
 # Test every sample versus control
 data_diff <- test_diff(data_imp, type = "control", control = "Ctrl")
