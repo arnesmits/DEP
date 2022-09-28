@@ -445,6 +445,7 @@ filter_missval <- function(se, thr = 0) {
     summarize(miss_val = n() - sum(value)) %>%
     filter(miss_val <= thr) %>%
     spread(condition, miss_val)
+  keep$rowname <- as.numeric(keep$rowname)
   se_fltrd <- se[keep$rowname, ]
   return(se_fltrd)
 }
